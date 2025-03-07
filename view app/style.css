@@ -1,0 +1,50 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.section {
+    flex: 1 1 100%; /* Volle Breite für jede Sektion */
+    margin: 10px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.week-schedule {
+    display: flex; /* Flexbox für nebeneinander liegende Tage */
+    gap: 10px; /* Abstand zwischen den Tagen */
+}
+
+.day {
+    flex: 1; /* Gleiche Breite für jeden Tag */
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.event {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #e3f2fd;
+    border-left: 5px solid #007bff;
+    border-radius: 5px;
+}
+
+.event.non-weekly {
+    border-left-color: #ffc107;
+}
+
+.deadline {
+    background-color: #ffebee;
+    border-left-color: #dc3545;
+}
+
+h2 {
+    text-align: center;
+}
