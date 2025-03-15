@@ -35,6 +35,8 @@ ccm.files["ccm.teacher_cours_self.js"] = {
 
     Instance: function () {
         this.start = async () => {
+            // Kursdaten zum Einfügen in die Datenbank
+
             const alleKurse = await this.store.get({});
             console.log("Alle Kurse:", alleKurse);
 
@@ -123,7 +125,7 @@ ccm.files["ccm.teacher_cours_self.js"] = {
         };
 
         // Notiz rendern
-        this.renderNote = (note, notesList, courseId) => {
+       /* this.renderNote = (note, notesList, courseId) => {
             const li = document.createElement('li');
             li.innerHTML = `
                 <span class="note-text">${note}</span>
@@ -134,7 +136,21 @@ ccm.files["ccm.teacher_cours_self.js"] = {
             li.querySelector('.delete-button').addEventListener('click', () => {
                 this.deleteNote(note, notesList, li, courseId); // courseId übergeben
             });
+        };*/
+        this.renderNote = (note, notesList, courseId) => {
+            const li = document.createElement('li');
+            ccm.helper.decomposeEmbedCode(note)
+            li.innerHTML = `
+                <span class="note-text">${note}</span>
+                <button class="delete-button">Delete</button>
+            `;
+            notesList.appendChild(li);
+
+            li.querySelector('.delete-button').addEventListener('click', () => {
+                this.deleteNote(note, notesList, li, courseId); // courseId übergeben
+            });
         };
+
 
         // Notiz löschen
         this.deleteNote = async (note, notesList, listItem, courseId) => {

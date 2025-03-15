@@ -11,13 +11,11 @@ ccm.files["ccm.select_courses.js"] = {
             <div id="schedule-container">
                 <select id="schedule-dropdown">
                     <option value="">-- Stundenplan auswählen --</option>
-                    %schedule_options%
                 </select>
                 <div id="selected-schedule"></div>
                 <div id="add-course-container">
                     <select id="add-course-dropdown">
                         <option value="">-- Kurs hinzufügen --</option>
-                        %course_options%
                     </select>
                 </div>
                 <button id="save-button">Speichern</button>
@@ -58,16 +56,55 @@ ccm.files["ccm.select_courses.js"] = {
         this.start = async () => {
             console.log("Starte select_courses...");
 
+            // Dummy student ID
+            const studentId = "tmiede2s";
+
+            // Fetch the saved schedule for the user
+            const savedSchedule = await self.store.get(studentId);
+            console.log("Saved schedule for user", studentId, ":", savedSchedule);
+
+            // Initialize currentCourses with saved courses (if any)
+            let currentCourses = [];
+            let preSelectedSchedule = null;
+            if (savedSchedule && savedSchedule.value && savedSchedule.value.courses) {
+                // Map the saved courses to their full data from the store
+                const savedCourseKeys = savedSchedule.value.courses.map(course => course.key);
+                const savedCoursesWithColors = savedSchedule.value.courses;
+
+                // We'll fetch the full course data later after loading all courses
+                currentCourses = savedCoursesWithColors;
+                // Determine the pre-selected schedule based on the first course
+                if (savedCoursesWithColors.length > 0) {
+                    preSelectedSchedule = savedCoursesWithColors[0].course; // Will be set after fetching all courses
+                }
+            }
+
             // Alle verfügbaren Kurse abrufen
             const alleKurse = await self.store.get({});
             console.log("Alle Kurse:", alleKurse);
+
+            // Map saved courses to their full data now that we have alleKurse
+            if (currentCourses.length > 0) {
+                currentCourses = currentCourses.map(savedCourse => {
+                    const fullCourse = alleKurse.find(k => k.key === savedCourse.key);
+                    if (fullCourse) {
+                        return { ...fullCourse, color: savedCourse.color };
+                    }
+                    return null;
+                }).filter(course => course !== null);
+
+                // Determine the pre-selected schedule based on the first course
+                if (currentCourses.length > 0 && currentCourses[0].value && currentCourses[0].value.course) {
+                    preSelectedSchedule = currentCourses[0].value.course;
+                }
+            }
 
             // Neue JSON-Struktur für Stundenpläne erstellen
             const groupedCourses = {};
             if (Array.isArray(alleKurse)) {
                 alleKurse.forEach(kurs => {
                     if (kurs && kurs.value && kurs.value.course) {
-                        const courseName = kurs.value.course; // z. B. "BCSP 1"
+                        const courseName = kurs.value.course;
                         if (!groupedCourses[courseName]) {
                             groupedCourses[courseName] = [];
                         }
@@ -78,15 +115,15 @@ ccm.files["ccm.select_courses.js"] = {
                 console.error("Fehler: alleKurse ist kein Array:", alleKurse);
             }
 
-            // Ausgabe des neuen JSON-Objekts
             console.log("Grouped Courses JSON:", JSON.stringify(groupedCourses, null, 2));
 
-            // Dropdown-Optionen für Stundenpläne (course-Namen)
+            // Dropdown-Optionen für Stundenpläne
             const scheduleOptions = Object.keys(groupedCourses).map(courseName => {
                 return `<option value="${courseName}">${courseName}</option>`;
             }).join('');
+            console.log("Schedule Options:", scheduleOptions);
 
-            // Dropdown-Optionen für alle individuellen Kurse, gruppiert nach course
+            // Dropdown-Optionen für alle individuellen Kurse
             const courseOptions = Array.isArray(alleKurse) ? Object.keys(groupedCourses).map(courseName => {
                 const courses = groupedCourses[courseName];
                 const courseItems = courses
@@ -97,22 +134,36 @@ ccm.files["ccm.select_courses.js"] = {
                     }).join('');
                 return `<optgroup label="${courseName}">${courseItems}</optgroup>`;
             }).join('') : '';
+            console.log("Course Options:", courseOptions);
 
             // Haupt-HTML rendern
-            self.element.appendChild(self.ccm.helper.html(self.html.main, {
-                title: "Stundenplan bearbeiten",
-                schedule_options: scheduleOptions,
-                course_options: courseOptions
-            }));
+            const mainHtml = self.ccm.helper.html(self.html.main, {
+                title: "Stundenplan bearbeiten"
+            });
+            console.log("self.element before append:", self.element);
+            self.element.appendChild(mainHtml);
+            console.log("Rendered HTML:", self.element.innerHTML);
+
+            // Manually insert options into the <select> elements
+            const scheduleDropdown = self.element.querySelector('#schedule-dropdown');
+            const addCourseDropdown = self.element.querySelector('#add-course-dropdown');
+            scheduleDropdown.innerHTML = `<option value="">-- Stundenplan auswählen --</option>${scheduleOptions}`;
+            addCourseDropdown.innerHTML = `<option value="">-- Kurs hinzufügen --</option>${courseOptions}`;
+
+            // Force visibility
+            const scheduleContainer = self.element.querySelector('#schedule-container');
+            scheduleContainer.style.display = 'block';
+            scheduleContainer.style.visibility = 'visible';
+
+            // Remove loading spinner
+            const loadingSpinner = self.element.querySelector('.ccm_loading');
+            if (loadingSpinner) {
+                loadingSpinner.style.display = 'none';
+            }
 
             // Container und Elemente
-            const scheduleDropdown = self.element.querySelector('#schedule-dropdown');
             const selectedScheduleContainer = self.element.querySelector('#selected-schedule');
-            const addCourseDropdown = self.element.querySelector('#add-course-dropdown');
             const saveButton = self.element.querySelector('#save-button');
-
-            // Liste der aktuell ausgewählten Kurse mit Farben
-            let currentCourses = [];
 
             // Funktion zum Rendern eines Kurses
             const renderCourse = (kurs) => {
@@ -129,13 +180,13 @@ ccm.files["ccm.select_courses.js"] = {
                 // Farbauswahl-Logik
                 const colorSelect = courseHtml.querySelector('.color-select');
                 if (kurs.color) {
-                    colorSelect.value = kurs.color; // Vorhandene Farbe setzen
-                    courseHtml.style.backgroundColor = kurs.color; // Farbe anwenden
+                    colorSelect.value = kurs.color;
+                    courseHtml.style.backgroundColor = kurs.color;
                 }
                 colorSelect.addEventListener('change', (e) => {
                     const selectedColor = e.target.value;
-                    kurs.color = selectedColor; // Farbe im Objekt speichern
-                    courseHtml.style.backgroundColor = selectedColor || ''; // Farbe anwenden oder zurücksetzen
+                    kurs.color = selectedColor;
+                    courseHtml.style.backgroundColor = selectedColor || '';
                     console.log("Farbe für Kurs", kurs.key, "geändert zu:", selectedColor);
                 });
 
@@ -148,17 +199,22 @@ ccm.files["ccm.select_courses.js"] = {
                 });
             };
 
+            // Pre-select the schedule and render saved courses
+            if (preSelectedSchedule && groupedCourses[preSelectedSchedule]) {
+                scheduleDropdown.value = preSelectedSchedule;
+                currentCourses.forEach(renderCourse);
+                console.log("Pre-selected schedule:", preSelectedSchedule, "with courses:", currentCourses);
+            }
+
             // Event-Listener für das Stundenplan-Dropdown
             scheduleDropdown.addEventListener('change', (e) => {
                 const selectedSchedule = e.target.value;
-                selectedScheduleContainer.innerHTML = ''; // Alte Anzeige löschen
-                currentCourses = []; // Zurücksetzen
+                selectedScheduleContainer.innerHTML = '';
+                currentCourses = [];
 
                 if (selectedSchedule) {
                     currentCourses = [...groupedCourses[selectedSchedule]];
                     console.log("Ausgewählter Stundenplan:", selectedSchedule, currentCourses);
-
-                    // Anzeige der Kurse des ausgewählten Stundenplans
                     currentCourses.forEach(renderCourse);
                 }
             });
@@ -169,7 +225,6 @@ ccm.files["ccm.select_courses.js"] = {
                 if (selectedCourseKey) {
                     const kurs = alleKurse.find(k => k.key === selectedCourseKey);
                     if (kurs && kurs.value) {
-                        // Nur hinzufügen, wenn der Kurs nicht bereits in der Liste ist
                         if (!currentCourses.some(k => k.key === kurs.key)) {
                             currentCourses.push(kurs);
                             console.log("Hinzugefügter Kurs:", kurs);
@@ -178,29 +233,25 @@ ccm.files["ccm.select_courses.js"] = {
                             console.log("Kurs bereits in der Liste:", kurs);
                         }
                     }
-
-                    // Dropdown zurücksetzen
                     addCourseDropdown.value = '';
                 }
             });
 
             // Event-Listener für den Speichern-Button
             saveButton.addEventListener('click', async () => {
-                const studentId = "tmiede2s"; // Beispiel-Kürzel, später anpassbar
                 const scheduleData = {
                     key: studentId,
                     value: {
                         student_id: studentId,
                         courses: currentCourses.map(kurs => ({
                             key: kurs.key,
-                            color: kurs.color || "" // Farbe speichern, leer wenn nicht gesetzt
+                            color: kurs.color || "",
+                            course: kurs.value.course // Save the course name for pre-selection
                         }))
                     }
                 };
 
                 console.log("Zu speicherndes JSON:", JSON.stringify(scheduleData, null, 2));
-
-                // Speichern im Store
                 await self.store.set(scheduleData);
                 console.log("Stundenplan gespeichert unter:", studentId);
                 alert("Stundenplan erfolgreich gespeichert!");
