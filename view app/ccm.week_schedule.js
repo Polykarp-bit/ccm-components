@@ -2,18 +2,28 @@ ccm.files["ccm.week_schedule.js"] = {
     name: "week_schedule",
     ccm: "https://ccmjs.github.io/ccm/ccm.js",
     config: {
-        schedule: {}, // Stundenplan-Daten
-        links: [],     // Links und Ressourcen
-        study_plans: [
-            // Studienverlaufspläne (wie zuvor)
-        ],
+        store: ["ccm.store", { url: "https://ccm2.inf.h-brs.de", name: "tniede2s_mycollection" }],
         css: ["ccm.load", "./style.css"],
+        user: ["ccm.start", "https://ccmjs.github.io/akless-components/user/versions/ccm.user-9.7.2.js"], // Für dynamisches Kürzel
+        schedule: {}, // Stundenplan-Daten (wird dynamisch gefüllt)
+        links: [],    // Links und Ressourcen
+        study_plans: [
+            // Studienverlaufspläne können hier bleiben, falls benötigt
+        ],
     },
     Instance: function () {
         let self = this;
 
         this.start = async () => {
-            // Standardfarben für Veranstaltungstypen
+            // Benutzer einloggen und Kürzel abrufen
+            await self.user.login();
+            const studentId = self.user.getValue().username || "tmiede2s"; // Fallback auf "tmiede2s"
+
+            // Gespeicherte Nutzerkonfiguration abrufen
+            const userConfig = await self.store.get(studentId);
+            console.log("Geladene Nutzerkonfiguration:", userConfig);
+
+            // Standardfarben für Veranstaltungstypen (als Fallback)
             const defaultColors = {
                 "Vorlesung": "#FFCC99",  // Hellorange für Vorlesungen
                 "Übung": "#99CCFF",      // Hellblau für Übungen
@@ -23,62 +33,53 @@ ccm.files["ccm.week_schedule.js"] = {
                 "default": "#F0F0F0"     // Standardfarbe für andere Typen
             };
 
-            // Farben aus dem Local Storage laden (falls vorhanden)
-            let eventColors = JSON.parse(localStorage.getItem("eventColors")) || defaultColors;
+            // Stundenplan nach Tagen strukturieren
+            const schedule = {};
+
+            if (userConfig && userConfig.value && userConfig.value.courses) {
+                const allCourses = await self.store.get({}); // Alle Kurse aus der Datenbank laden
+                userConfig.value.courses.forEach(course => {
+                    const kurs = allCourses.find(k => k.key === course.key);
+                    if (kurs && kurs.value) {
+                        const day = kurs.value.day || "Unbekannt";
+                        if (!schedule[day]) {
+                            schedule[day] = [];
+                        }
+                        schedule[day].push({
+                            title: kurs.value.activity,
+                            time: `${kurs.value.from} - ${kurs.value.until}`,
+                            room: kurs.value.room,
+                            color: course.color || defaultColors["default"] // Nutzerfarbe oder Fallback
+                        });
+                    }
+                });
+            } else {
+                console.log("Keine gespeicherte Konfiguration gefunden, verwende leeren Stundenplan.");
+            }
 
             // Rendere den Stundenplan
             self.element.innerHTML = `
-        <div class="container">
-          <!-- Stundenplan -->
-          <div class="section">
-            <h2>Stundenplan</h2>
-            <div class="week-schedule">
-              ${Object.entries(self.schedule).map(([day, events]) => `
-                <div class="day">
-                  <h3>${day}</h3>
-                  ${events.map(event => {
-                const type = event.type || "default";
-                const color = eventColors[type] || eventColors["default"];
-                return `
-                        <div class="event" style="background-color: ${color};">
-                          <strong>${event.title}</strong><br>
-                          <span>${event.time}</span>
+                <div class="container">
+                    <!-- Stundenplan -->
+                    <div class="section">
+                        <h2>Stundenplan für ${studentId}</h2>
+                        <div class="week-schedule">
+                            ${Object.entries(schedule).map(([day, events]) => `
+                                <div class="day">
+                                    <h3>${day}</h3>
+                                    ${events.map(event => `
+                                        <div class="event" style="background-color: ${event.color};">
+                                            <strong>${event.title}</strong><br>
+                                            <span>${event.time}</span><br>
+                                            <span>Raum: ${event.room}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `).join('') || '<p>Keine Kurse im Stundenplan.</p>'}
                         </div>
-                      `;
-            }).join('')}
+                    </div>
                 </div>
-              `).join('')}
-            </div>
-          </div>
-
-        
-
-      `;
-
-
-            // Funktion zum Rendern des Studienverlaufsplans
-            function renderStudyPlan(plan) {
-                const content = `
-                  <h3>${plan.studiengang} (${plan.abschluss})</h3>
-                  <p>Regelstudienzeit: ${plan.regelstudienzeit} Semester</p>
-                  <div class="semester-list">
-                    ${plan.semester.map(semester => `
-                      <div class="semester">
-                        <h4>Semester ${semester.semester_nummer}</h4>
-                        <ul>
-                          ${semester.module.map(module => `
-                            <li>
-                              <strong>${module.modulname}</strong><br>
-                              CP: ${module.cp}, Prüfungsform: ${module.pruefungsform}
-                            </li>
-                          `).join('')}
-                        </ul>
-                      </div>
-                    `).join('')}
-                  </div>
-                `;
-                self.element.querySelector('#study-plan-content').innerHTML = content;
-            }
+            `;
         };
     }
 };
