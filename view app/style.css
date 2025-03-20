@@ -1,50 +1,194 @@
+/* Allgemeine Styling-Regeln */
 body {
     font-family: Arial, sans-serif;
     margin: 20px;
+    background-color: #f4f4f4;
 }
 
 .container {
     display: flex;
     flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .section {
-    flex: 1 1 100%; /* Volle Breite für jede Sektion */
+    flex: 1 1 100%;
     margin: 10px;
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .week-schedule {
-    display: flex; /* Flexbox für nebeneinander liegende Tage */
-    gap: 10px; /* Abstand zwischen den Tagen */
+    display: flex;
+    gap: 10px;
 }
 
 .day {
-    flex: 1; /* Gleiche Breite für jeden Tag */
+    flex: 1;
     background-color: #f9f9f9;
     padding: 10px;
     border-radius: 5px;
 }
 
+.day h3 {
+    background-color: #ddd;
+    padding: 5px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: #333;
+}
+
 .event {
     margin-bottom: 10px;
     padding: 10px;
-    background-color: #e3f2fd;
-    border-left: 5px solid #007bff;
+    border-left: 5px solid;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.event strong {
+    font-size: 1.1em;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.event span {
+    display: block;
+    color: #555;
+}
+
+.event:hover {
+    background-color: #e0f7fa;
+}
+
+/* Farben basierend auf dem Bild */
+.event[style*="background-color: #FFCC99"],
+.event[style*="background-color: rgb(255, 204, 153)"] {
+    border-left-color: #ff9800;
+    background-color: #FFCC99;
+}
+
+.event[style*="background-color: #99CCFF"],
+.event[style*="background-color: rgb(153, 204, 255)"] {
+    border-left-color: #2196f3;
+    background-color: #99CCFF;
+}
+
+.event[style*="background-color: #CCFFCC"],
+.event[style*="background-color: rgb(204, 255, 204)"] {
+    border-left-color: #4caf50;
+    background-color: #CCFFCC;
+}
+
+.event[style*="background-color: #FF99CC"],
+.event[style*="background-color: rgb(255, 153, 204)"] {
+    border-left-color: #f06292;
+    background-color: #FF99CC;
+}
+
+.event[style*="background-color: #FF6666"],
+.event[style*="background-color: rgb(255, 102, 102)"] {
+    border-left-color: #f44336;
+    background-color: #FF6666;
+}
+
+.event[style*="background-color: #F0F0F0"],
+.event[style*="background-color: rgb(240, 240, 240)"] {
+    border-left-color: #757575;
+    background-color: #F0F0F0;
+}
+
+/* Responsives Design für den Stundenplan */
+@media (max-width: 1024px) {
+    .day {
+        flex: 1 1 calc(50% - 5px);
+    }
+}
+
+@media (max-width: 768px) {
+    .day {
+        flex: 1 1 100%;
+    }
+}
+
+/* Modal-Styling */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+}
+
+.modal-apps {
+    margin-top: 15px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.apps-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.app-container {
+    flex: 1 1 100%;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
     border-radius: 5px;
+    padding: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.event.non-weekly {
-    border-left-color: #ffc107;
-}
-
-.deadline {
-    background-color: #ffebee;
-    border-left-color: #dc3545;
+/* Responsives Design für das Modal */
+@media (max-width: 600px) {
+    .modal-content {
+        width: 90%;
+        margin: 20% auto;
+    }
 }
 
 h2 {
     text-align: center;
+    color: #333;
+    font-size: 1.5em;
+    margin-bottom: 20px;
 }
