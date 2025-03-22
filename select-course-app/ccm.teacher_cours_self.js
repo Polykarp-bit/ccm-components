@@ -7,56 +7,56 @@ ccm.files["ccm.teacher_cours_self.js"] = {
         helper: ["ccm.load", "../../libs/ccm/helper/helper-8.4.2.mjs"],
         html: {
             main: `
-<div id="user"></div>        
-<h1>%title%</h1>
-<button class="Kurs-button">Kurs Manuel Anlegen</button>
-<div id="course-form-container" style="display: none;">
-    <form id="course-form">
-        <div class="form-group">
-            <label for="course">Kursname:</label>
-            <input type="text" id="course" name="course" placeholder="z. B. BCSP 2" required>
-        </div>
-        <div class="form-group">
-            <label for="day">Tag:</label>
-            <select id="day" name="day" required>
-                <option value="" disabled selected>Wähle einen Tag</option>
-                <option value="Mo">Montag</option>
-                <option value="Di">Dienstag</option>
-                <option value="Mi">Mittwoch</option>
-                <option value="Do">Donnerstag</option>
-                <option value="Fr">Freitag</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="from">Startzeit:</label>
-            <input type="time" id="from" name="from" required>
-        </div>
-        <div class="form-group">
-            <label for="until">Endzeit:</label>
-            <input type="time" id="until" name="until" required>
-        </div>
-        <div class="form-group">
-            <label for="room">Raum:</label>
-            <input type="text" id="room" name="room" placeholder="z. B. St-C116" required>
-        </div>
-        <div class="form-group">
-            <label for="activity">Aktivität:</label>
-            <input type="text" id="activity" name="activity" placeholder="z. B. Angewandte Kryptographie 1 (Ü)" required>
-        </div>
-        <div class="form-group">
-            <label for="period">Zeitraum:</label>
-            <input type="text" id="period" name="period" placeholder="z. B. 03.04.2025-26.06.2025 (gKW (ab KW14))" required>
-        </div>
-        <div class="form-group">
-            <label for="id">ID:</label>
-            <input type="number" id="id" name="id" placeholder="z. B. 19" required>
-        </div>
-        <button type="submit">Kurs hinzufügen</button>
-        <button type="button" class="cancel-button">Abbrechen</button>
-    </form>
-</div>
-<div id="items"></div>
-`,
+                    <div id="user"></div>        
+                    <h1>%title%</h1>
+                    <button class="Kurs-button">Kurs Manuel Anlegen</button>
+                    <div id="course-form-container" style="display: none;">
+                        <form id="course-form">
+                            <div class="form-group">
+                                <label for="course">Kursname:</label>
+                                <input type="text" id="course" name="course" placeholder="z. B. BCSP 2" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="day">Tag:</label>
+                                <select id="day" name="day" required>
+                                    <option value="" disabled selected>Wähle einen Tag</option>
+                                    <option value="Mo">Montag</option>
+                                    <option value="Di">Dienstag</option>
+                                    <option value="Mi">Mittwoch</option>
+                                    <option value="Do">Donnerstag</option>
+                                    <option value="Fr">Freitag</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="from">Startzeit:</label>
+                                <input type="time" id="from" name="from" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="until">Endzeit:</label>
+                                <input type="time" id="until" name="until" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="room">Raum:</label>
+                                <input type="text" id="room" name="room" placeholder="z. B. St-C116" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="activity">Aktivität:</label>
+                                <input type="text" id="activity" name="activity" placeholder="z. B. Angewandte Kryptographie 1 (Ü)" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="period">Zeitraum:</label>
+                                <input type="text" id="period" name="period" placeholder="z. B. 03.04.2025-26.06.2025 (gKW (ab KW14))" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="id">ID:</label>
+                                <input type="number" id="id" name="id" placeholder="z. B. 19" required>
+                            </div>
+                            <button type="submit">Kurs hinzufügen</button>
+                            <button type="button" class="cancel-button">Abbrechen</button>
+                        </form>
+                    </div>
+                    <div id="items"></div>
+                    `,
             item: `
             <article data-course="%course%">
                 <main>
@@ -134,7 +134,7 @@ ccm.files["ccm.teacher_cours_self.js"] = {
                     activity: courseForm.querySelector('#activity').value,
                     period: courseForm.querySelector('#period').value,
                     who: "Weil",
-                    id: parseInt(courseForm.querySelector('#id').value)
+                    id: ccm.helper.generateKey()
                 };
 
                 // Erstelle einen eindeutigen Schlüssel für den Kurs (z. B. basierend auf der ID)
@@ -224,19 +224,7 @@ ccm.files["ccm.teacher_cours_self.js"] = {
             }
         };
 
-        // Notiz rendern
-       /* this.renderNote = (note, notesList, courseId) => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <span class="note-text">${note}</span>
-                <button class="delete-button">Delete</button>
-            `;
-            notesList.appendChild(li);
 
-            li.querySelector('.delete-button').addEventListener('click', () => {
-                this.deleteNote(note, notesList, li, courseId); // courseId übergeben
-            });
-        };*/
         this.renderNote = async (note, notesList, courseId) => {
             // Die Notiz ist ein Embed-Code für ein Quiz
             const li = document.createElement('li');
