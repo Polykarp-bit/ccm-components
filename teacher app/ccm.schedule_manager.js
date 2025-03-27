@@ -4,7 +4,7 @@ ccm.files["ccm.schedule_manager.js"] = {
     config: {
         store: ["ccm.store", { url: "https://ccm2.inf.h-brs.de", name: "tniede2s_mycollection" }],
         css: ["ccm.load", "./style.css"],
-        helper: ["ccm.load", "../../libs/ccm/helper/helper-8.4.2.mjs"],
+        helper: [ "ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-8.4.2.min.mjs" ],
         html: {
             editView: {
                 main: `
@@ -344,46 +344,91 @@ ccm.files["ccm.schedule_manager.js"] = {
             if (course && course.value && course.value.materials) {
                 modalApps.innerHTML = '';
 
-                // Debugging: Materialien ausgeben
-                console.log("Course Materials:", course.value.materials);
+                const decomposedMaterials = [];
 
+                // Materialien durchlaufen und nur gültige verarbeiten
                 course.value.materials.forEach((material, index) => {
-                    console.log("Material", material);
-                    if(material!=="wiete" && index!==1){
-                    console.log("fuck jeaj" + self.ccm.helper.decomposeEmbedCode(material));}
-                });
-                console.log(" dannach decompose")
+                    if (material !== "wiete" && ![0, 3, 4].includes(index)) {
+                        const decomposed = this.helper.decomposeEmbedCode(material);
 
-                // Konfiguration für eine neue app_collection basierend auf allen Materialien des Kurses
+                        if (Array.isArray(decomposed)) {
+                            decomposedMaterials.push(...decomposed);
+                        } else if (typeof decomposed === 'object' && decomposed !== null) {
+                            decomposedMaterials.push(decomposed);
+                        } else {
+                            console.warn("Ungültiges decomposed Material:", decomposed);
+                        }
+                    }
+                });
+
+                console.log("Decomposed Materials:", decomposedMaterials);
+
+                const renderedEntries = [];
+
+                for (let index = 0; index < decomposedMaterials.length; index++) {
+                    const decomposedMaterial = decomposedMaterials[index];
+                    console.log(decomposedMaterial);
+
+                    if (typeof decomposedMaterial === 'object' && decomposedMaterial.component && decomposedMaterial.config) {
+                        let title = `App ${index + 1}`;
+                        if (Array.isArray(decomposedMaterial.config) &&
+                            decomposedMaterial.config.length > 2 &&
+                            Array.isArray(decomposedMaterial.config[2]) &&
+                            typeof decomposedMaterial.config[2][0] === 'string') {
+                            title = decomposedMaterial.config[2][0];
+                        }
+
+                        try {
+                            const tempDiv = document.createElement('div');
+                            const instance = await self.ccm.start(decomposedMaterial.component, {
+                                root: tempDiv,
+                                ...decomposedMaterial.config
+                            });
+
+                            if (tempDiv.childNodes.length > 0) {
+                                renderedEntries.push({
+                                    "title": title,
+                                    //"ignore": tempDiv
+                                    //"ignore": [ "ccm.start", "https://ccmjs.github.io/tkless-components/pdf_viewer/versions/ccm.pdf_viewer-7.2.0.min.js", [ "ccm.load", "https://ccmjs.github.io/tkless-components/pdf_viewer/resources/resources.mjs#demo" ] ]
+                                    "ignore": [ "ccm.start",  decomposedMaterial.component]
+                                });
+                            } else {
+                                console.warn("Gerenderte App hat kein gültiges DOM-Element:", decomposedMaterial);
+                                renderedEntries.push({
+                                    "title": title,
+                                    "ignore": document.createTextNode("Fehler beim Laden der App.")
+                                });
+                            }
+                        } catch (error) {
+                            console.error("Fehler beim Rendern der Komponente:", decomposedMaterial, error);
+                            renderedEntries.push({
+                                "title": title,
+                                "ignore": document.createTextNode(`Fehler beim Laden der App: ${error.message}`)
+                            });
+                        }
+                    } else if (typeof decomposedMaterial === 'string') {
+                        if (decomposedMaterial.startsWith('http')) {
+                            renderedEntries.push({
+                                "title": `Externer Link ${index + 1}`,
+                                "ignore": document.createTextNode(decomposedMaterial)
+                            });
+                        } else if (decomposedMaterial.startsWith('mailto')) {
+                            renderedEntries.push({
+                                "title": `E-Mail Kontakt ${index + 1}`,
+                                "ignore": document.createTextNode(decomposedMaterial)
+                            });
+                        }
+                    } else {
+                        console.warn("Ungültiges Material in entries:", decomposedMaterial);
+                    }
+                }
+                console.log(renderedEntries)
+
                 const appCollectionConfig = {
                     "sections": [
                         {
                             "title": "Kursmaterialien",
-                            "entries": course.value.materials.map((material, index) => {
-                                // Prüfe, ob das Material ein Objekt mit component und config ist
-                                if (typeof material === 'object' && material.component && material.config) {
-                                    return {
-                                        "title": `App ${index + 1}`,
-                                        "ignore": material
-                                    };
-                                }
-                                // Fallback für andere Materialien (z. B. URLs oder mailto)
-                                else if (typeof material === 'string') {
-                                    if (material.startsWith('http')) {
-                                        return {
-                                            "title": `Externer Link ${index + 1}`,
-                                            "ignore": material
-                                        };
-                                    } else if (material.startsWith('mailto')) {
-                                        return {
-                                            "title": `E-Mail Kontakt ${index + 1}`,
-                                            "ignore": material
-                                        };
-                                    }
-                                }
-                                // Ignoriere ungültige Materialien
-                                return null;
-                            }).filter(entry => entry !== null)
+                            "entries": renderedEntries
                         }
                     ],
                     "footer": [
@@ -394,14 +439,13 @@ ccm.files["ccm.schedule_manager.js"] = {
                     ],
                     "title": "Apps für " + (course.value.activity || "Kurs"),
                     "dark": "auto",
-                    "color": "#4CAF50"
+                    "color": "#4CAF50",
+                    "helper": [ "ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-8.4.2.min.mjs" ]
                 };
 
-                // Debugging: app_collection-Konfiguration ausgeben
                 console.log("App Collection Config:", appCollectionConfig);
 
                 try {
-                    // Starte die neue app_collection-Komponente
                     const appCollectionInstance = await self.ccm.start(
                         "https://ccmjs.github.io/tkless-components/app_collection/versions/ccm.app_collection-3.0.0.min.js",
                         {
@@ -410,27 +454,11 @@ ccm.files["ccm.schedule_manager.js"] = {
                         }
                     );
 
-                    // Debugging: Prüfen, ob app_collection geladen wurde
-                    if (!appCollectionInstance) {
-                        console.error("Failed to load app_collection instance!");
-                        modalApps.innerHTML = '<p>Fehler beim Laden der App-Collection.</p>';
-                        return;
-                    }
-
-                    // Sicherstellen, dass closeModal korrekt referenziert wird
-                    const closeModalHandler = () => {
-                        if (typeof self.closeModal === 'function') {
-                            self.closeModal();
-                        } else {
-                            console.error("self.closeModal is not a function!");
-                            modal.style.display = 'none'; // Fallback: Modal manuell schließen
-                        }
-                    };
-
-                    // Schließen-Button im Footer
                     const footer = appCollectionInstance.element.querySelector('footer');
                     if (footer) {
-                        footer.addEventListener('click', closeModalHandler);
+                        footer.addEventListener('click', () => {
+                            this.closeModal();
+                        });
                     } else {
                         console.error("Footer element not found in app_collection!");
                     }
@@ -443,6 +471,7 @@ ccm.files["ccm.schedule_manager.js"] = {
                 modalApps.innerHTML = '<p>Keine Apps verfügbar.</p>';
             }
         };
+
 
         this.closeModal = () => {
             const modal = self.element.querySelector('#modal');
