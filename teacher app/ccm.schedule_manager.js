@@ -4,14 +4,14 @@ ccm.files["ccm.schedule_manager.js"] = {
     config: {
         store: ["ccm.store", { url: "https://ccm2.inf.h-brs.de", name: "tniede2s_mycollection" }],
         css: ["ccm.load", "./style.css"],
-        helper: [ "ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-8.4.2.min.mjs" ],
+        helper: ["ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-8.4.2.min.mjs"],
         html: {
             editView: {
                 main: `
                     <div id="user"></div>        
                     <h1>%title%</h1>
                     <div id="schedule-container">
-                        <h2>Füge einen Kurse hinzu</h2>
+                        <h2>Füge einen Kurs hinzu</h2>
                         <div class="dropdown-group">
                             <div class="dropdown-item">
                                 <label for="schedule-dropdown">Studiengang/Semester Hinzufügen:</label>
@@ -56,6 +56,10 @@ ccm.files["ccm.schedule_manager.js"] = {
                             <option value="#808080">Grau</option>
                         </select>
                         <button class="remove-button">Entfernen</button>
+                        <div class="course-links">
+                            <h4>Weblinks:</h4>
+                            <ul class="links-list"></ul>
+                        </div>
                     </div>
                 `
             },
@@ -79,7 +83,7 @@ ccm.files["ccm.schedule_manager.js"] = {
                 `
             }
         }
-    }, // Kein Komma hier!
+    },
 
     Instance: function () {
         let self = this;
@@ -134,7 +138,6 @@ ccm.files["ccm.schedule_manager.js"] = {
             });
             self.element.appendChild(mainHtml);
 
-
             let alleKurse = await self.store.get({});
             console.log("Alle Kurse:", alleKurse);
 
@@ -168,10 +171,10 @@ ccm.files["ccm.schedule_manager.js"] = {
 
             const clearButton = self.element.querySelector('#clear-button');
             clearButton.addEventListener('click', async () => {
-                await self.store.set({key: studentId, value: {student_id: studentId, courses: []}});
-                alleKurse = []
+                await self.store.set({ key: studentId, value: { student_id: studentId, courses: [] } });
+                currentCourses = [];
+                self.element.querySelector('#selected-schedule').innerHTML = '';
                 alert("Stundenplan erfolgreich zurückgesetzt!");
-
             });
 
             const scheduleDropdown = self.element.querySelector('#schedule-dropdown');
@@ -192,13 +195,48 @@ ccm.files["ccm.schedule_manager.js"] = {
             const renderCourse = (kurs) => {
                 const courseHtml = self.ccm.helper.html(self.html.editView.courseItem, {
                     key: kurs.key,
-                    activity: kurs.value.activity,
-                    day: kurs.value.day,
-                    from: kurs.value.from,
-                    until: kurs.value.until,
-                    room: kurs.value.room
+                    activity: kurs.value.activity || "Unbekannter Kurs",
+                    day: kurs.value.day || "Unbekannt",
+                    from: kurs.value.from || "Unbekannt",
+                    until: kurs.value.until || "Unbekannt",
+                    room: kurs.value.room || "Unbekannt"
                 });
                 selectedScheduleContainer.appendChild(courseHtml);
+
+                // Weblinks für den Kurs laden und anzeigen
+                const linksList = courseHtml.querySelector('.links-list');
+                if (kurs.value.materials && Array.isArray(kurs.value.materials)) {
+                    const urlPattern = /^(https?:\/\/)?(www\.)?([^\s$.?#]+\.[^\s]{2,})$/i;
+                    kurs.value.materials.forEach(material => {
+                        // Fall 1: Neues Format (Objekt mit headline und url)
+                        if (typeof material === 'object' && material.headline && material.url && urlPattern.test(material.url)) {
+                            const li = document.createElement('li');
+                            const headline = document.createElement('div');
+                            headline.className = 'link-headline';
+                            headline.textContent = material.headline;
+                            const link = document.createElement('a');
+                            link.href = material.url;
+                            link.textContent = material.url;
+                            link.target = "_blank";
+                            link.rel = "noopener noreferrer";
+                            li.appendChild(headline);
+                            li.appendChild(link);
+                            linksList.appendChild(li);
+                        }
+                        // Fall 2: Altes Format (nur URL als String)
+                        else if (typeof material === 'string' && urlPattern.test(material)) {
+                            const li = document.createElement('li');
+                            const link = document.createElement('a');
+                            const normalizedUrl = material.startsWith('http') ? material : `https://${material}`;
+                            link.href = normalizedUrl;
+                            link.textContent = normalizedUrl;
+                            link.target = "_blank";
+                            link.rel = "noopener noreferrer";
+                            li.appendChild(link);
+                            linksList.appendChild(li);
+                        }
+                    });
+                }
 
                 const colorSelect = courseHtml.querySelector('.color-select');
                 if (kurs.color) {
@@ -220,7 +258,7 @@ ccm.files["ccm.schedule_manager.js"] = {
             if (currentCourses.length > 0) {
                 currentCourses = currentCourses.map(savedCourse => {
                     const fullCourse = alleKurse.find(k => k.key === savedCourse.key);
-                    return fullCourse ? {...fullCourse, color: savedCourse.color} : null;
+                    return fullCourse ? { ...fullCourse, color: savedCourse.color } : null;
                 }).filter(course => course !== null);
                 preSelectedSchedule = currentCourses[0]?.value?.course;
             }
@@ -270,14 +308,6 @@ ccm.files["ccm.schedule_manager.js"] = {
 
         this.renderScheduleView = async () => {
             const userConfig = await self.store.get(studentId);
-            const defaultColors = {
-                "Vorlesung": "#FFCC99",
-                "Übung": "#99CCFF",
-                "Seminar": "#CCFFCC",
-                "Workshop": "#FF99CC",
-                "Deadline": "#FF6666",
-                "default": "#F0F0F0"
-            };
 
             const schedule = {};
             if (userConfig && userConfig.value && userConfig.value.courses) {
@@ -291,25 +321,45 @@ ccm.files["ccm.schedule_manager.js"] = {
                             title: kurs.value.activity,
                             time: `${kurs.value.from} - ${kurs.value.until}`,
                             room: kurs.value.room,
-                            color: course.color || defaultColors["default"],
+                            color: course.color || "#F0F0F0",
                             courseId: kurs.key
                         });
                     }
                 });
             }
 
+            // Hilfsfunktion, um eine Zeit (HH:MM) in Minuten umzuwandeln
+            const timeToMinutes = (time) => {
+                const [hours, minutes] = time.split(':').map(Number);
+                return hours * 60 + minutes;
+            };
+
+            // Sortiere die Events für jeden Tag nach Startzeit
+            Object.keys(schedule).forEach(day => {
+                schedule[day].sort((a, b) => {
+                    // Extrahiere die Startzeit aus dem time-Feld (z. B. "09:00 - 11:15" -> "09:00")
+                    const startTimeA = a.time.split(' - ')[0];
+                    const startTimeB = b.time.split(' - ')[0];
+                    // Wandle die Startzeiten in Minuten um
+                    const minutesA = timeToMinutes(startTimeA);
+                    const minutesB = timeToMinutes(startTimeB);
+                    // Sortiere aufsteigend nach Startzeit
+                    return minutesA - minutesB;
+                });
+            });
+
             const scheduleContent = Object.entries(schedule).map(([day, events]) => `
-                <div class="day">
-                    <h3>${day}</h3>
-                    ${events.map(event => `
-                        <div class="event" data-course-id="${event.courseId}" style="background-color: ${event.color};">
-                            <strong>${event.title}</strong><br>
-                            <span>${event.time}</span><br>
-                            <span>Raum: ${event.room}</span>
-                        </div>
-                    `).join('')}
+        <div class="day">
+            <h3>${day}</h3>
+            ${events.map(event => `
+                <div class="event" data-course-id="${event.courseId}" style="background-color: ${event.color};">
+                    <strong>${event.title}</strong><br>
+                    <span>${event.time}</span><br>
+                    <span>Raum: ${event.room}</span>
                 </div>
-            `).join('') || '<p>Keine Kurse im Stundenplan.</p>';
+            `).join('')}
+        </div>
+    `).join('') || '<p>Keine Kurse im Stundenplan.</p>';
 
             const mainHtml = self.ccm.helper.html(self.html.scheduleView.main, {
                 studentId: studentId,
@@ -321,7 +371,7 @@ ccm.files["ccm.schedule_manager.js"] = {
                 event.addEventListener('click', async () => {
                     const courseId = event.getAttribute('data-course-id');
                     const modalApps = self.element.querySelector('#modal-apps');
-                    modalApps.innerHTML = '<p>Lade Apps...</p>';
+                    modalApps.innerHTML = '<p>Lade Links...</p>';
                     await self.openModal(courseId, modalApps);
                 });
             });
@@ -333,145 +383,53 @@ ccm.files["ccm.schedule_manager.js"] = {
         };
 
         this.openModal = async (courseId, modalApps) => {
-            const modal = self.element.querySelector('#modal');
-            if (!modal) {
-                console.error("Modal element not found!");
+            const kurs = await this.store.get(courseId + "");
+            if (!kurs || !kurs.value || !kurs.value.materials) {
+                modalApps.innerHTML = '<p>Keine Links vorhanden.</p>';
+                const modal = self.element.querySelector('#modal');
+                modal.style.display = 'block';
                 return;
             }
-            modal.style.display = 'block';
 
-            const course = await self.store.get(courseId);
-            if (course && course.value && course.value.materials) {
-                modalApps.innerHTML = '';
-
-                const decomposedMaterials = [];
-
-                // Materialien durchlaufen und nur gültige verarbeiten
-                course.value.materials.forEach((material, index) => {
-                    if (material !== "wiete" && ![0, 3, 4].includes(index)) {
-                        const decomposed = this.helper.decomposeEmbedCode(material);
-
-                        if (Array.isArray(decomposed)) {
-                            decomposedMaterials.push(...decomposed);
-                        } else if (typeof decomposed === 'object' && decomposed !== null) {
-                            decomposedMaterials.push(decomposed);
-                        } else {
-                            console.warn("Ungültiges decomposed Material:", decomposed);
-                        }
-                    }
-                });
-
-                console.log("Decomposed Materials:", decomposedMaterials);
-
-                const renderedEntries = [];
-
-                for (let index = 0; index < decomposedMaterials.length; index++) {
-                    const decomposedMaterial = decomposedMaterials[index];
-                    console.log(decomposedMaterial);
-
-                    if (typeof decomposedMaterial === 'object' && decomposedMaterial.component && decomposedMaterial.config) {
-                        let title = `App ${index + 1}`;
-                        if (Array.isArray(decomposedMaterial.config) &&
-                            decomposedMaterial.config.length > 2 &&
-                            Array.isArray(decomposedMaterial.config[2]) &&
-                            typeof decomposedMaterial.config[2][0] === 'string') {
-                            title = decomposedMaterial.config[2][0];
-                        }
-
-                        try {
-                            const tempDiv = document.createElement('div');
-                            const instance = await self.ccm.start(decomposedMaterial.component, {
-                                root: tempDiv,
-                                ...decomposedMaterial.config
-                            });
-
-                            if (tempDiv.childNodes.length > 0) {
-                                renderedEntries.push({
-                                    "title": title,
-                                    //"ignore": tempDiv
-                                    //"ignore": [ "ccm.start", "https://ccmjs.github.io/tkless-components/pdf_viewer/versions/ccm.pdf_viewer-7.2.0.min.js", [ "ccm.load", "https://ccmjs.github.io/tkless-components/pdf_viewer/resources/resources.mjs#demo" ] ]
-                                    "ignore": [ "ccm.start",  decomposedMaterial.component]
-                                });
-                            } else {
-                                console.warn("Gerenderte App hat kein gültiges DOM-Element:", decomposedMaterial);
-                                renderedEntries.push({
-                                    "title": title,
-                                    "ignore": document.createTextNode("Fehler beim Laden der App.")
-                                });
-                            }
-                        } catch (error) {
-                            console.error("Fehler beim Rendern der Komponente:", decomposedMaterial, error);
-                            renderedEntries.push({
-                                "title": title,
-                                "ignore": document.createTextNode(`Fehler beim Laden der App: ${error.message}`)
-                            });
-                        }
-                    } else if (typeof decomposedMaterial === 'string') {
-                        if (decomposedMaterial.startsWith('http')) {
-                            renderedEntries.push({
-                                "title": `Externer Link ${index + 1}`,
-                                "ignore": document.createTextNode(decomposedMaterial)
-                            });
-                        } else if (decomposedMaterial.startsWith('mailto')) {
-                            renderedEntries.push({
-                                "title": `E-Mail Kontakt ${index + 1}`,
-                                "ignore": document.createTextNode(decomposedMaterial)
-                            });
-                        }
-                    } else {
-                        console.warn("Ungültiges Material in entries:", decomposedMaterial);
-                    }
+            const urlPattern = /^(https?:\/\/)?(www\.)?([^\s$.?#]+\.[^\s]{2,})$/i;
+            const links = kurs.value.materials.filter(material => {
+                if (typeof material === 'string') {
+                    return urlPattern.test(material);
+                } else if (typeof material === 'object' && material.url) {
+                    return urlPattern.test(material.url);
                 }
-                console.log(renderedEntries)
+                return false;
+            });
 
-                const appCollectionConfig = {
-                    "sections": [
-                        {
-                            "title": "Kursmaterialien",
-                            "entries": renderedEntries
-                        }
-                    ],
-                    "footer": [
-                        {
-                            "title": "Schließen",
-                            "ignore": null
-                        }
-                    ],
-                    "title": "Apps für " + (course.value.activity || "Kurs"),
-                    "dark": "auto",
-                    "color": "#4CAF50",
-                    "helper": [ "ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-8.4.2.min.mjs" ]
-                };
-
-                console.log("App Collection Config:", appCollectionConfig);
-
-                try {
-                    const appCollectionInstance = await self.ccm.start(
-                        "https://ccmjs.github.io/tkless-components/app_collection/versions/ccm.app_collection-3.0.0.min.js",
-                        {
-                            root: modalApps,
-                            ...appCollectionConfig
-                        }
-                    );
-
-                    const footer = appCollectionInstance.element.querySelector('footer');
-                    if (footer) {
-                        footer.addEventListener('click', () => {
-                            this.closeModal();
-                        });
-                    } else {
-                        console.error("Footer element not found in app_collection!");
-                    }
-                } catch (error) {
-                    console.error("Error loading app_collection:", error);
-                    modalApps.innerHTML = '<p>Fehler beim Laden der App-Collection: ' + error.message + '</p>';
-                }
-            } else {
-                console.warn("No materials found for course:", courseId);
-                modalApps.innerHTML = '<p>Keine Apps verfügbar.</p>';
+            if (links.length === 0) {
+                modalApps.innerHTML = '<p>Keine Links vorhanden.</p>';
+                const modal = self.element.querySelector('#modal');
+                modal.style.display = 'block';
+                return;
             }
-        };
 
+            if (links.length === 1) {
+                const link = typeof links[0] === 'string' ? links[0] : links[0].url;
+                const normalizedLink = link.startsWith('http') ? link : `https://${link}`;
+                window.open(normalizedLink, '_blank');
+                return;
+            }
+
+            modalApps.innerHTML = links.map(material => {
+                const headline = typeof material === 'object' && material.headline ? material.headline : 'Weblink';
+                const url = typeof material === 'string' ? material : material.url;
+                const normalizedUrl = url.startsWith('http') ? url : `https://${url}`;
+                return `
+                    <div class="modal-link">
+                        <strong>${headline}</strong><br>
+                        <a href="${normalizedUrl}" target="_blank" rel="noopener noreferrer">${normalizedUrl}</a>
+                    </div>
+                `;
+            }).join('');
+
+            const modal = self.element.querySelector('#modal');
+            modal.style.display = 'block';
+        };
 
         this.closeModal = () => {
             const modal = self.element.querySelector('#modal');
@@ -481,4 +439,5 @@ ccm.files["ccm.schedule_manager.js"] = {
                 console.error("Modal element not found in closeModal!");
             }
         };
-    }};
+    }
+};
