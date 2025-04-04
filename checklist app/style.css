@@ -1,0 +1,60 @@
+.checklist-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.checklist-container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.semester-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.semester-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    background-color: #f9f9f9;
+}
+
+.semester-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.semester-header input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.semester-header label {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #333;
+}
+
+.course-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-left: 30px;
+}
+
+.course-item {
+    display: flex;
+    align-items: center;
+}
+
+.course-item input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.course-item label {
+    flex-grow: 1;
+}
