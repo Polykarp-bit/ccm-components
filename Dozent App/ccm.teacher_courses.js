@@ -1,4 +1,4 @@
-ccm.files["ccm.teacher_cours_self.js"] = {
+ccm.files["ccm.teacher_courses.js"] = {
     name: "teacher_courses",
     ccm: "../../libs/ccm/ccm.js",
     config: {
