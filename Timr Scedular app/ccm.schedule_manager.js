@@ -2,7 +2,8 @@ ccm.files["ccm.schedule_manager.js"] = {
     name: "schedule_manager",
     ccm: "../../libs/ccm/ccm.js",
     config: {
-        store: ["ccm.store", { url: "https://ccm2.inf.h-brs.de", name: "tniede2s_mycollection" }],
+        studentStore: ["ccm.store", { url: "https://ccm2.inf.h-brs.de", name: "tniede2s_student_schedules" }],
+        courseStore: ["ccm.store", { url: "https://ccm2.inf.h-brs.de", name: "tniede2s_teacher_courses" }],
         css: ["ccm.load", "./style.css"],
         helper: ["ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-8.4.2.min.mjs"],
         html: {
@@ -12,22 +13,14 @@ ccm.files["ccm.schedule_manager.js"] = {
                     <h1>%title%</h1>
                     <div id="schedule-container">
                         <h2>Füge einen Kurs hinzu</h2>
-                        <div class="dropdown-group">
-                            <div class="dropdown-item">
-                                <label for="schedule-dropdown">Studiengang/Semester Hinzufügen:</label>
-                                <select id="schedule-dropdown">
-                                    <option value="">-- Stundenplan auswählen --</option>
-                                </select>
-                            </div>
-                            <div class="dropdown-item">
-                                <label for="add-course-dropdown">Einzelnen Kurs hinzufügen Abseits Des Regelsemesters:</label>
-                                <select id="add-course-dropdown">
-                                    <option value="">-- Kurs hinzufügen --</option>
-                                </select>
+                        <button id ="add-course-button">Neuen Kurs hinzufügen</button>
+                        <div class="dropdown-container">
+                            <button id="course-dropdown-button" class="dropdown-button">Kurs auswählen ▼</button>
+                            <div id="course-dropdown-content" class="dropdown-content">
+                                <input type="text" id="course-search" placeholder="Kurs suchen...">
+                                <div id="course-checkbox-list"></div>
                             </div>
                         </div>
-                        <button id="save-button">Speichern</button>
-                        <button id="clear-button">Stundenplan zurücksetzten</button>
                         <h2>Ausgewählter Stundenplan</h2>
                         <div id="selected-schedule"></div>
                     </div>
@@ -90,11 +83,23 @@ ccm.files["ccm.schedule_manager.js"] = {
         let currentCourses = [];
         let isEditMode = false;
         const studentId = "tmiede2s";
+        let toggleButton;
 
         this.start = async () => {
             console.log("Starte schedule_manager...");
 
-            const savedSchedule = await self.store.get(studentId);
+            toggleButton = document.createElement('button');
+            toggleButton.id = 'toggle-view-button';
+            toggleButton.style.position = 'absolute';
+            toggleButton.style.top = '10px';
+            toggleButton.style.right = '10px';
+            toggleButton.addEventListener('click', async () => {
+                isEditMode = !isEditMode;
+                await self.renderView();
+            });
+            self.element.appendChild(toggleButton);
+
+            const savedSchedule = await self.studentStore.get(studentId);
             console.log("Gespeicherte Konfiguration für", studentId, ":", savedSchedule);
 
             if (savedSchedule && savedSchedule.value && savedSchedule.value.courses) {
@@ -111,34 +116,63 @@ ccm.files["ccm.schedule_manager.js"] = {
         };
 
         this.renderView = async () => {
-            self.element.innerHTML = '';
-
-            if (isEditMode) {
-                await self.renderEditView();
-            } else {
-                await self.renderScheduleView();
+            const mainContent = self.element.querySelector('#main-content');
+            if (mainContent) {
+                mainContent.remove();
             }
 
-            const toggleButton = document.createElement('button');
-            toggleButton.id = 'toggle-view-button';
+            const contentDiv = document.createElement('div');
+            contentDiv.id = 'main-content';
+            self.element.insertBefore(contentDiv, toggleButton);
+
             toggleButton.textContent = isEditMode ? 'Zur Stundenplanansicht' : 'Settings';
-            toggleButton.style.position = 'absolute';
-            toggleButton.style.top = '10px';
-            toggleButton.style.right = '10px';
-            toggleButton.addEventListener('click', async () => {
-                isEditMode = !isEditMode;
-                await self.renderView();
-            });
-            self.element.appendChild(toggleButton);
+
+            if (isEditMode) {
+                await self.renderEditView(contentDiv);
+            } else {
+                await self.renderScheduleView(contentDiv);
+            }
         };
 
-        this.renderEditView = async () => {
+        this.renderEditView = async (container) => {
             const mainHtml = self.ccm.helper.html(self.html.editView.main, {
                 title: "Stundenplan bearbeiten"
             });
-            self.element.appendChild(mainHtml);
+            container.appendChild(mainHtml);container.appendChild(mainHtml);
 
-            let alleKurse = await self.store.get({});
+            const addCourseButton = document.createElement('button');
+            addCourseButton.textContent = 'Neuen Kurs hinzufügen';
+            container.appendChild(addCourseButton);
+
+            const newCourseForm = document.createElement('form');
+            newCourseForm.innerHTML = `
+                <input type="text" id="new-course-name" placeholder="Kursname" required>
+                <input type="text" id="new-course-day" placeholder="Tag" required>
+                <input type="text" id="new-course-from" placeholder="Von" required>
+                <input type="text" id="new-course-until" placeholder="Bis" required>
+                <input type="text" id="new-course-room" placeholder="Raum" required>
+                <button type="submit">Kurs hinzufügen</button>
+            `;
+            container.appendChild(newCourseForm);
+
+            newCourseForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const newCourse = {
+                    key: `course_${Date.now()}`,
+                    value: {
+                        course: document.getElementById('new-course-name').value,
+                        day: document.getElementById('new-course-day').value,
+                        from: document.getElementById('new-course-from').value,
+                        until: document.getElementById('new-course-until').value,
+                        room: document.getElementById('new-course-room').value,
+                        activity: document.getElementById('new-course-name').value
+                    }
+                };
+                await addCourse(newCourse);
+                newCourseForm.reset();
+            });
+
+            let alleKurse = await self.courseStore.get({});
             console.log("Alle Kurse:", alleKurse);
 
             const groupedCourses = {};
@@ -154,43 +188,105 @@ ccm.files["ccm.schedule_manager.js"] = {
                 });
             }
 
-            const scheduleOptions = Object.keys(groupedCourses).map(courseName => {
-                return `<option value="${courseName}">${courseName}</option>`;
+            const courseCheckboxList = container.querySelector('#course-checkbox-list');
+            const selectedScheduleContainer = container.querySelector('#selected-schedule');
+            const scheduleContainer = container.querySelector('#schedule-container');
+            const dropdownButton = container.querySelector('#course-dropdown-button');
+            const dropdownContent = container.querySelector('#course-dropdown-content');
+            const searchInput = container.querySelector('#course-search');
+
+            if (scheduleContainer) {
+                scheduleContainer.style.display = 'block';
+                scheduleContainer.style.visibility = 'visible';
+            }
+
+            const saveCourses = async () => {
+                console.log(currentCourses);
+                const scheduleData = {
+                    key: studentId,
+                    value: {
+                        student_id: studentId,
+                        courses: currentCourses.map(kurs => ({
+                            key: kurs.key,
+                            color: kurs.color || "",
+                            course: kurs.course || kurs.value.course
+                        }))
+                    }
+                };
+                await self.studentStore.set(scheduleData);
+                console.log("Kurse automatisch gespeichert:", scheduleData);
+            };
+
+            const courseListHtml = Object.keys(groupedCourses).map(courseName => {
+                const courses = groupedCourses[courseName];
+                const subCoursesHtml = courses
+                    .filter(kurs => kurs && kurs.value && kurs.value.activity)
+                    .map(kurs => `
+                <div class="subcourse-item">
+                    <input type="checkbox" class="subcourse-checkbox" data-key="${kurs.key}" data-parent="${courseName}" ${currentCourses.some(c => c.key === kurs.key) ? 'checked' : ''}>
+                    <label>${kurs.value.activity} (Tag: ${kurs.value.day}, ${kurs.value.from} - ${kurs.value.until}, Raum: ${kurs.value.room})</label>
+                </div>
+            `).join('');
+                return `
+            <div class="course-group">
+                <div class="course-item">
+                    <input type="checkbox" class="course-checkbox" data-course="${courseName}" ${currentCourses.some(c => c.course === courseName && groupedCourses[courseName].every(k => currentCourses.some(ck => ck.key === k.key))) ? 'checked' : ''}>
+                    <label>${courseName}</label>
+                </div>
+                <div class="subcourses">
+                    ${subCoursesHtml}
+                </div>
+            </div>
+        `;
             }).join('');
 
-            const courseOptions = Array.isArray(alleKurse) ? Object.keys(groupedCourses).map(courseName => {
-                const courses = groupedCourses[courseName];
-                const courseItems = courses
-                    .filter(kurs => kurs && kurs.value && kurs.value.activity)
-                    .map(kurs => {
-                        const label = `${kurs.value.activity} (Tag: ${kurs.value.day}, ${kurs.value.from} - ${kurs.value.until}, Raum: ${kurs.value.room})`;
-                        return `<option value="${kurs.key}">${label}</option>`;
-                    }).join('');
-                return `<optgroup label="${courseName}">${courseItems}</optgroup>`;
-            }).join('') : '';
+            if (courseCheckboxList) {
+                courseCheckboxList.innerHTML = courseListHtml;
+            }
 
-            const clearButton = self.element.querySelector('#clear-button');
-            clearButton.addEventListener('click', async () => {
-                await self.store.set({ key: studentId, value: { student_id: studentId, courses: [] } });
-                currentCourses = [];
-                self.element.querySelector('#selected-schedule').innerHTML = '';
-                alert("Stundenplan erfolgreich zurückgesetzt!");
-            });
+            if (dropdownButton && dropdownContent) {
+                document.addEventListener('click', function(event) {
+                    if (!dropdownContent.contains(event.target) && !dropdownButton.contains(event.target)) {
+                        dropdownContent.style.display = 'none';
+                        dropdownButton.textContent = 'Kurs auswählen ▼';
+                    }
+                });
 
-            const scheduleDropdown = self.element.querySelector('#schedule-dropdown');
-            const addCourseDropdown = self.element.querySelector('#add-course-dropdown');
-            scheduleDropdown.innerHTML = `<option value="">-- Stundenplan auswählen --</option>${scheduleOptions}`;
-            addCourseDropdown.innerHTML = `<option value="">-- Kurs hinzufügen --</option>${courseOptions}`;
+                dropdownButton.onclick = function(event) {
+                    event.stopPropagation();
+                    const isOpen = dropdownContent.style.display === 'block';
+                    dropdownContent.style.display = isOpen ? 'none' : 'block';
+                    dropdownButton.textContent = isOpen ? 'Kurs auswählen ▼' : 'Kurs auswählen ▲';
+                    if (!isOpen && searchInput) {
+                        searchInput.focus();
+                    }
+                };
+            }
 
-            const scheduleContainer = self.element.querySelector('#schedule-container');
-            scheduleContainer.style.display = 'block';
-            scheduleContainer.style.visibility = 'visible';
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    const searchTerm = searchInput.value.toLowerCase();
+                    const courseGroups = courseCheckboxList.querySelectorAll('.course-group');
 
-            const loadingSpinner = self.element.querySelector('.ccm_loading');
-            if (loadingSpinner) loadingSpinner.style.display = 'none';
+                    courseGroups.forEach(group => {
+                        const courseName = group.querySelector('.course-checkbox').dataset.course.toLowerCase();
+                        const subCourses = group.querySelectorAll('.subcourse-item');
+                        let hasVisibleSubCourse = false;
 
-            const selectedScheduleContainer = self.element.querySelector('#selected-schedule');
-            const saveButton = self.element.querySelector('#save-button');
+                        subCourses.forEach(subCourse => {
+                            const label = subCourse.querySelector('label').textContent.toLowerCase();
+                            if (courseName.includes(searchTerm) || label.includes(searchTerm)) {
+                                subCourse.style.display = 'flex';
+                                hasVisibleSubCourse = true;
+                            } else {
+                                subCourse.style.display = 'none';
+                            }
+                        });
+
+                        group.style.display = hasVisibleSubCourse ? 'block' : 'none';
+                    });
+                });
+            }
 
             const renderCourse = (kurs) => {
                 const courseHtml = self.ccm.helper.html(self.html.editView.courseItem, {
@@ -203,12 +299,10 @@ ccm.files["ccm.schedule_manager.js"] = {
                 });
                 selectedScheduleContainer.appendChild(courseHtml);
 
-                // Weblinks für den Kurs laden und anzeigen
                 const linksList = courseHtml.querySelector('.links-list');
                 if (kurs.value.materials && Array.isArray(kurs.value.materials)) {
                     const urlPattern = /^(https?:\/\/)?(www\.)?([^\s$.?#]+\.[^\s]{2,})$/i;
                     kurs.value.materials.forEach(material => {
-                        // Fall 1: Neues Format (Objekt mit headline und url)
                         if (typeof material === 'object' && material.headline && material.url && urlPattern.test(material.url)) {
                             const li = document.createElement('li');
                             const headline = document.createElement('div');
@@ -222,9 +316,7 @@ ccm.files["ccm.schedule_manager.js"] = {
                             li.appendChild(headline);
                             li.appendChild(link);
                             linksList.appendChild(li);
-                        }
-                        // Fall 2: Altes Format (nur URL als String)
-                        else if (typeof material === 'string' && urlPattern.test(material)) {
+                        } else if (typeof material === 'string' && urlPattern.test(material)) {
                             const li = document.createElement('li');
                             const link = document.createElement('a');
                             const normalizedUrl = material.startsWith('http') ? material : `https://${material}`;
@@ -243,75 +335,102 @@ ccm.files["ccm.schedule_manager.js"] = {
                     colorSelect.value = kurs.color;
                     courseHtml.style.backgroundColor = kurs.color;
                 }
-                colorSelect.addEventListener('change', (e) => {
+
+                colorSelect.addEventListener('change', async (e) => {
                     kurs.color = e.target.value;
                     courseHtml.style.backgroundColor = e.target.value || '';
+                    const courseInList = currentCourses.find(c => c.key === kurs.key);
+                    if (courseInList) {
+                        courseInList.color = kurs.color;
+                        await saveCourses();
+                    }
                 });
 
-                courseHtml.querySelector('.remove-button').addEventListener('click', () => {
+                courseHtml.querySelector('.remove-button').addEventListener('click', async () => {
                     currentCourses = currentCourses.filter(k => k.key !== kurs.key);
                     selectedScheduleContainer.removeChild(courseHtml);
+                    const checkbox = courseCheckboxList.querySelector(`.subcourse-checkbox[data-key="${kurs.key}"]`);
+                    if (checkbox) checkbox.checked = false;
+                    updateParentCheckbox(kurs.value.course);
+                    await saveCourses();
                 });
             };
 
-            let preSelectedSchedule = null;
-            if (currentCourses.length > 0) {
-                currentCourses = currentCourses.map(savedCourse => {
-                    const fullCourse = alleKurse.find(k => k.key === savedCourse.key);
-                    return fullCourse ? { ...fullCourse, color: savedCourse.color } : null;
-                }).filter(course => course !== null);
-                preSelectedSchedule = currentCourses[0]?.value?.course;
-            }
+            const updateParentCheckbox = (courseName) => {
+                const parentCheckbox = courseCheckboxList.querySelector(`.course-checkbox[data-course="${courseName}"]`);
+                const subCheckboxes = courseCheckboxList.querySelectorAll(`.subcourse-checkbox[data-parent="${courseName}"]`);
+                if (!parentCheckbox) {
+                    console.warn(`Kein parentCheckbox für Kurs "${courseName}" gefunden.`);
+                    return;
+                }
+                const allChecked = Array.from(subCheckboxes).every(sub => sub.checked);
+                const someChecked = Array.from(subCheckboxes).some(sub => sub.checked);
+                parentCheckbox.checked = allChecked;
+                parentCheckbox.indeterminate = someChecked && !allChecked;
+            };
 
-            if (preSelectedSchedule && groupedCourses[preSelectedSchedule]) {
-                scheduleDropdown.value = preSelectedSchedule;
-                currentCourses.forEach(renderCourse);
-            }
-
-            scheduleDropdown.addEventListener('change', (e) => {
-                const selectedSchedule = e.target.value;
-                selectedScheduleContainer.innerHTML = '';
-                currentCourses = selectedSchedule ? [...groupedCourses[selectedSchedule]] : [];
-                currentCourses.forEach(renderCourse);
-            });
-
-            addCourseDropdown.addEventListener('change', (e) => {
-                const selectedCourseKey = e.target.value;
-                if (selectedCourseKey) {
-                    const kurs = alleKurse.find(k => k.key === selectedCourseKey);
-                    if (kurs && !currentCourses.some(k => k.key === kurs.key)) {
-                        currentCourses.push(kurs);
-                        renderCourse(kurs);
-                    }
-                    addCourseDropdown.value = '';
+            currentCourses.forEach(course => {
+                const fullCourse = alleKurse.find(k => k.key === course.key);
+                if (fullCourse) {
+                    fullCourse.color = course.color;
+                    renderCourse(fullCourse);
+                    const checkbox = courseCheckboxList.querySelector(`.subcourse-checkbox[data-key="${course.key}"]`);
+                    if (checkbox) checkbox.checked = true;
+                    updateParentCheckbox(fullCourse.value.course);
+                } else {
+                    console.warn(`Kurs mit key "${course.key}" nicht in courseStore gefunden.`);
                 }
             });
 
-            saveButton.addEventListener('click', async () => {
-                const scheduleData = {
-                    key: studentId,
-                    value: {
-                        student_id: studentId,
-                        courses: currentCourses.map(kurs => ({
-                            key: kurs.key,
-                            color: kurs.color || "",
-                            course: kurs.value.course
-                        }))
+            courseCheckboxList.querySelectorAll('.course-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', async (e) => {
+                    const courseName = e.target.dataset.course;
+                    const subCheckboxes = courseCheckboxList.querySelectorAll(`.subcourse-checkbox[data-parent="${courseName}"]`);
+                    subCheckboxes.forEach(subCheckbox => {
+                        subCheckbox.checked = e.target.checked;
+                        const kursKey = subCheckbox.dataset.key;
+                        const kurs = alleKurse.find(k => k.key === kursKey);
+                        if (e.target.checked) {
+                            if (!currentCourses.some(c => c.key === kursKey)) {
+                                currentCourses.push(kurs);
+                                renderCourse(kurs);
+                            }
+                        } else {
+                            currentCourses = currentCourses.filter(c => c.key !== kursKey);
+                            const courseElement = selectedScheduleContainer.querySelector(`.course-item[data-key="${kursKey}"]`);
+                            if (courseElement) selectedScheduleContainer.removeChild(courseElement);
+                        }
+                    });
+                    await saveCourses();
+                });
+            });
+
+            courseCheckboxList.querySelectorAll('.subcourse-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', async (e) => {
+                    const kursKey = e.target.dataset.key;
+                    const kurs = alleKurse.find(k => k.key === kursKey);
+                    if (e.target.checked) {
+                        if (!currentCourses.some(c => c.key === kursKey)) {
+                            currentCourses.push(kurs);
+                            renderCourse(kurs);
+                        }
+                    } else {
+                        currentCourses = currentCourses.filter(c => c.key !== kursKey);
+                        const courseElement = selectedScheduleContainer.querySelector(`.course-item[data-key="${kursKey}"]`);
+                        if (courseElement) selectedScheduleContainer.removeChild(courseElement);
                     }
-                };
-                await self.store.set(scheduleData);
-                alert("Stundenplan erfolgreich gespeichert!");
-                isEditMode = false;
-                await self.renderView();
+                    updateParentCheckbox(kurs.value.course);
+                    await saveCourses();
+                });
             });
         };
 
-        this.renderScheduleView = async () => {
-            const userConfig = await self.store.get(studentId);
+        this.renderScheduleView = async (container) => {
+            const userConfig = await self.studentStore.get(studentId);
 
             const schedule = {};
             if (userConfig && userConfig.value && userConfig.value.courses) {
-                const allCourses = await self.store.get({});
+                const allCourses = await self.courseStore.get({});
                 userConfig.value.courses.forEach(course => {
                     const kurs = allCourses.find(k => k.key === course.key);
                     if (kurs && kurs.value) {
@@ -328,62 +447,57 @@ ccm.files["ccm.schedule_manager.js"] = {
                 });
             }
 
-            // Hilfsfunktion, um eine Zeit (HH:MM) in Minuten umzuwandeln
             const timeToMinutes = (time) => {
                 const [hours, minutes] = time.split(':').map(Number);
                 return hours * 60 + minutes;
             };
 
-            // Sortiere die Events für jeden Tag nach Startzeit
             Object.keys(schedule).forEach(day => {
                 schedule[day].sort((a, b) => {
-                    // Extrahiere die Startzeit aus dem time-Feld (z. B. "09:00 - 11:15" -> "09:00")
                     const startTimeA = a.time.split(' - ')[0];
                     const startTimeB = b.time.split(' - ')[0];
-                    // Wandle die Startzeiten in Minuten um
                     const minutesA = timeToMinutes(startTimeA);
                     const minutesB = timeToMinutes(startTimeB);
-                    // Sortiere aufsteigend nach Startzeit
                     return minutesA - minutesB;
                 });
             });
 
             const scheduleContent = Object.entries(schedule).map(([day, events]) => `
-        <div class="day">
-            <h3>${day}</h3>
-            ${events.map(event => `
-                <div class="event" data-course-id="${event.courseId}" style="background-color: ${event.color};">
-                    <strong>${event.title}</strong><br>
-                    <span>${event.time}</span><br>
-                    <span>Raum: ${event.room}</span>
+                <div class="day">
+                    <h3>${day}</h3>
+                    ${events.map(event => `
+                        <div class="event" data-course-id="${event.courseId}" style="background-color: ${event.color};">
+                            <strong>${event.title}</strong><br>
+                            <span>${event.time}</span><br>
+                            <span>Raum: ${event.room}</span>
+                        </div>
+                    `).join('')}
                 </div>
-            `).join('')}
-        </div>
-    `).join('') || '<p>Keine Kurse im Stundenplan.</p>';
+            `).join('') || '<p>Keine Kurse im Stundenplan.</p>';
 
             const mainHtml = self.ccm.helper.html(self.html.scheduleView.main, {
                 studentId: studentId,
                 scheduleContent: scheduleContent
             });
-            self.element.appendChild(mainHtml);
+            container.appendChild(mainHtml);
 
-            self.element.querySelectorAll('.event').forEach(event => {
+            container.querySelectorAll('.event').forEach(event => {
                 event.addEventListener('click', async () => {
                     const courseId = event.getAttribute('data-course-id');
-                    const modalApps = self.element.querySelector('#modal-apps');
+                    const modalApps = container.querySelector('#modal-apps');
                     modalApps.innerHTML = '<p>Lade Links...</p>';
                     await self.openModal(courseId, modalApps);
                 });
             });
 
-            self.element.querySelector('.close').addEventListener('click', self.closeModal);
+            container.querySelector('.close').addEventListener('click', self.closeModal);
             window.addEventListener('click', (event) => {
-                if (event.target === self.element.querySelector('#modal')) self.closeModal();
+                if (event.target === container.querySelector('#modal')) self.closeModal();
             });
         };
 
         this.openModal = async (courseId, modalApps) => {
-            const kurs = await this.store.get(courseId + "");
+            const kurs = await self.courseStore.get(courseId);
             if (!kurs || !kurs.value || !kurs.value.materials) {
                 modalApps.innerHTML = '<p>Keine Links vorhanden.</p>';
                 const modal = self.element.querySelector('#modal');

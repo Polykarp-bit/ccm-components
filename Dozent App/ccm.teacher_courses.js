@@ -2,7 +2,7 @@ ccm.files["ccm.teacher_courses.js"] = {
     name: "teacher_courses",
     ccm: "../../libs/ccm/ccm.js",
     config: {
-        store: ["ccm.store", { url: "https://ccm2.inf.h-brs.de", name: "tniede2s_mycollection" }],
+        store: ["ccm.store", { url: "https://ccm2.inf.h-brs.de", name: "tniede2s_teacher_courses" }],
         css: ["ccm.load", "./style.css"],
         helper: ["ccm.load", "../../libs/ccm/helper/helper-8.4.2.mjs"],
         html: {
@@ -45,7 +45,7 @@ ccm.files["ccm.teacher_courses.js"] = {
                         </div>
                         <div class="form-group">
                             <label for="period">Zeitraum:</label>
-                            <input type="text" id="period" name="period" placeholder="z. B. 03.04.2025-26.06.2025 (gKW (ab KW14))" required>
+                            <input type="text" id="period" name="period" placeholder="z. B. 03.04.2025-26.06.2025" required>
                         </div>
                         <button type="submit">Kurs hinzufügen</button>
                         <button type="button" class="cancel-button">Abbrechen</button>
@@ -84,9 +84,9 @@ ccm.files["ccm.teacher_courses.js"] = {
 
         this.start = async () => {
             try {
-                // Lade alle Kurse aus der Datenbank
+                // Lade alle Kurse aus der neuen Sammlung
                 const alleKurse = await self.store.get({});
-                console.log("Alle Kurse:", alleKurse);
+                console.log("Alle Kurse aus tniede2s_teacher_courses:", alleKurse);
 
                 let meineKurse = [];
                 if (Array.isArray(alleKurse)) {
@@ -134,7 +134,6 @@ ccm.files["ccm.teacher_courses.js"] = {
                     event.preventDefault();
 
                     try {
-                        // Sammle die Formulardaten
                         const courseData = {
                             course: courseForm.querySelector('#course').value,
                             day: courseForm.querySelector('#day').value,
@@ -147,10 +146,8 @@ ccm.files["ccm.teacher_courses.js"] = {
                             id: this.ccm.helper.generateKey()
                         };
 
-                        // Erstelle einen eindeutigen Schlüssel für den Kurs
-                        const courseId = courseData.id + "";
+                        const courseId = courseData.id;
 
-                        // Speichere den neuen Kurs in der Datenbank
                         await self.store.set({
                             key: courseId,
                             value: courseData
@@ -158,12 +155,10 @@ ccm.files["ccm.teacher_courses.js"] = {
 
                         console.log("Neuer Kurs hinzugefügt:", courseData);
 
-                        // Schließe das Formular und zeige den Button wieder an
                         courseFormContainer.style.display = 'none';
                         kursButton.style.display = 'block';
                         courseForm.reset();
 
-                        // Aktualisiere die Kursliste
                         await this.renderCourses(itemElement);
                     } catch (e) {
                         console.error("Fehler beim Hinzufügen eines Kurses:", e);
@@ -171,116 +166,47 @@ ccm.files["ccm.teacher_courses.js"] = {
                     }
                 });
 
-                // Kurse rendern
-                const item_element = this.element.querySelector('#items');
-                meineKurse.forEach(kurs => {
-                    try {
-                        const kursHtml = this.ccm.helper.html(this.html.item, {
-                            title: kurs.value.activity || "Unbekannter Kurs",
-                            course: kurs.key
-                        });
-                        console.log("Kurs HTML:", kursHtml);
-                        item_element.appendChild(kursHtml);
-
-                        const addButton = kursHtml.querySelector('.add-button');
-                        const noteInputContainer = kursHtml.querySelector('.note-input-container');
-                        const noteInput = kursHtml.querySelector('.note-input');
-                        const noteHeadline = kursHtml.querySelector('.note-headline');
-                        const confirmButton = kursHtml.querySelector('.confirm-button');
-                        const notesList = kursHtml.querySelector('.notes-list');
-                        const courseId = kurs.key;
-
-                        // Lade bestehende Notizen (Weblinks)
-                        this.loadNotes(courseId, notesList);
-
-                        // Event-Listener für das Anzeigen des Eingabeformulars
-                        addButton.addEventListener('click', () => {
-                            noteInputContainer.style.display = 'block';
-                            addButton.style.display = 'none';
-                        });
-
-                        // Event-Listener für das Bestätigen eines Weblinks
-                        confirmButton.addEventListener('click', async () => {
-                            const headline = noteHeadline.value.trim();
-                            const note = noteInput.value.trim();
-                            // Überprüfe, ob der eingegebene Wert eine gültige URL ist
-                            const urlPattern = /^(https?:\/\/)?(www\.)?([^\s$.?#]+\.[^\s]{2,})$/i;
-                            if (!headline) {
-                                alert("Bitte gib eine Überschrift ein.");
-                                return;
-                            }
-                            if (note && urlPattern.test(note)) {
-                                // Stelle sicher, dass die URL ein Protokoll hat (falls nicht, füge https:// hinzu)
-                                const normalizedNote = note.startsWith('http') ? note : `https://${note}`;
-                                // Erstelle ein Objekt mit Überschrift und URL
-                                const noteObject = {
-                                    headline: headline,
-                                    url: normalizedNote
-                                };
-                                await this.addNote(courseId, noteObject, notesList);
-                                noteHeadline.value = '';
-                                noteInput.value = '';
-                                noteInput.focus();
-                                noteInputContainer.style.display = 'none';
-                                addButton.style.display = 'block';
-                            } else {
-                                alert("Bitte gib eine gültige URL ein (z. B. https://example.com oder www.google.de).");
-                            }
-                        });
-                    } catch (e) {
-                        console.warn("Fehler beim Rendern eines Kurses:", kurs, e);
-                    }
-                });
+                // Initiale Kursliste rendern
+                await this.renderCourses(itemElement);
             } catch (e) {
                 console.error("Fehler beim Starten der Komponente:", e);
                 this.element.innerHTML = '<p>Fehler beim Laden der Kurse. Bitte überprüfe die Datenbank.</p>';
             }
         };
 
-        // Notizen (Weblinks) hinzufügen
         this.addNote = async (courseId, noteObject, notesList) => {
             try {
-                const kurs = await self.store.get(courseId + "");
+                const kurs = await self.store.get(courseId);
                 console.log("Kurs beim Hinzufügen:", kurs);
                 if (!kurs || !kurs.value) {
                     throw new Error(`Kurs mit ID ${courseId} nicht gefunden.`);
                 }
 
-                // Wenn der Kurs keine Materialien (Weblinks) hat, initialisieren wir das Feld
                 if (!kurs.value.materials) {
                     kurs.value.materials = [];
                 }
 
-                // Füge das neue Notiz-Objekt (mit Überschrift und URL) zu den Materialien hinzu
                 kurs.value.materials.push(noteObject);
 
-                // Speichern der Änderungen in der Datenbank
-                await self.store.set({ key: courseId + "", value: kurs.value });
+                await self.store.set({ key: courseId, value: kurs.value });
                 console.log("Kurs nach Hinzufügen:", kurs);
 
-                // Weblink im Frontend rendern
                 this.renderNote(noteObject, notesList, courseId);
             } catch (e) {
                 console.error("Fehler beim Hinzufügen eines Weblinks:", e);
             }
         };
 
-        // Notizen (Weblinks) laden
         this.loadNotes = async (courseId, notesList) => {
             try {
                 console.log("Lade Notizen für courseId:", courseId);
-                const kurs = await self.store.get(courseId + "");
+                const kurs = await self.store.get(courseId);
                 if (kurs && kurs.value && kurs.value.materials) {
-                    // Überprüfe jedes Material
                     const urlPattern = /^(https?:\/\/)?(www\.)?([^\s$.?#]+\.[^\s]{2,})$/i;
                     kurs.value.materials.forEach(note => {
-                        // Fall 1: Neues Format (Objekt mit headline und url)
                         if (typeof note === 'object' && note.headline && note.url && urlPattern.test(note.url)) {
                             this.renderNote(note, notesList, courseId);
-                        }
-                        // Fall 2: Altes Format (nur URL als String)
-                        else if (typeof note === 'string' && urlPattern.test(note)) {
-                            // Konvertiere in das neue Format mit einer Standard-Überschrift
+                        } else if (typeof note === 'string' && urlPattern.test(note)) {
                             const noteObject = {
                                 headline: "Weblink",
                                 url: note.startsWith('http') ? note : `https://${note}`
@@ -296,7 +222,6 @@ ccm.files["ccm.teacher_courses.js"] = {
             }
         };
 
-        // Weblink rendern
         this.renderNote = (noteObject, notesList, courseId) => {
             try {
                 const li = document.createElement('li');
@@ -307,23 +232,19 @@ ccm.files["ccm.teacher_courses.js"] = {
                 const link = document.createElement('a');
                 link.href = noteObject.url;
                 link.textContent = noteObject.url;
-                link.target = "_blank"; // Öffnet den Link in einem neuen Tab
-                link.rel = "noopener noreferrer"; // Sicherheitsmaßnahme
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
 
-                // Erstelle den Delete-Button
                 const deleteButton = document.createElement('button');
                 deleteButton.className = 'delete-button';
                 deleteButton.textContent = 'Delete';
 
-                // Füge die Elemente zum li hinzu
                 li.appendChild(headline);
                 li.appendChild(link);
                 li.appendChild(deleteButton);
 
-                // Füge das li zur Liste hinzu
                 notesList.appendChild(li);
 
-                // Event-Listener für den Delete-Button
                 deleteButton.addEventListener('click', () => {
                     this.deleteNote(noteObject, notesList, li, courseId);
                 });
@@ -332,21 +253,19 @@ ccm.files["ccm.teacher_courses.js"] = {
             }
         };
 
-        // Weblink löschen
         this.deleteNote = async (noteObject, notesList, listItem, courseId) => {
             try {
-                const kurs = await self.store.get(courseId + "");
+                const kurs = await self.store.get(courseId);
                 console.log("Kurs beim Löschen:", kurs);
                 if (!kurs || !kurs.value || !kurs.value.materials) return;
 
-                // Entferne das Notiz-Objekt aus den Materialien des Kurses
                 const index = kurs.value.materials.findIndex(item =>
                     (typeof item === 'object' && item.headline === noteObject.headline && item.url === noteObject.url) ||
                     (typeof item === 'string' && item === noteObject.url)
                 );
                 if (index !== -1) {
                     kurs.value.materials.splice(index, 1);
-                    await self.store.set({ key: courseId + "", value: kurs.value });
+                    await self.store.set({ key: courseId, value: kurs.value });
                     console.log("Kurs nach Löschen:", kurs);
                     notesList.removeChild(listItem);
                 }
@@ -355,10 +274,9 @@ ccm.files["ccm.teacher_courses.js"] = {
             }
         };
 
-        // Kurse neu rendern (nach Hinzufügen eines neuen Kurses)
         this.renderCourses = async (itemElement) => {
             try {
-                itemElement.innerHTML = ''; // Leere die aktuelle Liste
+                itemElement.innerHTML = '';
 
                 const alleKurse = await self.store.get({});
                 let meineKurse = [];
