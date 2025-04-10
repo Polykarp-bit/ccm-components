@@ -14,6 +14,15 @@ ccm.files["ccm.schedule_manager.js"] = {
                     <div id="schedule-container">
                         <h2>Füge einen Kurs hinzu</h2>
                         <button id ="add-course-button">Neuen Kurs hinzufügen</button>
+                        <form id="meinFormular">
+                            <label for="name">Name:</label><br>
+                            <input type="text" id="name" name="name" required><br><br>
+                        
+                            <label for="email">E-Mail:</label><br>
+                            <input type="email" id="email" name="email" required><br><br>
+                        
+                            <input type="submit" value="Absenden">
+                        </form>
                         <div class="dropdown-container">
                             <button id="course-dropdown-button" class="dropdown-button">Kurs auswählen ▼</button>
                             <div id="course-dropdown-content" class="dropdown-content">
@@ -144,6 +153,32 @@ ccm.files["ccm.schedule_manager.js"] = {
             addCourseButton.textContent = 'Neuen Kurs hinzufügen';
             container.appendChild(addCourseButton);
 
+            // nur tewmpüörer um die daten hinzuzufügen und zu testen
+            /*const fakeCourse = {
+                key: `fake_course_${Date.now()}`, // Einzigartiger Schlüssel
+                value: {
+                    course: "Fake Kurs", // Name des Kurses
+                    day: "Montag", // Tag
+                    from: "10:00", // Startzeit
+                    until: "12:00", // Endzeit
+                    room: "101", // Raum
+                    activity: "Testaktivität", // Aktivität
+                    period: "01.01.2025-31.01.2025 (KW 1-5)", // Zeitraum der Veranstaltung
+                    who: "tniede2s", // Verantwortlicher
+                    id: 998, // Beispiel-ID
+                    isBlock: true, // Standardwert
+                    materials: [
+                        { headline: "Testlink", url: "https://example.com" } // Beispiel-Link
+                    ]
+                },
+                updated_at: new Date().toISOString(), // Aktuelles Datum und Uhrzeit
+                created_at: new Date().toISOString(), // Aktuelles Datum und Uhrzeit
+                color: "#ffcc00" // Beispiel-Farbe
+            };
+
+            await self.courseStore.set(fakeCourse);
+            console.log("Fake-Kurs hinzugefügt:", fakeCourse); */
+
             const newCourseForm = document.createElement('form');
             newCourseForm.innerHTML = `
                 <input type="text" id="new-course-name" placeholder="Kursname" required>
@@ -165,7 +200,8 @@ ccm.files["ccm.schedule_manager.js"] = {
                         from: document.getElementById('new-course-from').value,
                         until: document.getElementById('new-course-until').value,
                         room: document.getElementById('new-course-room').value,
-                        activity: document.getElementById('new-course-name').value
+                        activity: document.getElementById('new-course-name').value,
+                        isBlock: false // Standardwert
                     }
                 };
                 await addCourse(newCourse);
@@ -288,6 +324,7 @@ ccm.files["ccm.schedule_manager.js"] = {
                 });
             }
 
+
             const renderCourse = (kurs) => {
                 const courseHtml = self.ccm.helper.html(self.html.editView.courseItem, {
                     key: kurs.key,
@@ -297,6 +334,14 @@ ccm.files["ccm.schedule_manager.js"] = {
                     until: kurs.value.until || "Unbekannt",
                     room: kurs.value.room || "Unbekannt"
                 });
+                // Blockkurs-Kennzeichnung hinzufügen
+                if (kurs.value.isBlock) {
+                    const blockLabel = document.createElement('span');
+                    blockLabel.textContent = 'Blockkurs';
+                    blockLabel.className = 'block-course-label';
+                    courseHtml.querySelector('h3').appendChild(blockLabel);
+                }
+
                 selectedScheduleContainer.appendChild(courseHtml);
 
                 const linksList = courseHtml.querySelector('.links-list');
@@ -434,14 +479,18 @@ ccm.files["ccm.schedule_manager.js"] = {
                 userConfig.value.courses.forEach(course => {
                     const kurs = allCourses.find(k => k.key === course.key);
                     if (kurs && kurs.value) {
-                        const day = kurs.value.day || "Unbekannt";
-                        if (!schedule[day]) schedule[day] = [];
-                        schedule[day].push({
+                        // Normalisiere den Tagesnamen
+                        const rawDay = kurs.value.day || "Unbekannt";
+                        const normalizedDay = normalizeDay(rawDay);
+                        if (!schedule[normalizedDay]) schedule[normalizedDay] = [];
+                        schedule[normalizedDay].push({
                             title: kurs.value.activity,
                             time: `${kurs.value.from} - ${kurs.value.until}`,
                             room: kurs.value.room,
                             color: course.color || "#F0F0F0",
-                            courseId: kurs.key
+                            courseId: kurs.key,
+                            isBlock: kurs.value.isBlock || false,
+                            period: kurs.value.period || "Kein Zeitraum angegeben"
                         });
                     }
                 });
@@ -462,18 +511,38 @@ ccm.files["ccm.schedule_manager.js"] = {
                 });
             });
 
-            const scheduleContent = Object.entries(schedule).map(([day, events]) => `
-                <div class="day">
-                    <h3>${day}</h3>
-                    ${events.map(event => `
-                        <div class="event" data-course-id="${event.courseId}" style="background-color: ${event.color};">
-                            <strong>${event.title}</strong><br>
-                            <span>${event.time}</span><br>
-                            <span>Raum: ${event.room}</span>
-                        </div>
-                    `).join('')}
+            // Feste Reihenfolge der Tage (Montag bis Sonntag)
+            const dayOrder = [
+                "Montag",
+                "Dienstag",
+                "Mittwoch",
+                "Donnerstag",
+                "Freitag",
+                "Samstag",
+                "Sonntag"
+            ];
+
+            // Immer anzeigen: Montag bis Freitag (ersten 5 Tage)
+            const alwaysShowDays = dayOrder.slice(0, 5); // Montag bis Freitag
+            // Optional anzeigen: Samstag und Sonntag (letzten 2 Tage)
+            const optionalDays = dayOrder.slice(5).filter(day => schedule[day] && schedule[day].length > 0);
+
+            // Kombinierte Liste: Montag-Freitag + Samstag/Sonntag (falls Kurse vorhanden)
+            const daysToDisplay = [...alwaysShowDays, ...optionalDays];
+
+            const scheduleContent = daysToDisplay.map(day => `
+        <div class="day">
+            <h3>${day}</h3>
+            ${schedule[day] && schedule[day].length > 0 ? schedule[day].map(event => `
+                <div class="event ${event.isBlock ? 'block-course' : ''}" data-course-id="${event.courseId}" style="background-color: ${event.color};">
+                    <strong>${event.title}${event.isBlock ? ' (Blockkurs)' : ''}</strong><br>
+                    <span>${event.time}</span><br>
+                    <span>Raum: ${event.room}</span>
+                    ${event.isBlock ? `<br><span>Zeitraum: ${event.period}</span>` : ''}
                 </div>
-            `).join('') || '<p>Keine Kurse im Stundenplan.</p>';
+            `).join('') : '<p>Keine Kurse an diesem Tag.</p>'}
+        </div>
+    `).join('');
 
             const mainHtml = self.ccm.helper.html(self.html.scheduleView.main, {
                 studentId: studentId,
@@ -496,6 +565,26 @@ ccm.files["ccm.schedule_manager.js"] = {
             });
         };
 
+// Hilfsfunktion zur Normalisierung der Tagesnamen
+        const normalizeDay = (day) => {
+            const dayMap = {
+                "mo": "Montag",
+                "montag": "Montag",
+                "di": "Dienstag",
+                "dienstag": "Dienstag",
+                "mi": "Mittwoch",
+                "mittwoch": "Mittwoch",
+                "do": "Donnerstag",
+                "donnerstag": "Donnerstag",
+                "fr": "Freitag",
+                "freitag": "Freitag",
+                "sa": "Samstag",
+                "samstag": "Samstag",
+                "so": "Sonntag",
+                "sonntag": "Sonntag"
+            };
+            return dayMap[day.toLowerCase()] || "Unbekannt";
+        };
         this.openModal = async (courseId, modalApps) => {
             const kurs = await self.courseStore.get(courseId);
             if (!kurs || !kurs.value || !kurs.value.materials) {
