@@ -91,7 +91,7 @@ button {
     color: #34495e;
 }
 
-.form-group input, .form-group select, .form.group textarea {
+.form-group input, .form-group select, .form-group textarea {
     width: 100%;
     padding: 6px;
     border: 1px solid #dcdcdc;
@@ -158,55 +158,89 @@ button {
 .dropdown-content {
     display: none;
     position: absolute;
-    background-color: #2c3e50;
-    color: #fff;
+    background-color: #fff;
+    color: #333;
     width: 100%;
-    max-height: 200px;
+    max-height: 400px;
     overflow-y: auto;
     z-index: 1;
-    padding: 10px;
+    padding: 15px;
+    border: 1px solid #dcdcdc;
     border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 #course-search {
     width: 100%;
-    padding: 6px;
-    margin-bottom: 10px;
+    padding: 8px;
+    margin-bottom: 15px;
     border: 1px solid #dcdcdc;
     font-size: 14px;
-    background: #fff;
+    background: #f9f9f9;
     border-radius: 4px;
+    transition: border-color 0.3s;
 }
 #course-search:focus {
     outline: none;
-    border-color: #fff;
+    border-color: #2c3e50;
+    background: #fff;
 }
 
-/* Kursliste */
-.course-group {
-    margin-bottom: 10px;
+/* Hierarchische Kursliste */
+.study-group, .semester-group, .course-group {
+    margin-bottom: 12px;
 }
 
-.course-item {
-    display: flex;
-    align-items: center;
-    padding: 8px;
-    margin-bottom: 5px;
-}
-
-.subcourses {
-    padding-left: 20px;
-}
-
-.subcourse-item {
+.study-item, .semester-item, .course-item, .event-item {
     display: flex;
     align-items: center;
     padding: 6px 0;
+    transition: background-color 0.2s;
 }
 
-.subcourse-item label {
-    margin-left: 8px;
+.study-item:hover, .semester-item:hover, .course-item:hover, .event-item:hover {
+    background-color: #f5f5f5;
+}
+
+.semester-group {
+    margin-left: 20px;
+}
+
+.course-group {
+    margin-left: 40px;
+}
+
+.event-item {
+    margin-left: 60px;
+}
+
+.study-item label, .semester-item label, .course-item label, .event-item label {
+    margin-left: 10px;
     font-size: 14px;
+    color: #34495e;
+    cursor: pointer;
+}
+
+.event-item label {
+    font-size: 13px;
+    color: #555;
+}
+
+input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0 5px 0 0;
+    cursor: pointer;
+    accent-color: #2c3e50;
+}
+
+input[type="checkbox"]:indeterminate {
+    background-color: #2c3e50;
+    border-color: #2c3e50;
+}
+
+.study-item input[type="checkbox"], .semester-item input[type="checkbox"], .course-item input[type="checkbox"] {
+    margin-left: 5px;
 }
 
 /* Ausgewählter Stundenplan */
@@ -372,16 +406,20 @@ button {
 /* Stundenplanansicht */
 .week-schedule {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* Changed from wrap to nowrap */
     gap: 15px;
+    overflow-x: auto; /* Allow horizontal scrolling if needed */
+    padding-bottom: 10px; /* Space for scrollbar */
 }
 
 .day {
-    flex: 1 1 200px;
+    flex: 1 1 0; /* Equal width for each day */
+    min-width: 200px; /* Minimum width to prevent squishing */
     background: #fff;
     border: 1px solid #dcdcdc;
     padding: 15px;
     border-radius: 8px;
+    box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 .event {
@@ -416,7 +454,7 @@ button {
     border-radius: 4px;
     position: absolute;
     z-index: 1;
-    top: -40px; /* Tooltip oberhalb des Icons */
+    top: -40px;
     right: 0;
     width: 200px;
     opacity: 0;
@@ -455,9 +493,7 @@ button {
 }
 
 .close {
-    position: absolute;
-    top: 10px;
-    right: 15px;
+    float: right;
     font-size: 24px;
     color: #7f8c8d;
     cursor: pointer;
@@ -481,12 +517,13 @@ button {
 /* Responsive Design */
 @media (max-width: 768px) {
     .week-schedule {
-        flex-direction: column;
-        gap: 10px;
+        flex-wrap: nowrap; /* Maintain nowrap for single row */
+        overflow-x: auto; /* Ensure scrolling on small screens */
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     }
 
     .day {
-        flex: 1 1 100%;
+        min-width: 160px; /* Slightly smaller minimum width for mobile */
         padding: 10px;
     }
 
@@ -525,6 +562,32 @@ button {
 
     .note-icon .tooltip {
         width: 150px;
-        right: -50px; /* Anpassung für kleinere Bildschirme */
+        right: -50px;
+    }
+
+    /* Anpassungen für hierarchische Kursliste auf kleinen Bildschirmen */
+    .semester-group {
+        margin-left: 10px;
+    }
+
+    .course-group {
+        margin-left: 20px;
+    }
+
+    .event-item {
+        margin-left: 30px;
+    }
+
+    .study-item label, .semester-item label, .course-item label, .event-item label {
+        font-size: 13px;
+    }
+
+    .event-item label {
+        font-size: 12px;
+    }
+
+    input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
     }
 }
