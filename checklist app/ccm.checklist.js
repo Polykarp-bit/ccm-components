@@ -6,28 +6,24 @@ ccm.files["ccm.checklist.js"] = {
         css: ["ccm.load", "./style.css"],
         html: {
             main: `
-                <div class="container">
-                    <h1>Meine Listen</h1>
-                    <div class="create-list">
-                        <input type="text" id="list-name" placeholder="Listen-Name (z.B. Projekt 2024)">
-                        <input type="text" id="first-item-name" placeholder="Erstes Listenobjekt (z.B. Aufgabe 1)">
-                        <button id="start-create">Liste erstellen</button>
-                    </div>
-                    <div class="list-form" style="display: none;">
-                        <div class="item-section">
-                            <h3>Hinzugefügte Listenobjekte</h3>
-                            <ul id="item-list"></ul>
-                        </div>
-                        <div class="preview-section">
-                            <h3>Vorschau der Liste</h3>
-                            <div id="preview-list"></div>
-                        </div>
-                        <button id="save-list">Liste speichern</button>
-                        <button class="cancel-button">Abbrechen</button>
-                    </div>
-                    <div id="items"></div>
+        <div class="container">
+            <h1>Meine Listen</h1>
+            <div class="create-list">
+                <input type="text" id="list-name" placeholder="Listen-Name (z.B. Projekt 2024)">
+                <input type="text" id="first-item-name" placeholder="Erstes Listenobjekt (z.B. Aufgabe 1)">
+                <button id="start-create">Liste erstellen</button>
+            </div>
+            <div class="list-form" style="display: none;">
+                <div class="preview-section">
+                    <h3>Vorschau der Liste</h3>
+                    <div id="preview-list"></div>
                 </div>
-            `
+                <button id="save-list">Liste speichern</button>
+                <button class="cancel-button">Abbrechen</button>
+            </div>
+            <div id="items"></div>
+        </div>
+    `
         }
     },
     Instance: function () {
@@ -74,7 +70,6 @@ ccm.files["ccm.checklist.js"] = {
                 const startCreateButton = createListForm.querySelector('#start-create');
                 const saveListButton = listForm.querySelector('#save-list');
                 const cancelButton = listForm.querySelector('.cancel-button');
-                const itemList = listForm.querySelector('#item-list');
                 const previewList = self.element.querySelector('#preview-list');
                 const itemElement = self.element.querySelector('#items');
 
@@ -98,17 +93,12 @@ ccm.files["ccm.checklist.js"] = {
                         items: []
                     };
                     my.currentItems = [];
-                    itemList.innerHTML = '';
                     previewList.innerHTML = '';
 
                     const firstItemKey = `item_${firstItemName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()}_${Date.now()}`;
                     const firstItem = { key: firstItemKey, name: firstItemName, items: [], deadline: null };
                     my.tempList.items.push(firstItem);
                     my.currentItems.push(firstItem);
-
-                    const li = document.createElement('li');
-                    li.textContent = firstItemName;
-                    itemList.appendChild(li);
 
                     renderPreview(my.tempList.key, my.tempList.items);
 
@@ -122,7 +112,6 @@ ccm.files["ccm.checklist.js"] = {
                     listForm.style.display = 'none';
                     my.tempList = null;
                     my.currentItems = [];
-                    itemList.innerHTML = '';
                     previewList.innerHTML = '';
                 });
 
@@ -151,7 +140,6 @@ ccm.files["ccm.checklist.js"] = {
                     await renderLists(itemElement);
 
                     listForm.style.display = 'none';
-                    itemList.innerHTML = '';
                     previewList.innerHTML = '';
                     my.tempList = null;
                     my.currentItems = [];
@@ -200,11 +188,8 @@ ccm.files["ccm.checklist.js"] = {
 
                         my.tempList.items.push(newSubitem);
                         my.currentItems.push(newSubitem);
-                        const li = document.createElement('li');
-                        li.textContent = subitemName;
-                        itemList.appendChild(li);
 
-                        renderPreview(my.tempList.key, my.tempList.items);
+                        renderDivide(my.tempList.key, my.tempList.items);
                         subitemNameInput.value = '';
                         listInput.classList.remove('active');
                     });
@@ -295,9 +280,6 @@ ccm.files["ccm.checklist.js"] = {
                         findParent(my.tempList.items);
 
                         my.currentItems.push(newSubitem);
-                        const li = document.createElement('li');
-                        li.textContent = `${parentKey ? '  ' : ''}${subitemName}`;
-                        itemList.appendChild(li);
 
                         renderPreview(my.tempList.key, my.tempList.items);
                         subitemNameInput.value = '';
@@ -332,12 +314,6 @@ ccm.files["ccm.checklist.js"] = {
                         const keysToRemove = collectKeys([item], parentKey ? [parentKey] : []);
                         my.currentItems = my.currentItems.filter(it => !keysToRemove.includes(parentKey ? `${parentKey}_${it.key}` : it.key));
 
-                        itemList.innerHTML = '';
-                        my.currentItems.forEach(it => {
-                            const li = document.createElement('li');
-                            li.textContent = it.name;
-                            itemList.appendChild(li);
-                        });
                         renderPreview(my.tempList.key, my.tempList.items);
                     });
 
@@ -355,7 +331,6 @@ ccm.files["ccm.checklist.js"] = {
                         items: JSON.parse(JSON.stringify(my.listsData[listKey]))
                     };
                     my.currentItems = [];
-                    itemList.innerHTML = '';
                     previewList.innerHTML = '';
 
                     function populateCurrentItems(items) {
@@ -365,12 +340,6 @@ ccm.files["ccm.checklist.js"] = {
                         });
                     }
                     populateCurrentItems(my.tempList.items);
-
-                    my.currentItems.forEach(item => {
-                        const li = document.createElement('li');
-                        li.textContent = item.name;
-                        itemList.appendChild(li);
-                    });
 
                     renderPreview(my.tempList.key, my.tempList.items);
                     listForm.style.display = 'block';
@@ -567,6 +536,69 @@ ccm.files["ccm.checklist.js"] = {
 
                     checkbox.addEventListener('change', async () => {
                         my.listState[listKey].items[itemKey].checked = checkbox.checked;
+
+
+                        function parentElementForId(listContent, parentId) {
+                            return listContent.querySelector(`[data-id="${parentId}"]`);
+                        }
+
+
+                        function findChildItemsInData(items, targetKey, parentKey = '') {
+                            for (const item of items) {
+                                const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
+                                if (itemKey === targetKey || item.key === targetKey) {
+                                    return item.items || [];
+                                }
+                                const found = findChildItemsInData(item.items, targetKey, itemKey);
+                                if (found.length > 0) return found;
+                            }
+                            return [];
+                        }
+
+                        const updateParentState = (itemId) => {
+                            console.log("updateParentState aufgerufen für:", itemId);
+                            const parts = itemId.split('_');
+                            if (parts.length <= 1) {
+                                console.log("Oberste Ebene erreicht, beende updateParentState.");
+                                return; // Oberste Ebene erreicht
+                            }
+
+                            parts.pop(); // ID des übergeordneten Elements
+                            const parentId = parts.join('_');
+                            console.log("parentId:", parentId);
+
+                            const parentItemInState = my.listState[listKey].items[parentId];
+                            const parentElementInDOM = parentElementForId(listContent, parentId);
+                            console.log("parentItemInState:", parentItemInState);
+                            console.log("parentElementInDOM:", parentElementInDOM);
+
+                            if (parentItemInState && parentElementInDOM) {
+                                const childItems = findChildItemsInData(my.listsData[listKey], parentId.split('_').pop(), parts.slice(0, -1).join('_'));
+                                console.log("childItems gefunden:", childItems);
+
+                                const allChildrenChecked = childItems.every(child => {
+                                    const childKeyInState = `${parentId}_${child.key}`;
+                                    return my.listState[listKey].items[childKeyInState] && my.listState[listKey].items[childKeyInState].checked;
+                                });
+                                console.log("allChildrenChecked:", allChildrenChecked);
+
+                                parentItemInState.checked = allChildrenChecked;
+                                const parentCheckboxInDOM = parentElementInDOM.querySelector('.subitem-checkbox');
+                                console.log("parentCheckboxInDOM:", parentCheckboxInDOM);
+
+                                if (parentCheckboxInDOM) {
+                                    parentCheckboxInDOM.checked = allChildrenChecked;
+                                    console.log("Status der übergeordneten Checkbox gesetzt auf:", allChildrenChecked);
+                                }
+
+                                updateParentState(parentId); // Rekursiv nach oben gehen
+                            } else {
+                                console.log("Übergeordnetes Element im State oder DOM nicht gefunden.");
+                            }
+                        };
+
+                        updateParentState(itemKey); // Starte die Aktualisierung vom aktuellen Element aus
+
                         if (!isEndPoint) {
                             updateSubitemPoints(listKey, item.items, itemKey, checkbox.checked);
                             subitemList.innerHTML = '';
@@ -588,27 +620,9 @@ ccm.files["ccm.checklist.js"] = {
                             listItem.classList.remove('completed');
                         }
 
-                        let currentElement = itemHtml.parentElement;
-                        let currentKey = itemKey;
-                        while (currentElement.classList.contains('subitem-list') && currentElement.parentElement.classList.contains('subitem')) {
-                            currentElement = currentElement.parentElement;
-                            const subitemKey = currentElement.dataset.id;
-                            const subitemItems = findItems(my.listsData[listKey], subitemKey.split('_').pop());
-                            const subitemProgress = calculateSubitemProgress(listKey, subitemKey, subitemItems, subitemKey);
-                            const progressElement = currentElement.querySelector('.subitem-progress');
-                            if (progressElement) {
-                                progressElement.textContent = `${Math.round(subitemProgress)}%`;
-                            }
-                            const allChecked = subitemItems.every(subItem => my.listState[listKey].items[`${subitemKey}_${subItem.key}`].checked);
-                            my.listState[listKey].items[subitemKey].checked = allChecked;
-                            const subitemCheckbox = currentElement.querySelector('.subitem-checkbox');
-                            if (subitemCheckbox) {
-                                subitemCheckbox.checked = allChecked;
-                            }
-                        }
-
                         await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
                     });
+
 
                     if (!isEndPoint) {
                         item.items.forEach(subItem => {
