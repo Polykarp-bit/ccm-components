@@ -147,24 +147,26 @@ ccm.files["ccm.checklist.js"] = {
 
                 // Render preview
                 function renderPreview(listKey, items) {
-                    previewList.innerHTML = '';
+                    console.log('renderPreview called with:', { listKey, items: JSON.stringify(items, null, 2) });
+                    previewList.innerHTML = ''; // Löscht die vorherige Vorschau
                     const listTitle = listKey.replace(/([A-Z])/g, ' $1').trim();
                     const listHtml = document.createElement('div');
                     listHtml.className = 'list-item';
                     listHtml.innerHTML = `
-                        <div class="item-header">
-                            <h3>${listTitle}</h3>
-                        </div>
-                        <div class="item-content">
-                            <div class="subitem-list"></div>
-                            <button class="add-subitem">Listenobjekt hinzufügen</button>
-                            <div class="list-input">
-                                <input type="text" class="subitem-name" placeholder="Objekt-Name (z.B. Aufgabe 2)">
-                                <button class="confirm-subitem">Hinzufügen</button>
-                            </div>
-                        </div>
-                    `;
+        <div class="item-header">
+            <h3>${listTitle}</h3>
+        </div>
+        <div class="item-content">
+            <div class="subitem-list"></div>
+            <button class="add-subitem">Listenobjekt hinzufügen</button>
+            <div class="list-input">
+                <input type="text" class="subitem-name" placeholder="Objekt-Name (z.B. Aufgabe 2)">
+                <button class="confirm-subitem">Hinzufügen</button>
+            </div>
+        </div>
+    `;
                     previewList.appendChild(listHtml);
+                    console.log('listHtml appended to previewList:', listHtml);
 
                     const subitemList = listHtml.querySelector('.subitem-list');
                     const addSubitemButton = listHtml.querySelector('.add-subitem');
@@ -188,13 +190,17 @@ ccm.files["ccm.checklist.js"] = {
 
                         my.tempList.items.push(newSubitem);
                         my.currentItems.push(newSubitem);
+                        console.log('New item added:', newSubitem);
+                        console.log('Updated tempList:', JSON.stringify(my.tempList, null, 2));
+                        console.log('Updated currentItems:', JSON.stringify(my.currentItems, null, 2));
 
-                        renderDivide(my.tempList.key, my.tempList.items);
+                        renderPreview(my.tempList.key, my.tempList.items);
                         subitemNameInput.value = '';
                         listInput.classList.remove('active');
                     });
 
                     items.forEach(item => {
+                        console.log('Rendering item in preview:', item);
                         renderPreviewItem(item, subitemList, '');
                     });
                 }
@@ -212,8 +218,9 @@ ccm.files["ccm.checklist.js"] = {
                     itemHtml.dataset.id = itemKey;
                     itemHtml.innerHTML = `
                         <div class="${isEndPoint ? 'point' : 'subitem'}-header">
-                            <label class="${isEndPoint ? 'point' : 'subitem'}-title">${item.name}</label>
-                            <input type="date" class="deadline-picker" value="${item.deadline || ''}">
+                            <p class="${isEndPoint ? 'point' : 'subitem'}-title">${item.name}</p>
+                            <label for="deadline">Deadline</label>
+                            <input type="date" id="deadline" class="deadline-picker" value="${item.deadline || ''}">
                             <span class="deadline-display">${item.deadline ? `Fällig: ${formatDate(item.deadline)}` : ''}</span>
                             ${!isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : ''}
                             <button class="add-subitem">Unterpunkt hinzufügen</button>
@@ -488,6 +495,7 @@ ccm.files["ccm.checklist.js"] = {
                     if (!my.listState[listKey]) {
                         console.log(`Initialisiere listState für ${listKey} in renderItem`);
                         my.listState[listKey] = { items: {}, collapsed: false };
+                        initializeState(listKey, my.listsData[listKey], my.listState[listKey]);
                     }
                     if (!my.listState[listKey].items[itemKey]) {
                         console.log(`Initialisiere itemState für ${itemKey} in ${listKey}`);
@@ -500,22 +508,22 @@ ccm.files["ccm.checklist.js"] = {
                     itemHtml.className = isEndPoint ? 'point-item' : 'subitem';
                     itemHtml.dataset.id = itemKey;
                     itemHtml.innerHTML = `
-                        <div class="${isEndPoint ? 'point' : 'subitem'}-header">
-                            <input type="checkbox" id="${itemKey}" class="${isEndPoint ? 'point' : 'subitem'}-checkbox">
-                            <label for="${itemKey}" class="${isEndPoint ? 'point' : 'subitem'}-title">${item.name}</label>
-                            <input type="date" class="deadline-picker" value="${item.deadline || ''}">
-                            <span class="deadline-display">${item.deadline ? `Fällig: ${formatDate(item.deadline)}` : ''}</span>
-                            ${!isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : ''}
-                        </div>
-                        ${!isEndPoint ? '<div class="subitem-list"></div>' : ''}
-                    `;
+        <div class="${isEndPoint ? 'point' : 'subitem'}-header">
+            <input type="checkbox" id="${itemKey}" class="${isEndPoint ? 'point' : 'subitem'}-checkbox">
+            <label for="${itemKey}" class="${isEndPoint ? 'point' : 'subitem'}-title">${item.name}</label>
+            <input type="date" class="deadline-picker" value="${item.deadline || ''}">
+            <span class="deadline-display">${item.deadline ? `Fällig: ${formatDate(item.deadline)}` : ''}</span>
+            ${!isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : ''}
+        </div>
+        ${!isEndPoint ? '<div class="subitem-list"></div>' : ''}
+    `;
                     parentElement.appendChild(itemHtml);
 
                     const checkbox = itemHtml.querySelector(`.${isEndPoint ? 'point' : 'subitem'}-checkbox`);
                     const subitemList = itemHtml.querySelector('.subitem-list');
                     const deadlinePicker = itemHtml.querySelector('.deadline-picker');
                     const deadlineDisplay = itemHtml.querySelector('.deadline-display');
-                    checkbox.checked = my.listState[listKey].items[itemKey] ? my.listState[listKey].items[itemKey].checked : false;
+                    checkbox.checked = my.listState[listKey].items[itemKey]?.checked || false;
 
                     deadlinePicker.addEventListener('change', async () => {
                         const newDeadline = deadlinePicker.value || null;
@@ -534,71 +542,69 @@ ccm.files["ccm.checklist.js"] = {
                         await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
                     });
 
+                    // Hilfsfunktion, um das DOM-Element anhand der ID zu finden
+                    function parentElementForId(rootElement, itemId) {
+                        return rootElement.querySelector(`.subitem[data-id="${itemId}"]`);
+                    }
+
+                    // Hilfsfunktion, um die direkten Kindelemente eines Elements in den Daten zu finden
+                    function findChildItemsInData(items, targetKeyPart, currentParentKey) {
+                        for (const item of items) {
+                            const fullKey = currentParentKey ? `${currentParentKey}_${item.key}` : item.key;
+                            const keyPart = fullKey.split('_').pop();
+                            if (keyPart === targetKeyPart) {
+                                return item.items;
+                            }
+                            const found = findChildItemsInData(item.items, targetKeyPart, fullKey);
+                            if (found && found.length > 0) return found;
+                        }
+                        return [];
+                    }
+
+                    // Funktion, um den Status des übergeordneten Elements rekursiv zu aktualisieren
+                    const updateParentState = (itemId, currentListKey, currentListContent) => {
+                        const parts = itemId.split('_');
+                        if (parts.length <= 3) return; // Oberste Ebene erreicht
+
+                        parts.pop(); // Entfernt den Zeitstempel
+                        parts.pop(); // Entfernt den Namen
+                        parts.pop(); // Entfernt das "item" Präfix
+                        const parentId = parts.join('_');
+                        console.log("parent id: " + parentId);
+
+                        const parentItemInState = my.listState[currentListKey].items[parentId];
+                        const parentElementInDOM = parentElementForId(currentListContent, parentId);
+
+                        if (parentItemInState && parentElementInDOM) {
+                            const childItems = findChildItemsInData(my.listsData[currentListKey], parentId.split('_').pop(), parts.slice(0, -1).join('_'));
+
+                            const allChildrenChecked = childItems.every(child => {
+                                const childKeyInState = `${parentId}_${child.key}`;
+                                return my.listState[currentListKey].items[childKeyInState]?.checked;
+                            });
+
+                            parentItemInState.checked = allChildrenChecked;
+                            const parentCheckboxInDOM = parentElementInDOM.querySelector('.subitem-checkbox');
+
+                            if (parentCheckboxInDOM) {
+                                parentCheckboxInDOM.checked = allChildrenChecked;
+                            }
+
+                            // Aktualisiere die Fortschrittsanzeige des übergeordneten Elements
+                            const parentProgressElement = parentElementInDOM.querySelector('.subitem-progress');
+                            if (parentProgressElement) {
+                                const parentSubitemProgress = calculateSubitemProgress(currentListKey, parentId, childItems, parentId);
+                                parentProgressElement.textContent = `${Math.round(parentSubitemProgress)}%`;
+                            }
+
+                            updateParentState(parentId, currentListKey, currentListContent); // Rekursiv nach oben gehen
+                        }
+                    };
+
                     checkbox.addEventListener('change', async () => {
                         my.listState[listKey].items[itemKey].checked = checkbox.checked;
 
-
-                        function parentElementForId(listContent, parentId) {
-                            return listContent.querySelector(`[data-id="${parentId}"]`);
-                        }
-
-
-                        function findChildItemsInData(items, targetKey, parentKey = '') {
-                            for (const item of items) {
-                                const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
-                                if (itemKey === targetKey || item.key === targetKey) {
-                                    return item.items || [];
-                                }
-                                const found = findChildItemsInData(item.items, targetKey, itemKey);
-                                if (found.length > 0) return found;
-                            }
-                            return [];
-                        }
-
-                        const updateParentState = (itemId) => {
-                            console.log("updateParentState aufgerufen für:", itemId);
-                            const parts = itemId.split('_');
-                            if (parts.length <= 1) {
-                                console.log("Oberste Ebene erreicht, beende updateParentState.");
-                                return; // Oberste Ebene erreicht
-                            }
-
-                            parts.pop(); // ID des übergeordneten Elements
-                            const parentId = parts.join('_');
-                            console.log("parentId:", parentId);
-
-                            const parentItemInState = my.listState[listKey].items[parentId];
-                            const parentElementInDOM = parentElementForId(listContent, parentId);
-                            console.log("parentItemInState:", parentItemInState);
-                            console.log("parentElementInDOM:", parentElementInDOM);
-
-                            if (parentItemInState && parentElementInDOM) {
-                                const childItems = findChildItemsInData(my.listsData[listKey], parentId.split('_').pop(), parts.slice(0, -1).join('_'));
-                                console.log("childItems gefunden:", childItems);
-
-                                const allChildrenChecked = childItems.every(child => {
-                                    const childKeyInState = `${parentId}_${child.key}`;
-                                    return my.listState[listKey].items[childKeyInState] && my.listState[listKey].items[childKeyInState].checked;
-                                });
-                                console.log("allChildrenChecked:", allChildrenChecked);
-
-                                parentItemInState.checked = allChildrenChecked;
-                                const parentCheckboxInDOM = parentElementInDOM.querySelector('.subitem-checkbox');
-                                console.log("parentCheckboxInDOM:", parentCheckboxInDOM);
-
-                                if (parentCheckboxInDOM) {
-                                    parentCheckboxInDOM.checked = allChildrenChecked;
-                                    console.log("Status der übergeordneten Checkbox gesetzt auf:", allChildrenChecked);
-                                }
-
-                                updateParentState(parentId); // Rekursiv nach oben gehen
-                            } else {
-                                console.log("Übergeordnetes Element im State oder DOM nicht gefunden.");
-                            }
-                        };
-
-                        updateParentState(itemKey); // Starte die Aktualisierung vom aktuellen Element aus
-
+                        // If this is a parent item (not an endpoint), propagate the checked state to all subitems
                         if (!isEndPoint) {
                             updateSubitemPoints(listKey, item.items, itemKey, checkbox.checked);
                             subitemList.innerHTML = '';
@@ -611,6 +617,11 @@ ccm.files["ccm.checklist.js"] = {
                                 progressElement.textContent = `${Math.round(subitemProgress)}%`;
                             }
                         }
+
+                        // Update parent checkboxes
+                        updateParentState(itemKey, listKey, listContent);
+
+                        // Update progress bar for the entire list
                         const progress = calculateProgress(listKey, my.listsData[listKey]);
                         listContent.querySelector('.progress-fill').style.width = `${progress}%`;
                         const listItem = listContent.closest('.list-item');
@@ -620,9 +631,9 @@ ccm.files["ccm.checklist.js"] = {
                             listItem.classList.remove('completed');
                         }
 
+                        // Persist state to store
                         await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
                     });
-
 
                     if (!isEndPoint) {
                         item.items.forEach(subItem => {
@@ -630,7 +641,6 @@ ccm.files["ccm.checklist.js"] = {
                         });
                     }
                 }
-
                 // Update subitem points
                 function updateSubitemPoints(listKey, items, parentKey, checked) {
                     items.forEach(item => {
