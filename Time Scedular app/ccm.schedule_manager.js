@@ -1,154 +1,154 @@
 ccm.files["ccm.schedule_manager.js"] = {
     name: "schedule_manager",
-    ccm: "../../libs/ccm/ccm.js",
+    ccm: "../libs/ccm/ccm.js",
     config: {
-        studentStore: ["ccm.store", { url: "https://ccm2.inf.h-brs.de", name: "tniede2s_student_schedules" }],
-        courseStore: ["ccm.store", { url: "https://ccm2.inf.h-brs.de", name: "tniede2s_teacher_courses" }],
-        studentCourseStore: ["ccm.store", { url: "https://ccm2.inf.h-brs.de", name: "tniede2s_student_courses" }],
+        studentStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_student_schedules"}],
+        courseStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_teacher_courses"}],
+        studentCourseStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_student_courses"}],
         css: ["ccm.load", "./style.css"],
         helper: ["ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-8.4.2.min.mjs"],
         html: {
             editView: {
                 main: `
-                    <div id="user"></div>        
-                    <h1>%title%</h1>
-                    <div id="schedule-container">
-                        <div class="add-course-header">
-                            <h2>Füge einen Kurs hinzu</h2>
-                            <button id="KursButton">Kurs Hinzufügen</button>
-                        </div>
-                        <div id="course-form-container" style="display: none;">
-                            <form id="course-form">
-                                <div class="form-group">
-                                    <label for="course">Kursname:</label>
-                                    <input type="text" id="course" name="course" placeholder="z. B. Einführung in die" required>
-                                </div>
-                                <div id="events-container">
-                                    <div class="event-form" data-index="0">
-                                        <h4>Veranstaltung 1</h4>
-                                        <div class="form-group">
-                                            <label for="event-type-0">Typ:</label>
-                                            <select id="event-type-0" name="event-type-0" required>
-                                                <option value="" disabled selected>Wähle einen Typ</option>
-                                                <option value="Vorlesung">Vorlesung</option>
-                                                <option value="Übung">Übung</option>
-                                                <option value="Seminar">Seminar</option>
-                                                <option value="Praktikum">Praktikum</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="event-day-0">Tag:</label>
-                                            <select id="event-day-0" name="event-day-0" required>
-                                                <option value="" disabled selected>Wähle einen Tag</option>
-                                                <option value="Mo">Montag</option>
-                                                <option value="Di">Dienstag</option>
-                                                <option value="Mi">Mittwoch</option>
-                                                <option value="Do">Donnerstag</option>
-                                                <option value="Fr">Freitag</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="event-from-0">Startzeit:</label>
-                                            <input type="time" id="event-from-0" name="event-from-0" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="event-until-0">Endzeit:</label>
-                                            <input type="time" id="event-until-0" name="event-until-0" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="event-room-0">Raum:</label>
-                                            <input type="text" id="event-room-0" name="event-room-0" placeholder="z. B. St-C116" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="event-period-from-0">Startdatum:</label>
-                                            <input type="text" id="event-period-from-0" name="event-period-from-0" placeholder="z. B. 03.04.2025" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="event-period-until-0">Enddatum:</label>
-                                            <input type="text" id="event-period-until-0" name="event-period-until-0" placeholder="z. B. 26.06.2025" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="event-who-0">Dozent:</label>
-                                            <input type="text" id="event-who-0" name="event-who-0" placeholder="z. B. Weil">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="event-group-0">Gruppe:</label>
-                                            <input type="text" id="event-group-0" name="event-group-0" placeholder="z. B. A">
-                                        </div>
-                                        <button type="button" class="remove-event-button" style="display: none;">Veranstaltung entfernen</button>
-                                    </div>
-                                </div>
-                                <button type="button" id="add-event-button">Weitere Veranstaltung hinzufügen</button><br><br>
-                                <button type="submit">Kurs hinzufügen</button>
-                                <button type="button" class="cancel-button">Abbrechen</button>
-                            </form>
-                        </div>
-                        <div class="dropdown-container">
-                            <button id="course-dropdown-button" class="dropdown-button">Kurs auswählen ▼</button>
-                            <div id="course-dropdown-content" class="dropdown-content">
-                                <input type="text" id="course-search" placeholder="Kurs suchen...">
-                                <div id="course-checkbox-list"></div>
-                            </div>
-                        </div>
-                        <h2>Ausgewählter Stundenplan</h2>
-                        <div id="selected-schedule"></div>
+                  <div id="user"></div>
+                  <h1>%title%</h1>
+                  <div id="schedule-container">
+                    <div class="add-course-header">
+                      <h2>Füge einen Kurs hinzu</h2>
+                      <button id="KursButton">Kurs Hinzufügen</button>
                     </div>
+                    <div id="course-form-container" style="display: none;">
+                      <form id="course-form">
+                        <div class="form-group">
+                          <label for="course">Kursname:</label>
+                          <input type="text" id="course" name="course" placeholder="z. B. Einführung in die" required>
+                        </div>
+                        <div id="events-container">
+                          <div class="event-form" data-index="0">
+                            <h4>Veranstaltung 1</h4>
+                            <div class="form-group">
+                              <label for="event-type-0">Typ:</label>
+                              <select id="event-type-0" name="event-type-0" required>
+                                <option value="" disabled selected>Wähle einen Typ</option>
+                                <option value="Vorlesung">Vorlesung</option>
+                                <option value="Übung">Übung</option>
+                                <option value="Seminar">Seminar</option>
+                                <option value="Praktikum">Praktikum</option>
+                              </select>
+                            </div>
+                            <div class="form-group">
+                              <label for="event-day-0">Tag:</label>
+                              <select id="event-day-0" name="event-day-0" required>
+                                <option value="" disabled selected>Wähle einen Tag</option>
+                                <option value="Mo">Montag</option>
+                                <option value="Di">Dienstag</option>
+                                <option value="Mi">Mittwoch</option>
+                                <option value="Do">Donnerstag</option>
+                                <option value="Fr">Freitag</option>
+                              </select>
+                            </div>
+                            <div class="form-group">
+                              <label for="event-from-0">Startzeit:</label>
+                              <input type="time" id="event-from-0" name="event-from-0" required>
+                            </div>
+                            <div class="form-group">
+                              <label for="event-until-0">Endzeit:</label>
+                              <input type="time" id="event-until-0" name="event-until-0" required>
+                            </div>
+                            <div class="form-group">
+                              <label for="event-room-0">Raum:</label>
+                              <input type="text" id="event-room-0" name="event-room-0" placeholder="z. B. St-C116" required>
+                            </div>
+                            <div class="form-group">
+                              <label for="event-period-from-0">Startdatum:</label>
+                              <input type="text" id="event-period-from-0" name="event-period-from-0" placeholder="z. B. 03.04.2025" required>
+                            </div>
+                            <div class="form-group">
+                              <label for="event-period-until-0">Enddatum:</label>
+                              <input type="text" id="event-period-until-0" name="event-period-until-0" placeholder="z. B. 26.06.2025" required>
+                            </div>
+                            <div class="form-group">
+                              <label for="event-who-0">Dozent:</label>
+                              <input type="text" id="event-who-0" name="event-who-0" placeholder="z. B. Weil">
+                            </div>
+                            <div class="form-group">
+                              <label for="event-group-0">Gruppe:</label>
+                              <input type="text" id="event-group-0" name="event-group-0" placeholder="z. B. A">
+                            </div>
+                            <button type="button" class="remove-event-button" style="display: none;">Veranstaltung entfernen</button>
+                          </div>
+                        </div>
+                        <button type="button" id="add-event-button">Weitere Veranstaltung hinzufügen</button><br><br>
+                        <button type="submit">Kurs hinzufügen</button>
+                        <button type="button" class="cancel-button">Abbrechen</button>
+                      </form>
+                    </div>
+                    <div class="dropdown-container">
+                      <button id="course-dropdown-button" class="dropdown-button">Kurs auswählen ▼</button>
+                      <div id="course-dropdown-content" class="dropdown-content">
+                        <input type="text" id="course-search" placeholder="Kurs suchen...">
+                        <div id="course-checkbox-list"></div>
+                      </div>
+                    </div>
+                    <h2>Ausgewählter Stundenplan</h2>
+                    <div id="selected-schedule"></div>
+                  </div>
                 `,
                 courseItem: `
-                    <div class="course-item" data-key="%key%">
-                        <h3>%course%</h3>
-                        <div class="events-list">
-                            <!-- Veranstaltungen werden hier dynamisch eingefügt -->
-                        </div>
-                        <div class="course-note" id="course-note-container-%key%">
-                            <!-- Notiz oder Button wird hier dynamisch eingefügt -->
-                        </div>
-                        <select class="color-select">
-                            <option value="">-- Farbe auswählen --</option>
-                            <option value="#ff9999">Hellrot</option>
-                            <option value="#ff4d4d">Rot</option>
-                            <option value="#ffcc99">Pfirsich</option>
-                            <option value="#ff8c1a">Orange</option>
-                            <option value="#ffff99">Hellgelb</option>
-                            <option value="#ffeb3b">Gelb</option>
-                            <option value="#b3ff99">Hellgrün</option>
-                            <option value="#4caf50">Grün</option>
-                            <option value="#99ccff">Hellblau</option>
-                            <option value="#2196f3">Blau</option>
-                            <option value="#cc99ff">Lavendel</option>
-                            <option value="#9c27b0">Lila</option>
-                            <option value="#ff99cc">Rosa</option>
-                            <option value="#f06292">Pink</option>
-                            <option value="#d3d3d3">Hellgrau</option>
-                            <option value="#808080">Grau</option>
-                        </select>
-                        <div class="course-actions">
-                            <button class="remove-button">Entfernen</button>
-                        </div>
-                        <div class="course-links">
-                            <h4>Weblinks:</h4>
-                            <ul class="links-list"></ul>
-                        </div>
-                    </div>
-                `
+          <div class="course-item" data-key="%key%">
+            <h3>%course%</h3>
+            <div class="events-list">
+              <!-- Veranstaltungen werden hier dynamisch eingefügt -->
+            </div>
+            <div class="course-note" id="course-note-container-%key%">
+              <!-- Notiz oder Button wird hier dynamisch eingefügt -->
+            </div>
+            <select class="color-select">
+              <option value="">-- Farbe auswählen --</option>
+              <option value="#ff9999">Hellrot</option>
+              <option value="#ff4d4d">Rot</option>
+              <option value="#ffcc99">Pfirsich</option>
+              <option value="#ff8c1a">Orange</option>
+              <option value="#ffff99">Hellgelb</option>
+              <option value="#ffeb3b">Gelb</option>
+              <option value="#b3ff99">Hellgrün</option>
+              <option value="#4caf50">Grün</option>
+              <option value="#99ccff">Hellblau</option>
+              <option value="#2196f3">Blau</option>
+              <option value="#cc99ff">Lavendel</option>
+              <option value="#9c27b0">Lila</option>
+              <option value="#ff99cc">Rosa</option>
+              <option value="#f06292">Pink</option>
+              <option value="#d3d3d3">Hellgrau</option>
+              <option value="#808080">Grau</option>
+            </select>
+            <div class="course-actions">
+              <button class="remove-button">Entfernen</button>
+            </div>
+            <div class="course-links">
+              <h4>Weblinks:</h4>
+              <ul class="links-list"></ul>
+            </div>
+          </div>
+        `
             },
             scheduleView: {
                 main: `
-                    <div class="container">
-                        <div class="section">
-                            <h2>Stundenplan für %studentId%</h2>
-                            <div class="week-schedule">
-                                %scheduleContent%
-                            </div>
-                        </div>
-                        <div id="modal" class="modal">
-                            <div class="modal-content">
-                                <span class="close">×</span>
-                                <h3>Apps für ausgewählte Veranstaltung</h3>
-                                <div id="modal-apps" class="modal-apps"></div>
-                            </div>
-                        </div>
+                  <div class="container">
+                    <div class="section">
+                      <h2>Stundenplan für %studentId%</h2>
+                      <div class="week-schedule">
+                        %scheduleContent%
+                      </div>
                     </div>
+                    <div id="modal" class="modal">
+                      <div class="modal-content">
+                        <span class="close">×</span>
+                        <h3>Apps für ausgewählte Veranstaltung</h3>
+                        <div id="modal-apps" class="modal-apps"></div>
+                      </div>
+                    </div>
+                  </div>
                 `
             }
         }
@@ -157,12 +157,12 @@ ccm.files["ccm.schedule_manager.js"] = {
     Instance: function () {
         let self = this;
         const studentId = "tmiede2s";
+        let allCourses = [];
         let currentCourses = [];
         let isEditMode = false;
         let toggleButton;
-        let allCourses = [];
 
-        // Helper functions (unchanged)
+        // Helper functions
         const normalizeDay = (day) => {
             const dayMap = {
                 "mo": "Montag", "montag": "Montag",
@@ -180,11 +180,10 @@ ccm.files["ccm.schedule_manager.js"] = {
             const [hours, minutes] = time.split(':').map(Number);
             return hours * 60 + minutes;
         };
-
-        // Updated addCourse function
+//////
         const addCourse = async (form) => {
             try {
-                const courseName = form.querySelector('#course-name').value.trim();
+                const courseName = form.querySelector('#course').value.trim();
                 if (!courseName) {
                     throw new Error("Bitte gib einen Kursnamen ein.");
                 }
@@ -200,7 +199,6 @@ ccm.files["ccm.schedule_manager.js"] = {
                         period_from: eventForm.querySelector(`#event-period-from-${index}`).value,
                         period_until: eventForm.querySelector(`#event-period-until-${index}`).value
                     };
-                    // Optional fields
                     const who = eventForm.querySelector(`#event-who-${index}`).value.trim();
                     const group = eventForm.querySelector(`#event-group-${index}`).value.trim();
                     if (who) eventData.who = who;
@@ -217,12 +215,12 @@ ccm.files["ccm.schedule_manager.js"] = {
                     createdBy: "student",
                     who: studentId,
                     materials: [],
-                    events: events,
-                    course_of_study: [] // Explicitly empty for student courses
+                    events: events, // Jede Veranstaltung hat ein Event
+                    course_of_study: []
                 };
 
                 const courseId = self.ccm.helper.generateKey();
-                await self.studentCourseStore.set({ key: courseId, value: courseData });
+                await self.studentCourseStore.set({key: courseId, value: courseData});
                 console.log("Neuer studentischer Kurs hinzugefügt:", courseData);
 
                 const newCourse = {
@@ -239,7 +237,6 @@ ccm.files["ccm.schedule_manager.js"] = {
             }
         };
 
-        // Other functions (unchanged except for renderEditView)
         const saveCourses = async () => {
             try {
                 const scheduleData = {
@@ -287,10 +284,10 @@ ccm.files["ccm.schedule_manager.js"] = {
             const eventsList = courseHtml.querySelector('.events-list');
             kurs.value.events.forEach(event => {
                 const eventHtml = `
-                <div class="event-item">
-                    ${event.type}: ${event.day}, ${event.from} - ${event.until}, Raum: ${event.room}${event.who ? `, Dozent: ${event.who}` : ''}${event.group ? `, Gruppe: ${event.group}` : ''}, ${event.period_from} - ${event.period_until}
-                </div>
-            `;
+          <div class="event-item">
+            ${event.type}: ${event.day}, ${event.from} - ${event.until}, Raum: ${event.room}${event.who ? `, Dozent: ${event.who}` : ''}${event.group ? `, Gruppe: ${event.group}` : ''}, ${event.period_from} - ${event.period_until}
+          </div>
+        `;
                 eventsList.insertAdjacentHTML('beforeend', eventHtml);
             });
 
@@ -299,9 +296,9 @@ ccm.files["ccm.schedule_manager.js"] = {
             const noteContainer = courseHtml.querySelector(`#course-note-container-${kurs.key}`);
             if (kurs.note && kurs.note.trim() !== "") {
                 const noteHtml = `
-                <label for="course-note-${kurs.key}">Notiz:</label>
-                <textarea class="course-note-textarea" id="course-note-${kurs.key}" placeholder="Deine Notiz...">${kurs.note}</textarea>
-            `;
+          <label for="course-note-${kurs.key}">Notiz:</label>
+          <textarea class="course-note-textarea" id="course-note-${kurs.key}" placeholder="Deine Notiz...">${kurs.note}</textarea>
+        `;
                 noteContainer.innerHTML = noteHtml;
 
                 const noteTextarea = noteContainer.querySelector(`#course-note-${kurs.key}`);
@@ -313,9 +310,9 @@ ccm.files["ccm.schedule_manager.js"] = {
                         const addNoteButton = noteContainer.querySelector('.add-note-button');
                         addNoteButton.addEventListener('click', () => {
                             noteContainer.innerHTML = `
-                            <label for="course-note-${kurs.key}">Notiz:</label>
-                            <textarea class="course-note-textarea" id="course-note-${kurs.key}" placeholder="Deine Notiz..."></textarea>
-                        `;
+                <label for="course-note-${kurs.key}">Notiz:</label>
+                <textarea class="course-note-textarea" id="course-note-${kurs.key}" placeholder="Deine Notiz..."></textarea>
+              `;
                             const newTextarea = noteContainer.querySelector(`#course-note-${kurs.key}`);
                             newTextarea.focus();
                             newTextarea.addEventListener('blur', async () => {
@@ -335,9 +332,9 @@ ccm.files["ccm.schedule_manager.js"] = {
                 const addNoteButton = noteContainer.querySelector('.add-note-button');
                 addNoteButton.addEventListener('click', () => {
                     noteContainer.innerHTML = `
-                    <label for="course-note-${kurs.key}">Notiz:</label>
-                    <textarea class="course-note-textarea" id="course-note-${kurs.key}" placeholder="Deine Notiz..."></textarea>
-                `;
+            <label for="course-note-${kurs.key}">Notiz:</label>
+            <textarea class="course-note-textarea" id="course-note-${kurs.key}" placeholder="Deine Notiz..."></textarea>
+          `;
                     const newTextarea = noteContainer.querySelector(`#course-note-${kurs.key}`);
                     newTextarea.focus();
                     newTextarea.addEventListener('blur', async () => {
@@ -373,23 +370,12 @@ ccm.files["ccm.schedule_manager.js"] = {
                 currentCourses = currentCourses.filter(k => k.key !== kurs.key);
                 container.removeChild(courseHtml);
 
-                const [courseId, eventIndex] = kurs.key.includes('_') ? kurs.key.split('_') : [kurs.key, null];
-                let checkbox = null;
-                if (eventIndex !== null) {
-                    const selector = `.event-checkbox[data-key="${courseId}"][data-event-index="${eventIndex}"]`;
-                    console.log('Checkbox selector:', selector);
-                    checkbox = document.querySelector(selector);
-                    console.log('Found checkbox:', checkbox);
-                }
-
+                const checkbox = document.querySelector(`.event-checkbox[data-key="${kurs.key}"]`);
                 if (checkbox) {
                     checkbox.checked = false;
                     if (updateParentCheckbox) {
-                        console.log('Calling updateParentCheckboxes with checkbox:', checkbox);
                         updateParentCheckbox(checkbox);
                     }
-                } else {
-                    console.log('No checkbox found for course:', kurs.key, 'likely a student-created course');
                 }
 
                 await saveCourses();
@@ -432,7 +418,12 @@ ccm.files["ccm.schedule_manager.js"] = {
                 const allCourses = [...teacherCourses, ...ownStudentCourses];
 
                 userConfig.value.courses.forEach(course => {
-                    const kurs = allCourses.find(k => k.key === course.key) || { value: { course: course.course, events: course.events } };
+                    const kurs = allCourses.find(k => k.key === course.key) || {
+                        value: {
+                            course: course.course,
+                            events: course.events
+                        }
+                    };
                     if (kurs && kurs.value && kurs.value.events) {
                         kurs.value.events.forEach(event => {
                             const normalizedDay = normalizeDay(event.day || "Unbekannt");
@@ -462,28 +453,28 @@ ccm.files["ccm.schedule_manager.js"] = {
             const daysToDisplay = [...alwaysShowDays, ...optionalDays];
 
             const scheduleContent = daysToDisplay.map(day => `
-            <div class="day">
-                <h3>${day}</h3>
-                ${schedule[day] && schedule[day].length > 0 ? schedule[day].map(event => `
-                    <div class="event" data-course-id="${event.courseId}" style="background-color: ${event.color};">
-                        <div class="event-header">
-                            <strong>${event.title}</strong>
-                            ${event.note && event.note.trim() !== "" ? `
-                                <span class="note-icon">📝
-                                    <span class="tooltip">${event.note}</span>
-                                </span>
-                            ` : ''}
-                        </div>
-                        <span>${event.time}</span><br>
-                        <span>Raum: ${event.room}</span><br>
-                        <span>Dozent: ${event.who}</span><br>
-                        <span>Zeitraum: ${event.period}</span>
-                    </div>
-                `).join('') : '<p>Keine Kurse an diesem Tag.</p>'}
+        <div class="day">
+          <h3>${day}</h3>
+          ${schedule[day] && schedule[day].length > 0 ? schedule[day].map(event => `
+            <div class="event" data-course-id="${event.courseId}" style="background-color: ${event.color};">
+              <div class="event-header">
+                <strong>${event.title}</strong>
+                ${event.note && event.note.trim() !== "" ? `
+                  <span class="note-icon">📝
+                    <span class="tooltip">${event.note}</span>
+                  </span>
+                ` : ''}
+              </divMui
+              <span>${event.time}</span><br>
+              <span>Raum: ${event.room}</span><br>
+              <span>Dozent: ${event.who}</span><br>
+              <span>Zeitraum: ${event.period}</span>
             </div>
-        `).join('');
+          `).join('') : '<p>Keine Kurse an diesem Tag.</p>'}
+        </div>
+      `).join('');
 
-            return self.ccm.helper.html(self.html.scheduleView.main, { studentId, scheduleContent });
+            return self.ccm.helper.html(self.html.scheduleView.main, {studentId, scheduleContent});
         };
 
         const initializeDropdownAndSearch = (dropdownButton, dropdownContent, searchInput, courseCheckboxList) => {
@@ -545,7 +536,7 @@ ccm.files["ccm.schedule_manager.js"] = {
                 });
             });
         };
-
+//////
         this.start = async () => {
             console.log("courseStore:", await self.courseStore.get());
             console.log("studentCourseStore:", await self.studentCourseStore.get());
@@ -584,7 +575,12 @@ ccm.files["ccm.schedule_manager.js"] = {
             if (savedSchedule && savedSchedule.value && savedSchedule.value.courses) {
                 currentCourses = savedSchedule.value.courses
                     .filter(course => {
-                        const fullCourse = allCourses.find(c => c.key === course.key) || { value: { course: course.course, events: course.events } };
+                        const fullCourse = allCourses.find(c => c.key === course.key) || {
+                            value: {
+                                course: course.course,
+                                events: course.events
+                            }
+                        };
                         return fullCourse && fullCourse.value && fullCourse.value.course;
                     })
                     .map(course => ({
@@ -605,7 +601,7 @@ ccm.files["ccm.schedule_manager.js"] = {
 
             await self.renderView();
         };
-
+/////
         this.renderView = async () => {
             const mainContent = self.element.querySelector('#main-content');
             if (mainContent) mainContent.remove();
@@ -623,9 +619,8 @@ ccm.files["ccm.schedule_manager.js"] = {
             }
         };
 
-        // Updated renderEditView with new course form
         this.renderEditView = async (container) => {
-            const mainHtml = self.ccm.helper.html(self.html.editView.main, { title: "Stundenplan bearbeiten" });
+            const mainHtml = self.ccm.helper.html(self.html.editView.main, {title: "Stundenplan bearbeiten"});
             container.appendChild(mainHtml);
 
             const courseFormContainer = container.querySelector('#course-form-container');
@@ -644,141 +639,106 @@ ccm.files["ccm.schedule_manager.js"] = {
             console.log('courseForm:', courseForm);
 
             // Check if critical elements exist
-            if (!kursButton) {
-                console.error('Error: #KursButton not found in DOM. Check self.html.editView.main template.');
-                return;
-            }
-            if (!courseFormContainer) {
-                console.error('Error: #course-form-container not found in DOM. Check self.html.editView.main template.');
-                return;
-            }
-            if (!courseForm) {
-                console.error('Error: #course-form not found in DOM. Check self.html.editView.main template.');
+            if (!kursButton || !courseFormContainer || !courseForm) {
+                console.error('Error: Critical elements not found in DOM. Check self.html.editView.main template.');
                 return;
             }
 
-            const eventsContainer = courseForm.querySelector('#events-container') || document.createElement('div');
-            eventsContainer.id = 'events-container';
-            const addEventButton = courseForm.querySelector('#add-event-button') || document.createElement('button');
-            addEventButton.id = 'add-event-button';
-            addEventButton.type = 'button';
-            addEventButton.textContent = 'Veranstaltung hinzufügen';
+            const eventsContainer = courseForm.querySelector('#events-container');
+            const addEventButton = courseForm.querySelector('#add-event-button');
 
             let eventIndex = 0;
 
-            // Initialize form HTML
-            courseForm.innerHTML = `
-        <div class="form-group">
-            <label for="course-name">Kursname *</label>
-            <input type="text" id="course-name" name="course-name" placeholder="z. B. Meine Vorlesung" required>
-        </div>
-        <h3>Veranstaltungen</h3>
-        <div id="events-container"></div>
-        <button type="button" id="add-event-button">Veranstaltung hinzufügen</button>
-        <div class="form-actions">
-            <button type="submit">Kurs speichern</button>
-            <button type="button" class="cancel-button">Abbrechen</button>
-        </div>
-    `;
-
-            // Re-query elements after updating form
-            const newEventsContainer = courseForm.querySelector('#events-container');
-            const newAddEventButton = courseForm.querySelector('#add-event-button');
-
-            // Add initial event form
+            // Add event form
             const addEventForm = (index) => {
-                const eventFormHtml = `
+                const eventForm = eventsContainer.querySelector(`.event-form[data-index="${index}"]`);
+                if (!eventForm) {
+                    const eventFormHtml = `
             <div class="event-form" data-index="${index}">
-                <h4>Veranstaltung ${index + 1}</h4>
-                <div class="form-group">
-                    <label for="event-type-${index}">Typ *</label>
-                    <select id="event-type-${index}" name="event-type-${index}" required>
-                        <option value="" disabled selected>Wähle einen Typ</option>
-                        <option value="Vorlesung">Vorlesung</option>
-                        <option value="Übung">Übung</option>
-                        <option value="Seminar">Seminar</option>
-                        <option value="Praktikum">Praktikum</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="event-day-${index}">Tag *</label>
-                    <select id="event-day-${index}" name="event-day-${index}" required>
-                        <option value="" disabled selected>Wähle einen Tag</option>
-                        <option value="Mo">Montag</option>
-                        <option value="Di">Dienstag</option>
-                        <option value="Mi">Mittwoch</option>
-                        <option value="Do">Donnerstag</option>
-                        <option value="Fr">Freitag</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="event-from-${index}">Startzeit *</label>
-                    <input type="time" id="event-from-${index}" name="event-from-${index}" required>
-                </div>
-                <div class="form-group">
-                    <label for="event-until-${index}">Endzeit *</label>
-                    <input type="time" id="event-until-${index}" name="event-until-${index}" required>
-                </div>
-                <div class="form-group">
-                    <label for="event-room-${index}">Raum *</label>
-                    <input type="text" id="event-room-${index}" name="event-room-${index}" placeholder="z. B. St-C116" required>
-                </div>
-                <div class="form-group">
-                    <label for="event-period-from-${index}">Startdatum *</label>
-                    <input type="text" id="event-period-from-${index}" name="event-period-from-${index}" placeholder="z. B. 03.04.2025" required>
-                </div>
-                <div class="form-group">
-                    <label for="event-period-until-${index}">Enddatum *</label>
-                    <input type="text" id="event-period-until-${index}" name="event-period-until-${index}" placeholder="z. B. 26.06.2025" required>
-                </div>
-                <div class="form-group">
-                    <label for="event-who-${index}">Dozent (optional)</label>
-                    <input type="text" id="event-who-${index}" name="event-who-${index}" placeholder="z. B. Prof. Müller">
-                </div>
-                <div class="form-group">
-                    <label for="event-group-${index}">Gruppe (optional)</label>
-                    <input type="text" id="event-group-${index}" name="event-group-${index}" placeholder="z. B. A">
-                </div>
-                <button type="button" class="remove-event-button">Veranstaltung entfernen</button>
+              <h4>Veranstaltung ${index + 1}</h4>
+              <div class="form-group">
+                <label for="event-type-${index}">Typ *</label>
+                <select id="event-type-${index}" name="event-type-${index}" required>
+                  <option value="" disabled selected>Wähle einen Typ</option>
+                  <option value="Vorlesung">Vorlesung</option>
+                  <option value="Übung">Übung</option>
+                  <option value="Seminar">Seminar</option>
+                  <option value="Praktikum">Praktikum</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="event-day-${index}">Tag *</label>
+                <select id="event-day-${index}" name="event-day-${index}" required>
+                  <option value="" disabled selected>Wähle einen Tag</option>
+                  <option value="Mo">Montag</option>
+                  <option value="Di">Dienstag</option>
+                  <option value="Mi">Mittwoch</option>
+                  <option value="Do">Donnerstag</option>
+                  <option value="Fr">Freitag</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="event-from-${index}">Startzeit *</label>
+                <input type="time" id="event-from-${index}" name="event-from-${index}" required>
+              </div>
+              <div class="form-group">
+                <label for="event-until-${index}">Endzeit *</label>
+                <input type="time" id="event-until-${index}" name="event-until-${index}" required>
+              </div>
+              <div class="form-group">
+                <label for="event-room-${index}">Raum *</label>
+                <input type="text" id="event-room-${index}" name="event-room-${index}" placeholder="z. B. St-C116" required>
+              </div>
+              <div class="form-group">
+                <label for="event-period-from-${index}">Startdatum *</label>
+                <input type="text" id="event-period-from-${index}" name="event-period-from-${index}" placeholder="z. B. 03.04.2025" required>
+              </div>
+              <div class="form-group">
+                <label for="event-period-until-${index}">Enddatum *</label>
+                <input type="text" id="event-period-until-${index}" name="event-period-until-${index}" placeholder="z. B. 26.06.2025" required>
+              </div>
+              <div class="form-group">
+                <label for="event-who-${index}">Dozent (optional)</label>
+                <input type="text" id="event-who-${index}" name="event-who-${index}" placeholder="z. B. Prof. Müller">
+              </div>
+              <div class="form-group">
+                <label for="event-group-${index}">Gruppe (optional)</label>
+                <input type="text" id="event-group-${index}" name="event-group-${index}" placeholder="z. B. A">
+              </div>
+              <button type="button" class="remove-event-button" ${index === 0 ? 'style="display: none;"' : ''}>Veranstaltung entfernen</button>
             </div>
-        `;
-                newEventsContainer.insertAdjacentHTML('beforeend', eventFormHtml);
+          `;
+                    eventsContainer.insertAdjacentHTML('beforeend', eventFormHtml);
+                }
             };
 
-            // Add initial event form
-            addEventForm(eventIndex);
-
-            // Clear existing listeners to prevent duplicates
-            const newKursButton = kursButton.cloneNode(true);
-            kursButton.parentNode.replaceChild(newKursButton, kursButton);
-
             // Event listeners
-            newKursButton.addEventListener('click', () => {
+            kursButton.addEventListener('click', () => {
                 console.log('KursButton clicked');
                 courseFormContainer.style.display = 'block';
-                newKursButton.style.display = 'none';
-                courseForm.querySelector('#course-name').focus();
+                kursButton.style.display = 'none';
+                courseForm.querySelector('#course').focus();
             });
 
             cancelButton.addEventListener('click', () => {
                 courseFormContainer.style.display = 'none';
-                newKursButton.style.display = 'block';
+                kursButton.style.display = 'block';
                 courseForm.reset();
-                newEventsContainer.innerHTML = '';
+                eventsContainer.innerHTML = '';
                 eventIndex = 0;
                 addEventForm(eventIndex);
             });
 
-            newAddEventButton.addEventListener('click', () => {
+            addEventButton.addEventListener('click', () => {
                 eventIndex++;
                 addEventForm(eventIndex);
             });
 
-            newEventsContainer.addEventListener('click', (e) => {
+            eventsContainer.addEventListener('click', (e) => {
                 if (e.target.classList.contains('remove-event-button')) {
                     const eventForm = e.target.closest('.event-form');
-                    newEventsContainer.removeChild(eventForm);
-                    Array.from(newEventsContainer.children).forEach((form, idx) => {
+                    eventsContainer.removeChild(eventForm);
+                    Array.from(eventsContainer.children).forEach((form, idx) => {
                         form.dataset.index = idx;
                         form.querySelector('h4').textContent = `Veranstaltung ${idx + 1}`;
                         form.querySelectorAll('input, select').forEach(input => {
@@ -796,8 +756,9 @@ ccm.files["ccm.schedule_manager.js"] = {
                                 });
                             }
                         });
+                        form.querySelector('.remove-event-button').style.display = idx === 0 ? 'none' : 'block';
                     });
-                    eventIndex = newEventsContainer.children.length - 1;
+                    eventIndex = eventsContainer.children.length - 1;
                 }
             });
 
@@ -807,9 +768,9 @@ ccm.files["ccm.schedule_manager.js"] = {
                     const newCourse = await addCourse(courseForm);
                     currentCourses.push(newCourse);
                     courseFormContainer.style.display = 'none';
-                    newKursButton.style.display = 'block';
+                    kursButton.style.display = 'block';
                     courseForm.reset();
-                    newEventsContainer.innerHTML = '';
+                    eventsContainer.innerHTML = '';
                     eventIndex = 0;
                     addEventForm(eventIndex);
                     await self.renderEditView(container);
@@ -837,7 +798,7 @@ ccm.files["ccm.schedule_manager.js"] = {
                 if (kurs && kurs.value && kurs.value.course) {
                     const studies = kurs.value.course_of_study && kurs.value.course_of_study.length > 0
                         ? kurs.value.course_of_study
-                        : [{ courseOfStudy: "Ohne Studiengang", semester: "N/A" }];
+                        : [{courseOfStudy: "Ohne Studiengang", semester: "N/A"}];
 
                     studies.forEach(study => {
                         const studyName = study.courseOfStudy || "Ohne Studiengang";
@@ -914,42 +875,42 @@ ccm.files["ccm.schedule_manager.js"] = {
                             .map(kurs => {
                                 return kurs.value.events.map((event, eventIndex) => {
                                     const eventInfo = `${event.type} (${event.day}, ${event.from} - ${event.until}, Raum: ${event.room}${event.who ? `, Dozent: ${event.who}` : ''}${event.group ? `, Gruppe: ${event.group}` : ''}, ${event.period_from} - ${event.period_until})`;
-                                    const isChecked = currentCourses.some(c => c.key === `${kurs.key}_${eventIndex}`);
+                                    const isChecked = currentCourses.some(c => c.key === kurs.key);
                                     return `
-                                <div class="event-item">
-                                    <input type="checkbox" class="event-checkbox" data-key="${kurs.key}" data-event-index="${eventIndex}" ${isChecked ? 'checked' : ''}>
-                                    <label>${eventInfo}${kurs.value.createdBy === "student" ? ' [Student]' : ''}</label>
-                                </div>
-                            `;
+                    <div class="event-item">
+                      <input type="checkbox" class="event-checkbox" data-key="${kurs.key}" ${isChecked ? 'checked' : ''}>
+                      <label>${eventInfo}${kurs.value.createdBy === "student" ? ' [Student]' : ''}</label>
+                    </div>
+                  `;
                                 }).join('');
                             }).join('');
                         return `
-                    <div class="course-group" data-course="${courseName}">
-                        <div class="course-item">
-                            <input type="checkbox" class="course-checkbox">
-                            <label>${courseName}</label>
-                        </div>
-                        <div class="events">${eventHtml}</div>
-                    </div>
-                `;
+              <div class="course-group" data-course="${courseName}">
+                <div class="course-item">
+                  <input type="checkbox" class Ascendant: true;
+                  <label>${courseName}</label>
+                </div>
+                <div class="courses">${eventHtml}</div>
+              </div>
+            `;
                     }).join('');
                     return `
-                <div class="semester-group" data-semester="${semester}">
-                    <div class="semester-item">
-                        <input type="checkbox" class="semester-checkbox">
-                        <label>Semester ${semester}</label>
-                    </div>
-                    <div class="courses">${courseHtml}</div>
-                </div>
-            `;
+            <div class="semester-group" data-semester="${semester}">
+              <div class="semester-item">
+                <input type="checkbox" class="semester-checkbox">
+                <label>Semester ${semester}</label>
+              </div>
+              <div class="courses">${courseHtml}</div>
+            </div>
+          `;
                 }).join('');
                 return `
-            <div class="study-group" data-study="${studyName}">
-                <div class="study-item">
-                    <label>${studyName}</label>
-                </div>
-                <div class="semesters">${semesterHtml}</div>
+          <div class="study-group" data-study="${studyName}">
+            <div class="study-item">
+              <label>${studyName}</label>
             </div>
+            <div class="semesters">${semesterHtml}</div>
+          </div>
         `;
             }).join('');
 
@@ -966,17 +927,15 @@ ccm.files["ccm.schedule_manager.js"] = {
                     eventCheckboxes.forEach(cb => {
                         cb.checked = e.target.checked;
                         const kursKey = cb.dataset.key;
-                        const eventIndex = parseInt(cb.dataset.eventIndex);
                         const kurs = allCourses.find(k => k.key === kursKey);
-                        const eventKey = `${kursKey}_${eventIndex}`;
-                        if (e.target.checked && !currentCourses.some(c => c.key === eventKey)) {
+                        if (e.target.checked && !currentCourses.some(c => c.key === kursKey)) {
                             const filteredCourse = {
-                                key: eventKey,
+                                key: kursKey,
                                 value: {
                                     course: kurs.value.course,
                                     course_of_study: kurs.value.course_of_study,
                                     materials: kurs.value.materials,
-                                    events: [kurs.value.events[eventIndex]],
+                                    events: kurs.value.events,
                                     createdBy: kurs.value.createdBy
                                 },
                                 color: "",
@@ -985,8 +944,8 @@ ccm.files["ccm.schedule_manager.js"] = {
                             currentCourses.push(filteredCourse);
                             renderCourse(filteredCourse, selectedScheduleContainer, updateParentCheckboxes);
                         } else if (!e.target.checked) {
-                            currentCourses = currentCourses.filter(c => c.key !== eventKey);
-                            const courseElement = selectedScheduleContainer.querySelector(`.course-item[data-key="${eventKey}"]`);
+                            currentCourses = currentCourses.filter(c => c.key !== kursKey);
+                            const courseElement = selectedScheduleContainer.querySelector(`.course-item[data-key="${kursKey}"]`);
                             if (courseElement) selectedScheduleContainer.removeChild(courseElement);
                         }
                     });
@@ -1004,17 +963,15 @@ ccm.files["ccm.schedule_manager.js"] = {
                     eventCheckboxes.forEach(cb => {
                         cb.checked = e.target.checked;
                         const kursKey = cb.dataset.key;
-                        const eventIndex = parseInt(cb.dataset.eventIndex);
                         const kurs = allCourses.find(k => k.key === kursKey);
-                        const eventKey = `${kursKey}_${eventIndex}`;
-                        if (e.target.checked && !currentCourses.some(c => c.key === eventKey)) {
+                        if (e.target.checked && !currentCourses.some(c => c.key === kursKey)) {
                             const filteredCourse = {
-                                key: eventKey,
+                                key: kursKey,
                                 value: {
                                     course: kurs.value.course,
                                     course_of_study: kurs.value.course_of_study,
                                     materials: kurs.value.materials,
-                                    events: [kurs.value.events[eventIndex]],
+                                    events: kurs.value.events,
                                     createdBy: kurs.value.createdBy
                                 },
                                 color: "",
@@ -1023,8 +980,8 @@ ccm.files["ccm.schedule_manager.js"] = {
                             currentCourses.push(filteredCourse);
                             renderCourse(filteredCourse, selectedScheduleContainer, updateParentCheckboxes);
                         } else if (!e.target.checked) {
-                            currentCourses = currentCourses.filter(c => c.key !== eventKey);
-                            const courseElement = selectedScheduleContainer.querySelector(`.course-item[data-key="${eventKey}"]`);
+                            currentCourses = currentCourses.filter(c => c.key !== kursKey);
+                            const courseElement = selectedScheduleContainer.querySelector(`.course-item[data-key="${kursKey}"]`);
                             if (courseElement) selectedScheduleContainer.removeChild(courseElement);
                         }
                     });
@@ -1038,17 +995,15 @@ ccm.files["ccm.schedule_manager.js"] = {
             courseCheckboxList.querySelectorAll('.event-checkbox').forEach(checkbox => {
                 checkbox.addEventListener('change', async (e) => {
                     const kursKey = e.target.dataset.key;
-                    const eventIndex = parseInt(e.target.dataset.eventIndex);
                     const kurs = allCourses.find(k => k.key === kursKey);
-                    const eventKey = `${kursKey}_${eventIndex}`;
-                    if (e.target.checked && !currentCourses.some(c => c.key === eventKey)) {
+                    if (e.target.checked && !currentCourses.some(c => c.key === kursKey)) {
                         const filteredCourse = {
-                            key: eventKey,
+                            key: kursKey,
                             value: {
                                 course: kurs.value.course,
                                 course_of_study: kurs.value.course_of_study,
                                 materials: kurs.value.materials,
-                                events: [kurs.value.events[eventIndex]],
+                                events: kurs.value.events,
                                 createdBy: kurs.value.createdBy
                             },
                             color: "",
@@ -1057,8 +1012,8 @@ ccm.files["ccm.schedule_manager.js"] = {
                         currentCourses.push(filteredCourse);
                         renderCourse(filteredCourse, selectedScheduleContainer, updateParentCheckboxes);
                     } else if (!e.target.checked) {
-                        currentCourses = currentCourses.filter(c => c.key !== eventKey);
-                        const courseElement = selectedScheduleContainer.querySelector(`.course-item[data-key="${eventKey}"]`);
+                        currentCourses = currentCourses.filter(c => c.key !== kursKey);
+                        const courseElement = selectedScheduleContainer.querySelector(`.course-item[data-key="${kursKey}"]`);
                         if (courseElement) selectedScheduleContainer.removeChild(courseElement);
                     }
                     updateParentCheckboxes(e.target);
@@ -1070,13 +1025,10 @@ ccm.files["ccm.schedule_manager.js"] = {
 
             currentCourses.forEach(course => {
                 renderCourse(course, selectedScheduleContainer, updateParentCheckboxes);
-                const [courseId, eventIndex] = course.key.includes('_') ? course.key.split('_') : [course.key, null];
-                if (eventIndex !== null) {
-                    const checkbox = courseCheckboxList.querySelector(`.event-checkbox[data-key="${courseId}"][data-event-index="${eventIndex}"]`);
-                    if (checkbox) {
-                        checkbox.checked = true;
-                        updateParentCheckboxes(checkbox);
-                    }
+                const checkbox = courseCheckboxList.querySelector(`.event-checkbox[data-key="${course.key}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    updateParentCheckboxes(checkbox);
                 }
             });
         };
@@ -1130,11 +1082,11 @@ ccm.files["ccm.schedule_manager.js"] = {
                 const url = typeof material === 'string' ? material : material.url;
                 const normalizedUrl = url.startsWith('http') ? url : `https://${url}`;
                 return `
-                <div class="modal-link">
-                    <strong>${headline}</strong><br>
-                    <a href="${normalizedUrl}" target="_blank" rel="noopener noreferrer">${normalizedUrl}</a>
-                </div>
-            `;
+          <div class="modal-link">
+            <strong>${headline}</strong><br>
+            <a href="${normalizedUrl}" target="_blank" rel="noopener noreferrer">${normalizedUrl}</a>
+          </div>
+        `;
             }).join('');
 
             self.element.querySelector('#modal').style.display = 'block';
