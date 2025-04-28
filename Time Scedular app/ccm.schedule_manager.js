@@ -1,6 +1,6 @@
 ccm.files["ccm.schedule_manager.js"] = {
     name: "schedule_manager",
-    ccm: "../libs/ccm/ccm.js",
+    ccm: "https://ccmjs.github.io/ccm/ccm.js",
     config: {
         studentStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_student_schedules"}],
         courseStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_teacher_courses"}],
