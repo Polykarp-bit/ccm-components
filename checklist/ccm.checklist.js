@@ -224,38 +224,29 @@ ccm.files["ccm.checklist.js"] = {
                     itemHtml.className = isEndPoint ? 'point-item' : 'subitem';
                     itemHtml.dataset.id = itemKey;
                     itemHtml.innerHTML = `
-        <div class="${isEndPoint ? 'point' : 'subitem'}-header">
-            <p class="${isEndPoint ? 'point' : 'subitem'}-title">${item.name}</p>
-            <div class="deadline-container">
-                <span class="deadline-icon" aria-hidden="true">Deadline</span>
-                <label for="deadline-${itemKey}" class="deadline-label visually-hidden">Fälligkeitsdatum</label>
-                <input type="date" id="deadline-${itemKey}" class="deadline-picker" value="${item.deadline || ''}" aria-label="Fälligkeitsdatum">
-                <span class="deadline-display">${item.deadline ? `Fällig: ${formatDate(item.deadline)}` : ''}</span>
-            </div>
-            ${!isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : ''}
-            <button class="remove-subitem">Entfernen</button>
-        </div>
-        ${!isEndPoint ? `
-            <div class="subitem-list-container">
-                <div class="subitem-list"></div>
-                <div class="add-subitem-wrapper">
-                    <button class="add-subitem">
-                        <span class="add-icon">➕</span> Unterpunkt hinzufügen
-                    </button>
-                    <div class="subitem-input">
-                        <input type="text" class="subitem-name" placeholder="Unterpunkt-Name (z.B. Unteraufgabe)" aria-label="Unterpunkt-Name">
-                        <input type="date" class="subitem-deadline" placeholder="Fälligkeit wählen" aria-label="Unterpunkt-Fälligkeitsdatum">
-                        <button class="confirm-subitem">Hinzufügen</button>
-                        <button class="cancel-subitem">Abbrechen</button>
-                    </div>
-                </div>
-            </div>
-        ` : ''}
-    `;
-
+                        <div class="${isEndPoint ? 'point' : 'subitem'}-header">
+                            <p class="${isEndPoint ? 'point' : 'subitem'}-title">${item.name}</p>
+                            <label for="deadline">Deadline</label>
+                            <input type="date" id="deadline" class="deadline-picker" value="${item.deadline || ''}">
+                            <span class="deadline-display">${item.deadline ? `Fällig: ${formatDate(item.deadline)}` : ''}</span>
+                            ${!isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : ''}
+                            <button class="add-subitem">Unterpunkt hinzufügen</button>
+                            <button class="remove-subitem">Entfernen</button>
+                        </div>
+                        <div class="subitem-input">
+                            <input type="text" class="subitem-name" placeholder="Unterpunkt-Name (z.B. Unteraufgabe)">
+                            <button class="confirm-subitem">Hinzufügen</button>
+                        </div>
+                        ${!isEndPoint ? '<div class="subitem-list"></div>' : ''}
+                    `;
                     parentElement.appendChild(itemHtml);
 
+                    const subitemList = itemHtml.querySelector('.subitem-list');
+                    const addSubitemButton = itemHtml.querySelector('.add-subitem');
                     const removeSubitemButton = itemHtml.querySelector('.remove-subitem');
+                    const subitemInput = itemHtml.querySelector('.subitem-input');
+                    const subitemNameInput = itemHtml.querySelector('.subitem-name');
+                    const confirmSubitemButton = itemHtml.querySelector('.confirm-subitem');
                     const deadlinePicker = itemHtml.querySelector('.deadline-picker');
                     const deadlineDisplay = itemHtml.querySelector('.deadline-display');
 
@@ -276,65 +267,38 @@ ccm.files["ccm.checklist.js"] = {
                         renderPreview(my.tempList.key, my.tempList.items);
                     });
 
-                    if (!isEndPoint) {
-                        const subitemListContainer = itemHtml.querySelector('.subitem-list-container');
-                        const subitemList = itemHtml.querySelector('.subitem-list');
-                        const addSubitemButton = itemHtml.querySelector('.add-subitem');
-                        const subitemInput = itemHtml.querySelector('.subitem-input');
-                        const subitemNameInput = itemHtml.querySelector('.subitem-name');
-                        const subitemDeadlineInput = itemHtml.querySelector('.subitem-deadline');
-                        const confirmSubitemButton = itemHtml.querySelector('.confirm-subitem');
-                        const cancelSubitemButton = itemHtml.querySelector('.cancel-subitem');
+                    addSubitemButton.addEventListener('click', () => {
+                        subitemInput.classList.toggle('active');
+                        subitemNameInput.focus();
+                    });
 
-                        addSubitemButton.addEventListener('click', () => {
-                            subitemInput.classList.add('active');
-                            addSubitemButton.style.display = 'none'; // Hide the "Add Subitem" button while form is active
-                            subitemNameInput.focus();
-                        });
+                    confirmSubitemButton.addEventListener('click', () => {
+                        const subitemName = subitemNameInput.value.trim();
+                        if (!subitemName) {
+                            alert('Bitte geben Sie einen Namen für den Unterpunkt ein.');
+                            return;
+                        }
+                        const subitemKey = `item_${subitemName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()}_${Date.now()}`;
+                        const newSubitem = { key: subitemKey, name: subitemName, items: [], deadline: null };
 
-                        confirmSubitemButton.addEventListener('click', () => {
-                            const subitemName = subitemNameInput.value.trim();
-                            const subitemDeadline = subitemDeadlineInput.value || null;
-                            if (!subitemName) {
-                                alert('Bitte geben Sie einen Namen für den Unterpunkt ein.');
-                                return;
-                            }
-                            const subitemKey = `item_${subitemName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()}_${Date.now()}`;
-                            const newSubitem = { key: subitemKey, name: subitemName, items: [], deadline: subitemDeadline };
-
-                            function findParent(items) {
-                                for (const currentItem of items) {
-                                    if (currentItem.key === item.key) {
-                                        currentItem.items.push(newSubitem);
-                                        return true;
-                                    }
-                                    if (findParent(currentItem.items)) return true;
+                        function findParent(items) {
+                            for (const currentItem of items) {
+                                if (currentItem.key === item.key) {
+                                    currentItem.items.push(newSubitem);
+                                    return true;
                                 }
-                                return false;
+                                if (findParent(currentItem.items)) return true;
                             }
-                            findParent(my.tempList.items);
+                            return false;
+                        }
+                        findParent(my.tempList.items);
 
-                            my.currentItems.push(newSubitem);
+                        my.currentItems.push(newSubitem);
 
-                            subitemNameInput.value = '';
-                            subitemDeadlineInput.value = '';
-                            subitemInput.classList.remove('active');
-                            addSubitemButton.style.display = 'block';
-                            renderPreview(my.tempList.key, my.tempList.items);
-                        });
-
-                        cancelSubitemButton.addEventListener('click', () => {
-                            subitemInput.classList.remove('active');
-                            addSubitemButton.style.display = 'block';
-                            subitemNameInput.value = '';
-                            subitemDeadlineInput.value = '';
-                        });
-
-                        // Render existing subitems
-                        item.items.forEach(subItem => {
-                            renderPreviewItem(subItem, subitemList, itemKey);
-                        });
-                    }
+                        renderPreview(my.tempList.key, my.tempList.items);
+                        subitemNameInput.value = '';
+                        subitemInput.classList.remove('active');
+                    });
 
                     removeSubitemButton.addEventListener('click', () => {
                         if (my.tempList.items.length === 1 && item.items.length === 0 && !parentKey) {
@@ -366,6 +330,12 @@ ccm.files["ccm.checklist.js"] = {
 
                         renderPreview(my.tempList.key, my.tempList.items);
                     });
+
+                    if (!isEndPoint) {
+                        item.items.forEach(subItem => {
+                            renderPreviewItem(subItem, subitemList, itemKey);
+                        });
+                    }
                 }
 
                 // Edit list
@@ -476,7 +446,6 @@ ccm.files["ccm.checklist.js"] = {
                                     <h3>${listTitle}</h3>
                                     <div>
                                         <button class="edit-list">Bearbeiten</button>
-                                        <button class="delete-list">Löschen</button> <!-- Neuer Löschen-Button -->
                                         <button class="toggle-item">▼</button>
                                     </div>
                                 </div>
@@ -493,7 +462,6 @@ ccm.files["ccm.checklist.js"] = {
                             const subitemList = listHtml.querySelector('.subitem-list');
                             const toggleButton = listHtml.querySelector('.toggle-item');
                             const editButton = listHtml.querySelector('.edit-list');
-                            const deleteButton = listHtml.querySelector('.delete-list'); // Selektor für den neuen Button
 
                             if (my.listState[key].collapsed) {
                                 itemContent.style.display = 'none';
@@ -508,28 +476,6 @@ ccm.files["ccm.checklist.js"] = {
                             });
 
                             editButton.addEventListener('click', () => self.editList(key));
-
-                            // Event-Listener für den Löschen-Button
-                            deleteButton.addEventListener('click', async () => {
-                                if (!confirm(`Möchten Sie die Liste "${listTitle}" wirklich löschen?`)) {
-                                    return;
-                                }
-
-                                // Entferne die Liste aus listsData und listState
-                                delete my.listsData[key];
-                                delete my.listState[key];
-
-                                try {
-                                    // Speichere die aktualisierten Daten im Store
-                                    await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
-                                    console.log(`Liste ${key} erfolgreich gelöscht.`);
-                                    // Rendern die Listen neu
-                                    await renderLists(itemElement);
-                                } catch (e) {
-                                    console.error(`Fehler beim Löschen der Liste ${key}:`, e);
-                                    alert('Fehler beim Löschen der Liste. Bitte überprüfe die Konsole.');
-                                }
-                            });
 
                             my.listsData[key].forEach(item => {
                                 renderItem(key, item, subitemList, itemContent, '');
@@ -572,12 +518,8 @@ ccm.files["ccm.checklist.js"] = {
                         <div class="${isEndPoint ? 'point' : 'subitem'}-header">
                             <input type="checkbox" id="${itemKey}" class="${isEndPoint ? 'point' : 'subitem'}-checkbox">
                             <label for="${itemKey}" class="${isEndPoint ? 'point' : 'subitem'}-title">${item.name}</label>
-                            <div class="deadline-container">
-                                <span class="deadline-icon" aria-hidden="true">Deadline</span>
-                                <label for="deadline-${itemKey}" class="deadline-label visually-hidden">Fälligkeitsdatum</label>
-                                <input type="date" id="deadline-${itemKey}" class="deadline-picker" value="${item.deadline || ''}" aria-label="Fälligkeitsdatum">
-                                <span class="deadline-display">${item.deadline ? `Fällig: ${formatDate(item.deadline)}` : ''}</span>
-                            </div>
+                            <input type="date" class="deadline-picker" value="${item.deadline || ''}">
+                            <span class="deadline-display">${item.deadline ? `Fällig: ${formatDate(item.deadline)}` : ''}</span>
                             ${!isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : ''}
                         </div>
                         ${!isEndPoint ? '<div class="subitem-list"></div>' : ''}
