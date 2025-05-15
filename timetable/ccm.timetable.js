@@ -50,12 +50,22 @@ ccm.files["ccm.timetable.js"] = {
                       </form>
                     </div>
                     <div class="dropdown-container">
-                      <button id="course-dropdown-button" class="dropdown-button">Kurs hinzufügen ▼</button>
-                      <div id="course-dropdown-content" class="dropdown-content">
-                        <input type="text" id="course-search" placeholder="Kurs suchen ...">
-                        <div id="course-checkbox-list"></div>
-                      </div>
-                    </div>
+  <button id="course-dropdown-button" class="dropdown-button">Kurs hinzufügen ▼</button>
+  <div id="course-dropdown-content" class="dropdown-content">
+    <input type="text" id="course-search" placeholder="Kurs suchen ...">
+    <select id="day-filter">
+      <option value="">Alle Tage</option>
+      <option value="Montag">Montag</option>
+      <option value="Dienstag">Dienstag</option>
+      <option value="Mittwoch">Mittwoch</option>
+      <option value="Donnerstag">Donnerstag</option>
+      <option value="Freitag">Freitag</option>
+      <option value="Sa">Samstag</option>
+      <option value="So">Sonntag</option>
+    </select>
+    <div id="course-checkbox-list"></div>
+  </div>
+</div>
                     <h2>Ausgewählter Stundenplan</h2>
                     <div id="selected-schedule"></div>
                   </div>
@@ -86,6 +96,8 @@ ccm.files["ccm.timetable.js"] = {
                           <option value="Mi">Mittwoch</option>
                           <option value="Do">Donnerstag</option>
                           <option value="Fr">Freitag</option>
+                          <option value="Sa">Samstag</option>
+                          <option value="So">Sonntag</option>
                         </select>
                       </div>
                       <div class="form-group">
@@ -513,8 +525,8 @@ ccm.files["ccm.timetable.js"] = {
                                     const eventInfo = `${event.type} (${event.day}, ${event.from} - ${event.until}, Raum: ${event.room}${event.who ? `, Dozent: ${event.who}` : ''}${event.group ? `, Gruppe: ${event.group}` : ''}, ${event.period_from} - ${event.period_until})`;
                                     const isChecked = currentCourses.some(c => c.value.events.some(e => e.key === event.key)); // Prüfe, ob Event ausgewählt ist
                                     html += `<div class="event-item">
-                                        <input type="checkbox" class="event-checkbox" data-course-key="${kurs.key}" data-event-key="${event.key}" ${isChecked ? 'checked' : ''}>
-                                        <label>${eventInfo}${kurs.value.createdBy === "student" ? ' [eigene Veranstaltung]' : ''}</label>
+                                      <input type="checkbox" class="event-checkbox" data-course-key="${kurs.key}" data-event-key="${event.key}" data-event-day="${normalizeDay(event.day)}" ${isChecked ? 'checked' : ''}>
+                                      <label>${eventInfo}${kurs.value.createdBy === "student" ? ' [eigene Veranstaltung]' : ''}</label>
                                     </div>`;
                                 }
                             }
@@ -856,6 +868,7 @@ ccm.files["ccm.timetable.js"] = {
             const dropdownButton = container.querySelector('#course-dropdown-button');
             const dropdownContent = container.querySelector('#course-dropdown-content');
             const searchInput = container.querySelector('#course-search');
+            const dayFilter = container.querySelector('#day-filter');
 
             dropdownButton.onclick = (event) => {
                 event.stopPropagation();
@@ -864,10 +877,10 @@ ccm.files["ccm.timetable.js"] = {
                 dropdownButton.textContent = isOpen ? 'Kurs hinzufügen ▼' : 'Kurs hinzufügen ▲';
                 if (!isOpen) searchInput.focus();
             };
-            // todo nicht genau engeschaut, aberscheint zu funktionieren
-            //  todo überprfen nach was man suchen könnnen soll
-            searchInput.addEventListener('input', () => {
+
+            const filterCourses = () => {
                 const searchTerm = searchInput.value.toLowerCase();
+                const selectedDay = dayFilter.value;
                 const studyGroups = courseCheckboxList.querySelectorAll('.study-group');
 
                 studyGroups.forEach(studyGroup => {
@@ -887,14 +900,16 @@ ccm.files["ccm.timetable.js"] = {
 
                             eventItems.forEach(eventItem => {
                                 const label = eventItem.querySelector('label').textContent.toLowerCase();
-                                const matches = (
+                                const eventDay = eventItem.querySelector('.event-checkbox').dataset.eventDay;
+                                const matchesText = (
                                     studyName.includes(searchTerm) ||
                                     semester.includes(searchTerm) ||
                                     courseName.includes(searchTerm) ||
                                     label.includes(searchTerm)
                                 );
-                                eventItem.style.display = matches ? 'flex' : 'none';
-                                if (matches) hasVisibleEvent = true;
+                                const matchesDay = !selectedDay || eventDay === selectedDay;
+                                eventItem.style.display = matchesText && matchesDay ? 'flex' : 'none';
+                                if (matchesText && matchesDay) hasVisibleEvent = true;
                             });
                             courseGroup.style.display = hasVisibleEvent ? 'block' : 'none';
                             if (hasVisibleEvent) hasVisibleCourse = true;
@@ -904,7 +919,10 @@ ccm.files["ccm.timetable.js"] = {
                     });
                     studyGroup.style.display = hasVisibleSemester ? 'block' : 'none';
                 });
-            });
+            };
+
+            searchInput.addEventListener('input', filterCourses);
+            dayFilter.addEventListener('change', filterCourses);
         };
 
         const addNoteToCourse = async (courseKey, note) => {
