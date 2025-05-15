@@ -34,7 +34,7 @@ ccm.files["ccm.timetable.js"] = {
                   <h1>Stundenplan bearbeiten</h1>
                   <div id="schedule-container">
                     <div class="add-course-header">
-                      <button id="add-course-button">Kurs hinzufügen</button>
+                      <button id="add-course-button">Eigenen Kurs hinzufügen</button>
                     </div>
                     <div id="course-form-container" style="display: none;">
                       <form id="course-form">
@@ -45,12 +45,12 @@ ccm.files["ccm.timetable.js"] = {
                         </div>
                         <div id="events-container"></div>
                         <button type="button" id="add-event-button">Weitere Veranstaltung hinzufügen</button><br><br>
-                        <button type="submit" id="submit-course-button">Kurs hinzufügen</button>
+                        <button type="submit" id="submit-course-button">Kurs Hinzufügen</button>
                         <button type="button" id="cancel-button">Abbrechen</button>
                       </form>
                     </div>
                     <div class="dropdown-container">
-                      <button id="course-dropdown-button" class="dropdown-button">Kurs auswählen ▼</button>
+                      <button id="course-dropdown-button" class="dropdown-button">Kurs hinzufügen ▼</button>
                       <div id="course-dropdown-content" class="dropdown-content">
                         <input type="text" id="course-search" placeholder="Kurs suchen ...">
                         <div id="course-checkbox-list"></div>
@@ -71,6 +71,10 @@ ccm.files["ccm.timetable.js"] = {
                           <option value="Übung">Übung</option>
                           <option value="Seminar">Seminar</option>
                           <option value="Praktikum">Praktikum</option>
+                          <option value="Sportkurs">Sportkurs</option>
+                          <option value="Sprachkurs">Sprachkurs</option>
+                          <option value="Tutorium">Tutorium</option>
+                          <option value="Sonstiges">Sonstiges</option>
                         </select>
                       </div>
                       <div class="form-group">
@@ -269,7 +273,7 @@ ccm.files["ccm.timetable.js"] = {
         };
 
         this.renderView = async () => {
-            toggleButton.textContent = isEditMode ? 'Zur Stundenplanansicht' : 'Einstellungen';
+            toggleButton.textContent = isEditMode ? 'Zur Stundenplanansicht' : 'Stundenplan Konfigurieren';
 
             if (isEditMode) {
                 await self.renderEditView();
@@ -857,7 +861,7 @@ ccm.files["ccm.timetable.js"] = {
                 event.stopPropagation();
                 const isOpen = dropdownContent.style.display === 'block';
                 dropdownContent.style.display = isOpen ? 'none' : 'block';
-                dropdownButton.textContent = isOpen ? 'Kurs auswählen ▼' : 'Kurs auswählen ▲';
+                dropdownButton.textContent = isOpen ? 'Kurs hinzufügen ▼' : 'Kurs hinzufügen ▲';
                 if (!isOpen) searchInput.focus();
             };
             // todo nicht genau engeschaut, aberscheint zu funktionieren
