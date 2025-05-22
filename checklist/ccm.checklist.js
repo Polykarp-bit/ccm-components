@@ -30,9 +30,57 @@ ccm.files["ccm.checklist.js"] = {
                     </div>
                     <div id="items"></div>
                 </div>
+    `, previewList:`
+        
+                        <div class="item-header">
+                            <h3>%listTitle%</h3>
+                        </div>
+                        <div class="item-content">
+                            <div class="subitem-list"></div>
+                            <button class="add-subitem">Listenobjekt hinzufügen</button>
+                            <div class="list-input">
+                                <input type="text" class="subitem-name" placeholder="Objekt-Name (z.B. Aufgabe 2)">
+                                <button class="confirm-subitem">Hinzufügen</button>
+                            </div>
+                        </div>
+                    
+    `, renderpreviewList:`
+    
+                                    <div class='%isEndpoint%' id=%itemKey%>
+                                     <div class='%isEnpointHeader%'>
+                                    <div class='title-edit-wrapper'>
+                                      <button class='edit-item-name-btn' title='Namen bearbeiten' onclick=%editName%>&#9998</button>
+                                        <p class='%isEndpointTitle%'>%itemName%</p>
+                                         <div class='item-name-edit-form' style={display = 'none'}>
+                                          <input type="text" class='item-name-input-field'></input>
+                                          <button class='save-item-name-btn'>OK</button>
+                                          <button class='cancel-item-name-btn'>X</button>
+                                         </div>
+                                      </div>
+                                          </div>
+                                       <div class= '%deadlineGroup%'>
+                                           <label for="%deadlineGroupId%">Deadline</label>
+                                           <input type="date" id="%deadlineGroupId%" class="deadline-picker" value="${item.deadline || ''}">
+                                     </div>
+                                      %progressSpanHTML%
+                                     <div class='action-button-group'>
+                                         <button class='add-subitem' >
+                                             'Unterpunkt hinzufügen'
+                                         </button>
+                                         <button class='remove-subitem'>Entfernen</button>
+                                     </div>
+
+                                        <div class='subitem-input'>
+                                            <input type='text' class='subitem-name' placeholder='Unterpunkt-Name (z.B. Unteraufgabe)'></input>
+                                            <button class='confirm-subitem'>Hinzufügen</button>
+                                        </div>
+                                        <div class="subitem-list-children"></div>
+                                      </div>
+    
     `
         }
     },
+
     Instance: function () {
         let self = this;
         let my;
@@ -72,6 +120,20 @@ ccm.files["ccm.checklist.js"] = {
                 self.element.innerHTML = `<p>Error initializing store: ${e.message}</p>`;
             }
         };
+
+        const events = {
+            editName: () => {
+                editNameIcon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    titleDisplay.style.display = 'none';
+                    editNameIcon.style.display = 'none';
+                    nameEditForm.style.display = 'flex';
+                    nameInput.value = item.name;
+                    nameInput.focus();
+                });
+            }
+
+        }
 
         this.start = async () => {
             try {
@@ -159,19 +221,7 @@ ccm.files["ccm.checklist.js"] = {
                     const listTitle = listKey;
                     const listHtml = document.createElement('div');
                     listHtml.className = 'list-item';
-                    listHtml.innerHTML = `
-                        <div class="item-header">
-                            <h3>${listTitle}</h3>
-                        </div>
-                        <div class="item-content">
-                            <div class="subitem-list"></div>
-                            <button class="add-subitem">Listenobjekt hinzufügen</button>
-                            <div class="list-input">
-                                <input type="text" class="subitem-name" placeholder="Objekt-Name (z.B. Aufgabe 2)">
-                                <button class="confirm-subitem">Hinzufügen</button>
-                            </div>
-                        </div>
-                    `;
+                    listHtml.innerHTML = self.ccm.helper.html(self.html.previewList, {listTitle: listTitle});
                     previewList.appendChild(listHtml);
                     console.log('listHtml appended to previewList:', listHtml);
 
@@ -239,15 +289,19 @@ ccm.files["ccm.checklist.js"] = {
                         item
                     });
 
+
                     const itemHtml = document.createElement('div');
                     itemHtml.className = isEndPoint ? 'point-item' : 'subitem';
                     itemHtml.dataset.id = itemKey;
 
+
                     const headerDiv = document.createElement('div');
                     headerDiv.className = `${isEndPoint ? 'point' : 'subitem'}-header`;
 
+
                     const titleEditWrapper = document.createElement('div');
                     titleEditWrapper.className = 'title-edit-wrapper';
+
 
                     const editNameIcon = document.createElement('button');
                     editNameIcon.innerHTML = '&#9998;';
@@ -255,26 +309,32 @@ ccm.files["ccm.checklist.js"] = {
                     editNameIcon.title = 'Namen bearbeiten';
                     titleEditWrapper.appendChild(editNameIcon);
 
+
                     const titleDisplay = document.createElement('p');
                     titleDisplay.className = `${isEndPoint ? 'point' : 'subitem'}-title`;
                     titleDisplay.textContent = item.name;
                     titleEditWrapper.appendChild(titleDisplay);
 
+
                     const nameEditForm = document.createElement('div');
                     nameEditForm.className = 'item-name-edit-form';
                     nameEditForm.style.display = 'none';
+
 
                     const nameInput = document.createElement('input');
                     nameInput.type = 'text';
                     nameInput.className = 'item-name-input-field';
 
+
                     const saveNameButton = document.createElement('button');
                     saveNameButton.textContent = 'OK';
                     saveNameButton.className = 'save-item-name-btn';
 
+
                     const cancelNameButton = document.createElement('button');
                     cancelNameButton.textContent = 'X';
                     cancelNameButton.className = 'cancel-item-name-btn';
+
 
                     nameEditForm.appendChild(nameInput);
                     nameEditForm.appendChild(saveNameButton);
@@ -327,8 +387,96 @@ ccm.files["ccm.checklist.js"] = {
                         <label for="${deadlineGroupId}">Deadline</label>
                         <input type="date" id="${deadlineGroupId}" class="deadline-picker" value="${item.deadline || ''}">
                     `;
+
                     headerDiv.appendChild(deadlineGroup);
                     const deadlinePickerElement = deadlineGroup.querySelector(`#${deadlineGroupId}`);
+
+
+                    /*
+                                   <div class='%isEndpoint%' id=%itemKey%>
+                                     <div class='%isEnpointHeader%'>
+                                    <div class='title-edit-wrapper'>
+                                      <button class='edit-item-name-btn' title='Namen bearbeiten' onclick=%editName%>&#9998</button>
+                                        <p class='%isEndpointTitle%'>%itemName%</p>
+                                         <div class='item-name-edit-form' style={display = 'none'}>
+                                          <input type="text" class='item-name-input-field'></input>
+                                          <button class='save-item-name-btn'>OK</button>
+                                          <button class='cancel-item-name-btn'>X</button>
+                                         </div>
+                                      </div>
+                                          </div>
+                                       <div class= '%deadlineGroup%'>
+                                           <label for="%deadlineGroupId%">Deadline</label>
+                                           <input type="date" id="%deadlineGroupId%" class="deadline-picker" value="${item.deadline || ''}">
+                                     </div>
+                                      %progressSpanHTML%
+                                     <div class='action-button-group'>
+                                         <button class='add-subitem' >
+                                             'Unterpunkt hinzufügen'
+                                         </button>
+                                         <button class='remove-subitem'>Entfernen</button>
+                                     </div>
+
+                                        <div class='subitem-input'>
+                                            <input type='text' class='subitem-name' placeholder='Unterpunkt-Name (z.B. Unteraufgabe)'></input>
+                                            <button class='confirm-subitem'>Hinzufügen</button>
+                                        </div>
+                                        <div class="subitem-list-children"></div>
+                                      </div>
+
+
+                */
+
+                    self.ccm.helper.html(self.html.renderpreviewList, {
+                            isEndPoint: isEndPoint ? 'point-item' : 'subitem',
+                            isEnpointHeader: isEndPoint ? 'point' : 'subitem' + '- header',
+                            isEndpointTitle: isEndPoint ? 'point' : 'subitem' + '-title',
+                            itemName: item.name,
+                            deadlineGroupId: `deadline_preview_${itemKey.replace(/\W/g, '_')}`,
+                            editName: events.editName(),
+                            itemDeadline: item.deadline || '',
+                            subitemProgress: !isEndPoint ? Math.round(subitemProgress) : "",
+                        }
+                    )
+
+                    /*
+
+                    let progressSpanHTML = '';
+                        if (!isEndPoint) {
+                            progressSpanHTML = `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>`;
+                        }
+
+                       const paramsFuerDeinAktuellesTemplate = {
+                            isEndpoint: isEndPoint ? 'point-item' : 'subitem',
+                            itemKey: itemKey,
+                            isEnpointHeader: isEndPoint ? 'point' : 'subitem',
+                            editName: "handleEditNameAction", // Beispielhafter String; tatsächliche Bindung muss anders erfolgen
+                            isEndpointTitle: isEndPoint ? 'point-title' : 'subitem-title',
+                            itemName: item.name,
+                            deadlineGroupId: `deadline_preview_${itemKey.replace(/\W/g, '_')}`,
+                            itemDeadlineValue: item.deadline || '', // Für den value="${...}" Teil
+                            progressSpanHTML: progressSpanHTML
+                        };
+
+
+
+                    const params = {
+                        item_outer_class: isEndPoint ? 'point-item' : 'subitem',
+                        item_id_attr: `preview-item-${sanitizedItemKeyForId}`, // Eindeutige ID für das Haupt-Div
+                        item_key_data_id: itemKeyForData, // Roh-Key für data-id zum Wiederfinden des Items
+                        item_header_class: isEndPoint ? 'point-header' : 'subitem-header',
+                        item_title_class: isEndPoint ? 'point-title' : 'subitem-title',
+                        item_name_text: item.name,
+                        item_name_edit_value: item.name, // Initialwert für das Bearbeitungsfeld
+                        deadline_id_attr: `dl_prev_${sanitizedItemKeyForId}`, // Eindeutige ID für Deadline-Label und -Input
+                        deadline_value_attr: item.deadline || '',
+                        progress_span_html: progressSpanHTML // Entweder der Span-HTML-String oder ein leerer String
+                        // Beachte: 'editName' oder andere Event-Handler werden hier NICHT direkt übergeben.
+                        // Sie werden später an Elemente mit 'data-action' Attributen gebunden.
+                    };
+
+                    const itemHtmlElement = self.ccm.helper.html(self.html.renderpreviewList, params);
+                     */
 
                     if (!isEndPoint) {
                         const progressSpan = document.createElement('span');
@@ -336,6 +484,7 @@ ccm.files["ccm.checklist.js"] = {
                         progressSpan.textContent = `${Math.round(subitemProgress)}%`;
                         headerDiv.appendChild(progressSpan);
                     }
+
 
                     const actionButtonsDiv = document.createElement('div');
                     actionButtonsDiv.className = 'action-button-group';
@@ -345,12 +494,15 @@ ccm.files["ccm.checklist.js"] = {
                     actionButtonsDiv.appendChild(addSubitemButtonElement);
                     headerDiv.appendChild(actionButtonsDiv);
 
+
                     const removeSubitemButtonElement = document.createElement('button');
                     removeSubitemButtonElement.className = 'remove-subitem';
                     removeSubitemButtonElement.textContent = 'Entfernen';
                     headerDiv.appendChild(removeSubitemButtonElement);
 
                     itemHtml.appendChild(headerDiv);
+
+
 
                     const subitemInputContainer = document.createElement('div');
                     subitemInputContainer.className = 'subitem-input';
@@ -391,6 +543,7 @@ ccm.files["ccm.checklist.js"] = {
                         updateDeadlineRecursive(my.tempList.items, item.key, newDeadline);
                         renderPreview(my.tempList.key, my.tempList.items);
                     });
+
 
                     addSubitemButtonElement.addEventListener('click', () => {
                         subitemInputContainer.classList.toggle('active');
