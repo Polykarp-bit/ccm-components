@@ -44,7 +44,6 @@ ccm.files["ccm.timetable.js"] = {
                           <input type="text" id="course-title" name="course-title" placeholder="z.B. Einführung in die ..." required>
                         </div>
                         <div id="events-container"></div>
-                        <button type="button" id="add-event-button">Weitere Veranstaltung hinzufügen</button><br><br>
                         <button type="submit" id="submit-course-button">Kurs Hinzufügen</button>
                         <button type="button" id="cancel-button">Abbrechen</button>
                       </form>
@@ -72,7 +71,6 @@ ccm.files["ccm.timetable.js"] = {
                 `,
                 eventItem: `
                     <div class="event-form" data-index="%index%">
-                      <h4>%title%</h4>
                       <div class="form-group">
                         <label for="event-type-%index%">Typ *</label>
                         <select id="event-type-%index%" name="event-type-%index%" required>
@@ -195,8 +193,9 @@ ccm.files["ccm.timetable.js"] = {
                   </div>
                 `
             }
-        }
-    },
+        },
+        onchange: event => console.log(event),
+        },
 
     Instance: function () {
         let self = this;
@@ -296,7 +295,6 @@ ccm.files["ccm.timetable.js"] = {
 
 
 
-        // Render Edit View
         this.renderEditView = async () => {
             const mainHtml = self.ccm.helper.html(self.html.editView.main);
             const container = self.element.querySelector('#main-content');
@@ -306,7 +304,6 @@ ccm.files["ccm.timetable.js"] = {
             await initAddNewCourse(container);
             await initSelectCoursesDropdown(container);
 
-            // render selected courses
             currentCourses.forEach(course => {
                 renderCourse(course);
             });
@@ -318,15 +315,15 @@ ccm.files["ccm.timetable.js"] = {
             const addCourseButton = container.querySelector('#add-course-button');
             const cancelButton = container.querySelector('#cancel-button');
             const eventsContainer = courseForm.querySelector('#events-container');
-            const addEventButton = courseForm.querySelector('#add-event-button');
 
             let eventIndex = 0;
 
-            // Event listeners
             addCourseButton.addEventListener('click', () => {
                 eventsContainer.innerHTML = '';
-                eventIndex = 0;
-                addEventForm(eventIndex);
+                const eventFormHtml = self.ccm.helper.html(self.html.editView.eventItem, {
+                    index: 0
+                });
+                eventsContainer.appendChild(eventFormHtml);
                 courseFormContainer.style.display = 'block';
                 addCourseButton.style.display = 'none';
                 courseForm.querySelector('#course-title').focus();
@@ -338,10 +335,6 @@ ccm.files["ccm.timetable.js"] = {
                 courseForm.querySelector('#course-title').value = '';
             });
 
-            addEventButton.addEventListener('click', () => {
-                eventIndex++;
-                addEventForm(eventIndex);
-            });
 
             eventsContainer.addEventListener('click', (e) => {
                 if (e.target.classList.contains('remove-event-button')) {
@@ -393,7 +386,6 @@ ccm.files["ccm.timetable.js"] = {
                 if (!eventForm) {
                     const eventFormHtml = self.ccm.helper.html(self.html.editView.eventItem, {
                         index: index,
-                        title: `Veranstaltung ${index + 1}`,
                         removeEventButtonStyle: index === 0 ? 'display: none;' : ''
                     });
                     eventsContainer.appendChild(eventFormHtml);
@@ -482,7 +474,7 @@ ccm.files["ccm.timetable.js"] = {
             console.log(studyGroups)
 
             let html = '';
-            // Studiengänge durchlaufen (alphabetisch sortiert)
+
             for (const studyName of Object.keys(studyGroups).sort()) {
                 html += `<div class="study-group" data-study="${studyName}">
                     <div class="study-item">
@@ -491,14 +483,15 @@ ccm.files["ccm.timetable.js"] = {
                     <div class="semesters">`;
 
                 const semesters = studyGroups[studyName];
-                // Semester sortieren (N/A ans Ende)
+
+
                 const semesterList = Object.keys(semesters).sort((a, b) => {
                     if (a === "N/A") return 1;
                     if (b === "N/A") return -1;
                     return parseInt(a) - parseInt(b);
                 });
 
-                // Semester durchlaufen
+
                 for (const semester of semesterList) {
                     html += `<div class="semester-group" data-semester="${semester}">
                         <div class="semester-item">
@@ -507,7 +500,6 @@ ccm.files["ccm.timetable.js"] = {
                         </div>
                         <div class="courses">`;
 
-                    // Kurse durchlaufen (alphabetisch sortiert)
                     const courses = semesters[semester];
                     for (const courseName of Object.keys(courses).sort()) {
                         const courseList = courses[courseName];
@@ -518,7 +510,7 @@ ccm.files["ccm.timetable.js"] = {
                             </div>
                             <div class="courses">`;
 
-                        // Kurseinträge durchlaufen und Events anzeigen
+
                         for (const kurs of courseList) {
                             if (kurs?.value?.events) {
                                 for (const event of kurs.value.events) {
@@ -594,6 +586,7 @@ ccm.files["ccm.timetable.js"] = {
                 };
                 await self.studentStore.set(scheduleData);
                 console.log("Kurse automatisch gespeichert:", scheduleData);
+                this.onchange && this.onchange({event:"saveCourse", instance:self})
             } catch (e) {
                 console.error("Fehler beim Speichern der Kurse:", e);
                 alert("Fehler beim Speichern der Kurse. Bitte versuche es erneut.");
@@ -733,12 +726,12 @@ ccm.files["ccm.timetable.js"] = {
                             };
                             currentCourses.push(courseInCurrent);
                         }
-                        // Check if the event already exists
+
                         if (!courseInCurrent.value.events.some(e => e.key === eventKey)) {
                             courseInCurrent.value.events.push({
                                 ...event,
-                                color: event.color || "", // Initialize color
-                                note: event.note || ""   // Initialize note
+                                color: event.color || "",
+                                note: event.note || ""
                             });
                             renderCourse(courseInCurrent, updateParentCheckboxes);
                         }
@@ -786,7 +779,6 @@ ccm.files["ccm.timetable.js"] = {
                 eventInfo.innerText = `${event.day}, ${event.from} - ${event.until}, Raum: ${event.room}${event.who ? `, Dozent: ${event.who}` : ''}${event.group ? `, Gruppe: ${event.group}` : ''}, ${event.period_from} - ${event.period_until}`;
                 eventInfo.setAttribute('data-event-key', event.key);
 
-                // Handle color
                 const colorSelect = courseHtml.querySelector(`#event-color-${event.key}`);
                 if (event.color) {
                     colorSelect.value = event.color;
@@ -798,7 +790,6 @@ ccm.files["ccm.timetable.js"] = {
                     await saveSelectedCourses();
                 });
 
-                // Handle note
                 const noteContainer = courseHtml.querySelector(`#event-note-container-${event.key}`);
                 if (event.note && event.note.trim() !== "") {
                     noteContainer.innerHTML = `
@@ -840,7 +831,6 @@ ccm.files["ccm.timetable.js"] = {
                     });
                 }
 
-                // Event entfernen
                 courseHtml.querySelector('.remove-event-button').addEventListener('click', async () => {
                     console.log('Removing event with key:', event.key);
                     const courseInCurrent = currentCourses.find(c => c.key === course.key);
@@ -934,8 +924,6 @@ ccm.files["ccm.timetable.js"] = {
         };
 
 
-
-        // Render Schedule View
         this.renderScheduleView = async () => {
             const scheduleHtml = await renderSchedule();
             const container = self.element.querySelector('#main-content');
@@ -1077,8 +1065,6 @@ ccm.files["ccm.timetable.js"] = {
         };
 
 
-
-        // Small helper functions
         const normalizeDay = (day) => {
             const dayMap = {
                 "mo": "Montag", "montag": "Montag",
