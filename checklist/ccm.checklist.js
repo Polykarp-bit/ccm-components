@@ -271,6 +271,11 @@ ccm.files["ccm.checklist.js"] = {
                     console.log('listHtml appended to previewList:', listHtml);
                     $.append(previewList, listHtml);
 
+                    const subitemList = listHtml.querySelector('.subitem-list');
+                    const addSubitemButton = listHtml.querySelector('.add-subitem');
+                    const listInput = listHtml.querySelector('.list-input');
+                    const subitemNameInput = listHtml.querySelector('.subitem-name');
+                    const confirmSubitemButton = listHtml.querySelector('.confirm-subitem');
 
 /*
                     addSubitemButton.addEventListener('click', () => {
@@ -678,7 +683,7 @@ ccm.files["ccm.checklist.js"] = {
                                     </div>
                                 </div>
                                 <button class="toggle-item">▼</button>
-
+                                
                                 <div class="item-content">
                                     <div class="progress-bar">
                                         <div class="progress-fill"></div>
@@ -771,7 +776,7 @@ ccm.files["ccm.checklist.js"] = {
                             <!--<span class="deadline-display">${item.deadline ? `Fällig: ${formatDate(item.deadline)}` : ''}</span>-->
                             ${!isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : ''}
                         </div>
-
+                        
                         <div class="note-container">
                             ${item.note ? `
                                 <p class="subitem-note">${item.note}</p>
