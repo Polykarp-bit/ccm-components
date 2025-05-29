@@ -11,6 +11,7 @@ ccm.files["ccm.checklist.js"] = {
     config: {
         store: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_checklist_data"}],
         css: ["ccm.load", "./resources/style.css"],
+        "helper": ["ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-7.2.0.mjs"],
         html: {
             main: `
                 <div class="container">
@@ -30,6 +31,54 @@ ccm.files["ccm.checklist.js"] = {
                     </div>
                     <div id="items"></div>
                 </div>
+            `, previewList: `
+        
+                    <div class="item-header">
+                        <h3>%listTitle%</h3>
+                    </div>
+                    <div class="item-content">
+                        <div class="subitem-list"></div>
+                        <button class="add-subitem" onclick="%onAddSubmitItem%">Listenobjekt hinzufügen</button>
+                        <div class="list-input">
+                            <input type="text" class="list-item-name" placeholder="Objekt-Name (z.B. Aufgabe 2)">
+                            <button class="confirm-subitem" onclick="%onConfirmSubitem%">Hinzufügen</button>
+                        </div>
+                    </div>
+              
+                    
+    `,  renderpreviewList:`
+    
+                <div class='%isEndpoint%' id=%itemKey%>
+                 <div class='%isEnpointHeader%'>
+                <div class='title-edit-wrapper'>
+                  <button class='edit-item-name-btn' title='Namen bearbeiten' onclick=%editName%>&#9998</button>
+                    <p class='%isEndpointTitle%'>%itemName%</p>
+                     <div class='item-name-edit-form' style={display = 'none'}>
+                      <input type="text" class='item-name-input-field'></input>
+                      <button class='save-item-name-btn'>OK</button>
+                      <button class='cancel-item-name-btn'>X</button>
+                     </div>
+                  </div>
+                      </div>
+                   <div class= '%deadlineGroup%'>
+                       <label for="%deadlineGroupId%">Deadline</label>
+                       <input type="date" id="%deadlineGroupId%" class="deadline-picker" value="${item.deadline || ''}">
+                 </div>
+                  %progressSpanHTML%
+                 <div class='action-button-group'>
+                     <button class='add-subitem' >
+                         'Unterpunkt hinzufügen'
+                     </button>
+                     <button class='remove-subitem'>Entfernen</button>
+                 </div>
+    
+                    <div class='subitem-input'>
+                        <input type='text' class='subitem-name' placeholder='Unterpunkt-Name (z.B. Unteraufgabe)'></input>
+                        <button class='confirm-subitem'>Hinzufügen</button>
+                    </div>
+                    <div class="subitem-list-children"></div>
+                  </div>
+    
     `
         }
     },
@@ -65,6 +114,7 @@ ccm.files["ccm.checklist.js"] = {
                         initializeState(listKey, my.listsData[listKey], my.listState[listKey]);
                     }
                 });
+                $ = Object.assign( {}, this.ccm.helper, this.helper ); $.use( this.ccm );
 
                 console.log("Initialized store:", JSON.stringify(my, null, 2));
             } catch (e) {
@@ -159,7 +209,51 @@ ccm.files["ccm.checklist.js"] = {
                     const listTitle = listKey;
                     const listHtml = document.createElement('div');
                     listHtml.className = 'list-item';
-                    listHtml.innerHTML = `
+                    //listHtml.innerHTML = self.ccm.helper.html(self.html.previewList, {listTitle: listTitle});
+/*
+                    const subitemList = listHtml.querySelector('.subitem-list');
+                    const addSubitemButton = listHtml.querySelector('.add-subitem');
+                    const listInput = listHtml.querySelector('.list-input');
+                    const subitemNameInput = listHtml.querySelector('.subitem-name');
+                    const confirmSubitemButton = listHtml.querySelector('.confirm-subitem');
+
+ */
+
+                    $.setContent(listHtml, $.html(self.html.previewList, {
+                        listTitle: listTitle,
+                        dataItemId: "1",
+                        onAddSubmitItem: () =>{
+                            const listInput = self.element.querySelector('.list-input');
+                            listInput.classList.toggle('active');
+                            const subitemNameInput = self.element.querySelector('.list-item-name');
+                            subitemNameInput.focus();
+                        },
+                        onConfirmSubitem: () => {
+                            const subitemNameInput = self.element.querySelector('.list-item-name');
+                            console.log(self.element.querySelectorAll('.list-item-name'))
+                            const subitemName = subitemNameInput.value.trim();
+                            if (!subitemName) {
+                                alert('Bitte geben Sie einen Namen für das Listenobjekt ein.');
+                                return;
+                            }
+                            const subitemKey = `item_${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
+                            const newSubitem = {key: subitemKey, name: subitemName, items: [], deadline: null};
+
+                            my.tempList.items.push(newSubitem);
+                            my.currentItems.push(newSubitem);
+                            console.log('New item added:', newSubitem);
+                            console.log('Updated tempList:', JSON.stringify(my.tempList, null, 2));
+                            console.log('Updated currentItems:', JSON.stringify(my.currentItems, null, 2));
+
+                            renderPreview(my.tempList.key, my.tempList.items);
+                            subitemNameInput.value = '';
+                            listInput.classList.remove('active');
+                        },
+
+
+
+                    }));
+                       /* `
                         <div class="item-header">
                             <h3>${listTitle}</h3>
                         </div>
@@ -171,46 +265,49 @@ ccm.files["ccm.checklist.js"] = {
                                 <button class="confirm-subitem">Hinzufügen</button>
                             </div>
                         </div>
-                    `;
-                    previewList.appendChild(listHtml);
+                    `;*/
+                    //previewList.appendChild(listHtml);
+                    //$.append(previewList, self.ccm.helper.html(self.html.previewList, {listTitle: listTitle}));
                     console.log('listHtml appended to previewList:', listHtml);
+                    $.append(previewList, listHtml);
 
-                    const subitemList = listHtml.querySelector('.subitem-list');
-                    const addSubitemButton = listHtml.querySelector('.add-subitem');
-                    const listInput = listHtml.querySelector('.list-input');
-                    const subitemNameInput = listHtml.querySelector('.subitem-name');
-                    const confirmSubitemButton = listHtml.querySelector('.confirm-subitem');
 
+/*
                     addSubitemButton.addEventListener('click', () => {
                         listInput.classList.toggle('active');
                         subitemNameInput.focus();
                     });
 
-                    confirmSubitemButton.addEventListener('click', () => {
-                        const subitemName = subitemNameInput.value.trim();
-                        if (!subitemName) {
-                            alert('Bitte geben Sie einen Namen für das Listenobjekt ein.');
-                            return;
-                        }
-                        const subitemKey = `item_${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
-                        const newSubitem = {key: subitemKey, name: subitemName, items: [], deadline: null};
+ */
+                    /*
+                                        confirmSubitemButton.addEventListener('click', () => {
+                                            const subitemName = subitemNameInput.value.trim();
+                                            if (!subitemName) {
+                                                alert('Bitte geben Sie einen Namen für das Listenobjekt ein.');
+                                                return;
+                                            }
+                                            const subitemKey = `item_${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
+                                            const newSubitem = {key: subitemKey, name: subitemName, items: [], deadline: null};
 
-                        my.tempList.items.push(newSubitem);
-                        my.currentItems.push(newSubitem);
-                        console.log('New item added:', newSubitem);
-                        console.log('Updated tempList:', JSON.stringify(my.tempList, null, 2));
-                        console.log('Updated currentItems:', JSON.stringify(my.currentItems, null, 2));
+                                            my.tempList.items.push(newSubitem);
+                                            my.currentItems.push(newSubitem);
+                                            console.log('New item added:', newSubitem);
+                                            console.log('Updated tempList:', JSON.stringify(my.tempList, null, 2));
+                                            console.log('Updated currentItems:', JSON.stringify(my.currentItems, null, 2));
 
-                        renderPreview(my.tempList.key, my.tempList.items);
-                        subitemNameInput.value = '';
-                        listInput.classList.remove('active');
-                    });
+                                            renderPreview(my.tempList.key, my.tempList.items);
+                                            subitemNameInput.value = '';
+                                            ltInput.classList.remove('active');
+                                        });
+                       */
+                                        //$.append(previewList, listHtml);
 
-                    items.forEach(item => {
-                        console.log('Rendering item in preview:', item);
-                        renderPreviewItem(item, subitemList, '');
-                    });
-                }
+                                        items.forEach(item => {
+                                            console.log('Rendering item in preview:', item);
+                                            renderPreviewItem(item, listHtml.querySelector('.subitem-list'), '');
+                                        });
+                                    }
+
 
                 function updateItemNameInTempList(itemsArray, targetItemKey, updatedName) {
                     for (let i = 0; i < itemsArray.length; i++) {
@@ -226,6 +323,8 @@ ccm.files["ccm.checklist.js"] = {
                     }
                     return false;
                 }
+
+
 
                 function renderPreviewItem(item, parentElement, parentKey) {
                     const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
@@ -579,7 +678,7 @@ ccm.files["ccm.checklist.js"] = {
                                     </div>
                                 </div>
                                 <button class="toggle-item">▼</button>
-                                
+
                                 <div class="item-content">
                                     <div class="progress-bar">
                                         <div class="progress-fill"></div>
@@ -672,7 +771,7 @@ ccm.files["ccm.checklist.js"] = {
                             <!--<span class="deadline-display">${item.deadline ? `Fällig: ${formatDate(item.deadline)}` : ''}</span>-->
                             ${!isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : ''}
                         </div>
-                        
+
                         <div class="note-container">
                             ${item.note ? `
                                 <p class="subitem-note">${item.note}</p>
