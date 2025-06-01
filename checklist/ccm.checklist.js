@@ -58,7 +58,7 @@ ccm.files["ccm.checklist.js"] = {
                 </div>
             </div>
             <div class="deadline-group"> <label for="%deadlineGroupId%">Deadline</label>
-                <input type="date" id="%deadlineGroupId%" class="deadline-picker" value="%deadlinePickerValue%" /> %progressSpanHTML%
+                <input type="date" id="%deadlineGroupId%" class="deadline-picker" value="%deadlinePickerValue%" onchange="%onDeadlineChange%" /> %progressSpanHTML%
             </div>
             <div class='action-button-group'>
                 <button class='add-subitem' onclick='%onAddSubitem%'>
@@ -71,7 +71,29 @@ ccm.files["ccm.checklist.js"] = {
             <div class="subitem-list-children"></div>
         </div>
     
-    `
+    `,
+            renderItemTemplate: `
+                <div class="%itemClassName%" data-id="%itemKey%" id="item-root-%itemKey%">
+                    <div class="%headerClassName%">
+                        <input type="checkbox" id="%checkboxId%" class="%checkboxClassName%" %checkboxChecked% onchange="%onCheckboxChange%">
+                        <label for="%checkboxId%" class="%titleClassName%">%itemName%</label>
+                        <input type="date" class="deadline-picker" value="%deadlineValue%" onchange="%onDeadlineChange%">
+                        %subitemProgressHTML%
+                    </div>
+                    <div class="note-container">
+                        <p class="subitem-note" style="display: %noteDisplayStyle%;">%noteTextContent%</p>
+                        <p class="subitem-note-placeholder" style="display: %notePlaceholderDisplayStyle%;">Noch keine Notiz vorhanden</p>
+                        <button class="edit-note-btn" title="%editNoteButtonTitle%" onclick="%onEditNote%" style="display: %editNoteButtonDisplayStyle%;">✎</button>
+                        
+                        <div class="note-edit-form" style="display: none;"> {/* Bearbeitungsformular initial versteckt */}
+                            <textarea class="note-input" rows="3" placeholder="Notiz eingeben...">%noteTextareaContent%</textarea>
+                            <button class="save-note-btn" onclick="%onSaveNote%">Speichern</button>
+                            <button class="cancel-note-btn" onclick="%onCancelNote%">Abbrechen</button>
+                        </div>
+                    </div>
+                    %subitemListContainerHTML%
+                </div>
+            `,
         }
     },
     Instance: function () {
@@ -523,17 +545,9 @@ ccm.files["ccm.checklist.js"] = {
                                 renderPreview(my.tempList.key, my.tempList.items);
                             },
 
-
-
-                    }))
-
-                    $.append(parentElement,itemHtml)
-
-
-                    const deadlinePickerElement = self.element.querySelector(`#${deadlineGroupId}`);
-                    if (deadlinePickerElement) {
-                        deadlinePickerElement.addEventListener('change', () => {
-                            const newDeadline = deadlinePickerElement.value || null;
+                        onDeadlineChange: (event) => { // Handler for deadline change
+                            if (event) event.stopPropagation(); // Optional, if bubbling is an issue
+                            const newDeadline = event.target.value || null;
                             function updateDeadlineRecursive(items, targetKey, deadlineValue) {
                                 for (let current of items) {
                                     if (current.key === targetKey) {
@@ -545,32 +559,15 @@ ccm.files["ccm.checklist.js"] = {
                                 return false;
                             }
                             if (updateDeadlineRecursive(my.tempList.items, item.key, newDeadline)) {
-                                renderPreview(my.tempList.key, my.tempList.items);
+                                renderPreview(my.tempList.key, my.tempList.items); // Re-render preview to reflect changes
                             }
-                        });
-                    }
+                        }
 
-                    const removeButton = self.element.querySelector('.remove-item-btn'); // Use class from your template
-                    if (removeButton) {
-                        removeButton.addEventListener('click', () => {
-                            if (my.tempList.items.length === 1 && (!item.items || item.items.length === 0) && !parentKey) {
-                                alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
-                                return;
-                            }
-                            function removeItemRecursive(items, targetKey) { /* ... your existing logic ... */ }
-                            if (removeItemRecursive(my.tempList.items, item.key)) {
-                                // Optional: Update my.currentItems if you use it
-                                if (my.currentItems && Array.isArray(my.currentItems)) {
-                                    function collectAllItemKeys(itemsArr, keysSet = new Set()) { /* ... */ }
-                                    const keysInTempList = collectAllItemKeys(my.tempList.items);
-                                    my.currentItems = my.currentItems.filter(ci => keysInTempList.has(ci.key));
-                                }
-                                renderPreview(my.tempList.key, my.tempList.items);
-                            }
-                        });
-                    }
 
-                    console.log(!isEndPoint)
+                    }))
+
+                    $.append(parentElement,itemHtml)
+
 
                     // 4. Recursive Call for Sub-items
                     if (!isEndPoint) {
