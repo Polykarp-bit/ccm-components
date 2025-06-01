@@ -48,36 +48,28 @@ ccm.files["ccm.checklist.js"] = {
                     
     `,  renderpreviewList:`
     
-                <div class='%isEndpoint%' id=%itemKey%>
-                 <div class='%isEnpointHeader%'>
+           <div class='%isEndpoint%' id=%itemKey%>
+            <div class='%isEnpointHeader%'>
                 <div class='title-edit-wrapper'>
-                  <button class='edit-item-name-btn' title='Namen bearbeiten' onclick=%editName%>&#9998</button>
-                    <p class='%isEndpointTitle%'>%itemName%</p>
-                     <div class='item-name-edit-form' style={display = 'none'}>
-                      <input type="text" class='item-name-input-field'></input>
-                      <button class='save-item-name-btn'>OK</button>
-                      <button class='cancel-item-name-btn'>X</button>
-                     </div>
-                  </div>
-                      </div>
-                   <div class= '%deadlineGroup%'>
-                       <label for="%deadlineGroupId%">Deadline</label>
-                       <input type="date" id="%deadlineGroupId%" class="deadline-picker" value="${item.deadline || ''}">
-                 </div>
-                  %progressSpanHTML%
-                 <div class='action-button-group'>
-                     <button class='add-subitem' >
-                         'Unterpunkt hinzufügen'
-                     </button>
-                     <button class='remove-subitem'>Entfernen</button>
-                 </div>
-    
-                    <div class='subitem-input'>
-                        <input type='text' class='subitem-name' placeholder='Unterpunkt-Name (z.B. Unteraufgabe)'></input>
-                        <button class='confirm-subitem'>Hinzufügen</button>
+                    <button class='edit-item-name-btn' title='Namen bearbeiten' onclick=%editName%>&#9998;</button> <p class='%isEndpointTitle%'>%itemName%</p>
+                    <div class='item-name-edit-form' style="display: none;"> <input type="text" class='item-name-input-field' /> <button class='save-item-name-btn' onclick=%saveItemName%>OK</button>
+                        <button class='cancel-item-name-btn' onclick=%cancelNameButton%>X</button>
                     </div>
-                    <div class="subitem-list-children"></div>
-                  </div>
+                </div>
+            </div>
+            <div class="deadline-group"> <label for="%deadlineGroupId%">Deadline</label>
+                <input type="date" id="%deadlineGroupId%" class="deadline-picker" value="%deadlinePickerValue%" /> %progressSpanHTML%
+            </div>
+            <div class='action-button-group'>
+                <button class='add-subitem' onclick='%onAddSubitem%'>
+                    Unterpunkt hinzufügen </button>
+                <button class='remove-subitem' onclick='%onRemoveSubitem%'>Entfernen</button>
+            </div>
+            <div class='subitem-input'>
+                <input type='text' class='subitem-name' placeholder='Unterpunkt-Name (z.B. Unteraufgabe)' /> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
+            </div>
+            <div class="subitem-list-children"></div>
+        </div>
     
     `
         }
@@ -122,6 +114,41 @@ ccm.files["ccm.checklist.js"] = {
                 self.element.innerHTML = `<p>Error initializing store: ${e.message}</p>`;
             }
         };
+        this.events = {
+
+            onAddSubitem: (itemKey, event) => {
+                console.log(event)
+                if (event) event.stopPropagation();
+
+
+                console.log("onAddSubitem called for itemKey:", itemKey);
+                const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
+
+                if (!currentItemRenderedRoot) {
+                    console.error(`onAddSubitem: Element mit ID '${itemKey}' nicht gefunden!`);
+                    return;
+                }
+
+                const subitemInputContainer = currentItemRenderedRoot.querySelector('.subitem-input');
+                if (!subitemInputContainer) {
+                    console.error(`onAddSubitem: '.subitem-input' nicht in Element mit ID '${itemKey}' gefunden.`);
+
+
+                    console.log("Inhalt von currentItemRenderedRoot (ID: " + itemKey + "):", currentItemRenderedRoot.innerHTML);
+                    return;
+                }
+
+                subitemInputContainer.classList.toggle('active');
+                const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
+                if (subitemNameInputForNew) {
+                    subitemNameInputForNew.focus();
+                } else {
+                    console.error(`onAddSubitem: '.subitem-name' Input nicht im subitemInputContainer für itemKey '${itemKey}' gefunden.`);
+                }
+            },
+
+
+        }
 
         this.start = async () => {
             try {
@@ -268,7 +295,7 @@ ccm.files["ccm.checklist.js"] = {
                     `;*/
                     //previewList.appendChild(listHtml);
                     //$.append(previewList, self.ccm.helper.html(self.html.previewList, {listTitle: listTitle}));
-                    console.log('listHtml appended to previewList:', listHtml);
+                 //   console.log('listHtml appended to previewList:', listHtml);
                     $.append(previewList, listHtml);
 
                     const subitemList = listHtml.querySelector('.subitem-list');
@@ -333,8 +360,10 @@ ccm.files["ccm.checklist.js"] = {
 
                 function renderPreviewItem(item, parentElement, parentKey) {
                     const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
+           //         console.log(" parent element"+ parentElement)
                     const isEndPoint = item.items.length === 0;
                     const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(my.tempList.key, itemKey, item.items, itemKey);
+                    const deadlineGroupId= `deadline_preview_${itemKey.replace(/\W/g, '_')}`;
 
                     console.log('Rendering preview item (editable name):', {
                         itemKey,
@@ -347,6 +376,160 @@ ccm.files["ccm.checklist.js"] = {
                     itemHtml.className = isEndPoint ? 'point-item' : 'subitem';
                     itemHtml.dataset.id = itemKey;
 
+                    $.setContent(itemHtml, $.html(self.html.renderpreviewList, {
+                        itemKey: itemKey,
+                        isEndPointHeader: `${isEndPoint ? 'point' : 'subitem'}-header`,
+
+                        isEndPoint: isEndPoint ? 'point-item' : 'subitem',
+                        deadlineGroupId: deadlineGroupId,
+
+                        progressSpanHTML : !isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : '',
+
+                        ediName: (e) => {
+                            if (e) e.stopPropagation();
+                            const currentItemRenderedRoot = document.getElementById(itemKey);
+                            if (!currentItemRenderedRoot) return;
+
+                            const titleDisplay = currentItemRenderedRoot.querySelector('.' + (isEndPoint ? 'point' : 'subitem') + '-title'); // oder deine %isEndpointTitle% Klasse
+                            const editNameIcon = currentItemRenderedRoot.querySelector('.edit-item-name-btn'); // der Button selbst
+                            const nameEditForm = currentItemRenderedRoot.querySelector('.item-name-edit-form');
+                            const nameInput = nameEditForm.querySelector('.item-name-input-field');
+
+                            if (titleDisplay) titleDisplay.style.display = 'none';
+                            // if (editNameIcon) editNameIcon.style.display = 'none'; // Der Icon-Button wurde geklickt
+                            if (nameEditForm) nameEditForm.style.display = 'flex';
+                            if (nameInput) {
+                                nameInput.value = item.name; // 'item' ist aus dem Scope von renderPreviewItem
+                                nameInput.focus();
+                            }},
+
+
+                        itemName: item.name,
+                        deadlinePickerValue: item.deadline || '',
+                        onAddSubitem: () => self.events.onAddSubitem(itemKey),
+                        confirmSubitem: (e) => {
+                            if (e) e.stopPropagation();
+                            console.log("fuckfuckfuckfuckfuckfuck"+itemKey)
+                            const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
+
+                            if (!currentItemRenderedRoot) {
+                                console.error(`confirmSubitem: Element mit ID '${itemKey}' nicht gefunden!`);
+                                return;
+                            }
+
+                            const subitemInputContainer = currentItemRenderedRoot.querySelector('.subitem-input');
+                            if (!subitemInputContainer) {
+                                console.error(`confirmSubitem: '.subitem-input' nicht in Element mit ID '${itemKey}' gefunden.`);
+                                console.log("Inhalt von currentItemRenderedRoot (ID: " + itemKey + "):", currentItemRenderedRoot.innerHTML);
+                                return;
+                            }
+
+                            const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
+                            if (!subitemNameInputForNew) {
+                                console.error(`confirmSubitem: '.subitem-name' Input nicht im subitemInputContainer für itemKey '${itemKey}' gefunden.`);
+                                return;
+                            }
+
+                            const subitemName = subitemNameInputForNew.value.trim();
+                            if (!subitemName) {
+                                alert('Bitte geben Sie einen Namen für den Unterpunkt ein.');
+                                subitemNameInputForNew.focus();
+                                return;
+                            }
+
+                            const newSubitemKey = `subitem_${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
+                            const newSubitem = { key: newSubitemKey, name: subitemName, items: [], deadline: null, note: "" };
+
+                            if (!item.items) {
+                                item.items = [];
+                            }
+                            item.items.push(newSubitem);
+
+                            if (my.currentItems && Array.isArray(my.currentItems)) {
+                                my.currentItems.push(newSubitem);
+                            }
+                            // Beibehaltung der ursprünglichen Logik bezüglich tempList.items, falls spezifisch so gewollt:
+                            if (isEndPoint) { // Nur wenn das Item vorher ein Endpunkt war
+                                if (my.tempList && my.tempList.items && my.tempList.items.includes(item)) {
+                                    // Wenn das ursprüngliche item ein Top-Level item war und das neue Subitem auch als Top-Level
+                                    // (oder eine andere spezifische Bedingung). Dies ist ungewöhnlich.
+                                    my.tempList.items.push(newSubitem); // Überdenke diese Zeile, falls newSubitem nur ein Kind sein soll.
+                                }
+                            }
+
+
+                            renderPreview(my.tempList.key, my.tempList.items);
+                            subitemNameInputForNew.value = '';
+                            subitemInputContainer.classList.remove('active');
+                        },
+                        saveItemName: () => {
+                            e.stopPropagation();
+                            const newName = nameInput.value.trim();
+                            if (newName && newName !== item.name) {
+                                if (updateItemNameInTempList(my.tempList.items, item.key, newName)) {
+                                    renderPreview(my.tempList.key, my.tempList.items);
+                                } else {
+                                    console.error(`Konnte Item mit Key ${item.key} zum Umbenennen nicht in tempList finden.`);
+                                    nameEditForm.style.display = 'none';
+                                    titleDisplay.style.display = '';
+                                    editNameIcon.style.display = '';
+                                }
+                            } else if (!newName) {
+                                alert('Der Item-Name darf nicht leer sein.');
+                                nameInput.focus();
+                            } else {
+                                nameEditForm.style.display = 'none';
+                                titleDisplay.style.display = '';
+                                editNameIcon.style.display = '';
+                            }
+                        },
+                        cancelNameButton: () => {
+                            e.stopPropagation();
+                            nameEditForm.style.display = 'none';
+                            titleDisplay.style.display = '';
+                            editNameIcon.style.display = '';
+                        },
+                        onRemoveSubitem: () => {
+                                if (my.tempList.items.length === 1 && item.items.length === 0 && !parentKey) {
+                                    alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
+                                    return;
+                                }
+
+                                function removeItemRecursive(items, targetKey) {
+                                    for (let i = 0; i < items.length; i++) {
+                                        if (items[i].key === targetKey) {
+                                            items.splice(i, 1);
+                                            return true;
+                                        }
+                                        if (items[i].items && removeItemRecursive(items[i].items, targetKey)) return true;
+                                    }
+                                    return false;
+                                }
+
+                                removeItemRecursive(my.tempList.items, item.key);
+
+                                if (my.currentItems && Array.isArray(my.currentItems)) {
+                                    function collectAllItemKeys(itemsArr, keysSet = new Set()) {
+                                        itemsArr.forEach(it => {
+                                            keysSet.add(it.key);
+                                            if (it.items) collectAllItemKeys(it.items, keysSet);
+                                        });
+                                        return keysSet;
+                                    }
+
+                                    const keysInTempList = collectAllItemKeys(my.tempList.items);
+                                    my.currentItems = my.currentItems.filter(ci => keysInTempList.has(ci.key));
+                                }
+                                renderPreview(my.tempList.key, my.tempList.items);
+                            },
+
+
+
+                    }))
+
+                    $.append(parentElement,itemHtml)
+
+                    /*
                     const headerDiv = document.createElement('div');
                     headerDiv.className = `${isEndPoint ? 'point' : 'subitem'}-header`;
 
@@ -570,6 +753,61 @@ ccm.files["ccm.checklist.js"] = {
                         item.items.forEach(subItem => {
                             renderPreviewItem(subItem, subitemListDisplayContainer, itemKey);
                         });
+                    }*/
+
+
+                    const deadlinePickerElement = self.element.querySelector(`#${deadlineGroupId}`);
+                    if (deadlinePickerElement) {
+                        deadlinePickerElement.addEventListener('change', () => {
+                            const newDeadline = deadlinePickerElement.value || null;
+                            function updateDeadlineRecursive(items, targetKey, deadlineValue) {
+                                for (let current of items) {
+                                    if (current.key === targetKey) {
+                                        current.deadline = deadlineValue;
+                                        return true;
+                                    }
+                                    if (current.items && updateDeadlineRecursive(current.items, targetKey, deadlineValue)) return true;
+                                }
+                                return false;
+                            }
+                            if (updateDeadlineRecursive(my.tempList.items, item.key, newDeadline)) {
+                                renderPreview(my.tempList.key, my.tempList.items);
+                            }
+                        });
+                    }
+
+                    const removeButton = self.element.querySelector('.remove-item-btn'); // Use class from your template
+                    if (removeButton) {
+                        removeButton.addEventListener('click', () => {
+                            if (my.tempList.items.length === 1 && (!item.items || item.items.length === 0) && !parentKey) {
+                                alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
+                                return;
+                            }
+                            function removeItemRecursive(items, targetKey) { /* ... your existing logic ... */ }
+                            if (removeItemRecursive(my.tempList.items, item.key)) {
+                                // Optional: Update my.currentItems if you use it
+                                if (my.currentItems && Array.isArray(my.currentItems)) {
+                                    function collectAllItemKeys(itemsArr, keysSet = new Set()) { /* ... */ }
+                                    const keysInTempList = collectAllItemKeys(my.tempList.items);
+                                    my.currentItems = my.currentItems.filter(ci => keysInTempList.has(ci.key));
+                                }
+                                renderPreview(my.tempList.key, my.tempList.items);
+                            }
+                        });
+                    }
+
+                    console.log(!isEndPoint)
+
+                    // 4. Recursive Call for Sub-items
+                    if (!isEndPoint) {
+                        const subitemListDisplayContainer = itemHtml.querySelector('.subitem-list-children');
+                        if (subitemListDisplayContainer) {
+                            console.log(`Item '${item.name}' (Key: ${itemKey}) hat ${item.items.length} Sub-Items. Rufe Rekursion auf.`);
+                            item.items.forEach(subItem => {
+                                console.log(`  -> Rekursiver Aufruf für Sub-Item:`, JSON.parse(JSON.stringify(subItem)), `ParentKey für Rekursion: ${itemKey}`);
+                                renderPreviewItem(subItem, subitemListDisplayContainer, itemKey);
+                            });
+                        }
                     }
                 }
 
