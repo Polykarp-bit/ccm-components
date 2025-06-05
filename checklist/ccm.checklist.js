@@ -118,9 +118,9 @@ ccm.files["ccm.checklist.js"] = {
             renderItem:`
                     <div class="%isEndPoint%" id=%itemKey%>
                       <div class="%isEndPoint%--header">
-                            <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox">
+                            <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox" onchange="%onCheckboxChange%">
                             <label for="%itemKey%" class="%isEndPoint%--title">%itemName%</label>
-                            <input type="date" class="deadline-picker" value=%itemDeadline%>
+                            <input type="date" class="deadline-picker" value=%itemDeadline% onclick="%onDeadlinePicker%">
 
                             <!--<span class="deadline-display">%itemDeadlineFaellig%</span>-->
                             %subitemProgress%
@@ -128,15 +128,15 @@ ccm.files["ccm.checklist.js"] = {
 
                     <div class="note-container">
                     <p class="%subItemNodeClass%">%noteShow%</p>
-                    <button class="edit-note-btn" title="%noteTitle%">✎</button>
+                    <button class="edit-note-btn" title="%noteTitle%" onclick=%onEditeNode%>✎</button>
             
                     <p class="subitem-note">%itemNote%</p>
                     <button class="edit-note-btn" title="%editNote%">✎</button>
                     
                     <div class="note-edit-form" style="display: none;">
                         <textarea class="note-input" rows="3" placeholder="Notiz eingeben...">%item.Note%</textarea>
-                        <button class="save-note-btn">Speichern</button>
-                        <button class="cancel-note-btn">Abbrechen</button>
+                        <button class="save-note-btn" onclick="%onSaveNoteButton%">Speichern</button>
+                        <button class="cancel-note-btn" onclick="%onCancelNoteBtn%">Abbrechen</button>
                     </div>
                    %subItemList%   
                 </div>
@@ -1025,25 +1025,159 @@ ccm.files["ccm.checklist.js"] = {
                         noteTitle: item.note ? 'Notiz bearbeiten' : 'Notiz hinzufügen',
                         itemNote: item.note || '',
                         subItemList: !isEndPoint ? '<div class="subitem-list"></div>' : '',
+                        checkbox: my.listState[listKey].items[itemKey]?.checked || "false",
+
+                        onEditeNode: (e) => {
+                            e.stopPropagation();
+                            const nodeContainer = itemHtml.querySelector('.note-container');
+                            const nodeDisplay = nodeContainer.querySelector('.subitem-node');
+                            const nodePlaceholder = nodeContainer.querySelector('.subitem-note-placeholder');
+                            const editNodeBtn = nodeContainer.querySelector('.edit-note-btn');
+                            const nodeEditForm = nodeContainer.querySelector('.note-edit-form');
+                            const nodeInput = nodeEditForm.querySelector('.note-input');
+
+                            if (nodeDisplay) nodeDisplay.style.display = 'none';
+                            if (nodePlaceholder) nodePlaceholder.style.display = 'none';
+                            editNodeBtn.style.display = 'none';
+                            nodeEditForm.style.display = 'block';
+                            nodeInput.focus();
+                        },
+                        onSaveNoteButton:(e) => {
+                            e.stopPropagation();
+                            const newNote = noteInput.value.trim();
+
+                            function updateNote(items, targetKey, updatedNote) {
+                                for (let current of items) {
+                                    if (current.key === targetKey) {
+                                        current.note = updatedNote;
+                                        return true;
+                                    }
+                                    if (current.items && updateNote(current.items, targetKey, updatedNote)) return true;
+                                }
+                                return false;
+                            }
+
+                            updateNote(my.listsData[listKey], item.key, newNote);
+
+                            const noteContainer = noteEditForm.parentElement;
+                            const currentNoteDisplay = noteContainer.querySelector('.subitem-note');
+                            const currentNotePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
+
+                            noteEditForm.style.display = 'none';
+                            editNoteBtn.style.display = '';
+
+                            if (newNote) {
+                                if (currentNoteDisplay) {
+                                    currentNoteDisplay.textContent = newNote;
+                                    currentNoteDisplay.style.display = '';
+                                } else if (currentNotePlaceholder) {
+                                    const newNoteDisplay = document.createElement('p');
+                                    newNoteDisplay.className = 'subitem-note';
+                                    newNoteDisplay.textContent = newNote;
+                                    noteContainer.insertBefore(newNoteDisplay, editNoteBtn);
+                                    currentNotePlaceholder.remove();
+                                }
+                            } else {
+                                if (currentNoteDisplay) {
+
+                                    const newPlaceholder = document.createElement('p');
+                                    newPlaceholder.className = 'subitem-note-placeholder';
+                                    newPlaceholder.textContent = 'Notiz hinzufügen';
+                                    noteContainer.insertBefore(newPlaceholder, editNoteBtn);
+                                    currentNoteDisplay.remove();
+                                } else if (currentNotePlaceholder) {
+                                    currentNotePlaceholder.style.display = '';
+                                }
+                            }
+                            self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
+                        },
+                        onCancelNoteBtn:(e)=> {
+                            e.stopPropagation();
+                            noteEditForm.style.display = 'none';
+                            editNoteBtn.style.display = '';
+                            if (item.note) {
+                                if (noteDisplay) noteDisplay.style.display = '';
+                            } else {
+                                if (notePlaceholder) notePlaceholder.style.display = '';
+                            }
+                        },
+                        onDeadlinePicker: (e) => {
+                            const newDeadline = e.target.value || null;
+
+                            function updateDeadline(items) {
+                                for (const currentItem of items) {
+                                    if (currentItem.key === item.key) {
+                                        currentItem.deadline = newDeadline;
+                                        return true;
+                                    }
+                                    if (updateDeadline(currentItem.items)) return true;
+                                }
+                                return false;
+                            }
+
+                            updateDeadline(my.listsData[listKey]);
+                            const deadlineDisplay = itemHtml.querySelector('.deadline-display');
+                            deadlineDisplay.textContent = newDeadline ? `Fällig: ${formatDate(newDeadline)}` : '';
+                            self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
+                        },
+                        onCheckboxChange: async (e) => {
+                            my.listState[listKey].items[itemKey].checked = e.target.checked;
+                            console.log(`Checkbox für ${itemKey} geändert. Neuer Zustand: ${my.listState[listKey].items[itemKey].checked}`);
+
+                            if (!isEndPoint) {
+                                updateSubitemPoints(listKey, item.items, itemKey, my.listState[listKey].items[itemKey].checked);
+                                const subitemList = itemHtml.querySelector('.subitem-list');
+                                subitemList.innerHTML = '';
+                                item.items.forEach(subItem => {
+                                    renderItem(listKey, subItem, subitemList, listContent, itemKey);
+                                });
+                                const progressElement = itemHtml.querySelector('.subitem-progress');
+                                if (progressElement) {
+                                    progressElement.textContent = `${Math.round(calculateSubitemProgress(listKey, itemKey, item.items, itemKey))}%`;
+                                }
+                            }
+
+                            updateParentState(itemKey, listKey, listContent);
+
+                            const progress = calculateProgress(listKey, my.listsData[listKey]);
+                            const listItem = listContent.closest('.list-item');
+                            const progressFill = listContent.querySelector('.progress-fill');
+                            const progressProzent = listItem.querySelector('.progress-prozent');
+
+                            if (progressFill && progressProzent) {
+                                progressFill.style.width = `${Math.round(progress)}%`;
+                                progressProzent.innerText = `${Math.round(progress)}%`;
+                            } else {
+                                console.warn('Progress elements not found:', {progressFill, progressProzent});
+                            }
+
+                            if (progress === 100) {
+                                listItem.classList.add('completed');
+                            } else {
+                                listItem.classList.remove('completed');
+                            }
+
+                            await self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
+                        }
 
 
                     }));
 
                     parentElement.appendChild(itemHtml);
-
+                    //          const saveNoteBtn = itemHtml.querySelector('.save-note-btn');
+                    //       const cancelNoteBtn = itemHtml.querySelector('.cancel-note-btn');
+                    //     const deadlinePicker = itemHtml.querySelector('.deadline-picker');
                     const checkbox = itemHtml.querySelector(`.${isEndPoint ? 'point' : 'subitem'}--checkbox`);
                     const subitemList = itemHtml.querySelector('.subitem-list');
-                    const deadlinePicker = itemHtml.querySelector('.deadline-picker');
                     const editNoteBtn = itemHtml.querySelector('.edit-note-btn');
                     const noteEditForm = itemHtml.querySelector('.note-edit-form');
                     const noteInput = itemHtml.querySelector('.note-input');
-                    const saveNoteBtn = itemHtml.querySelector('.save-note-btn');
-                    const cancelNoteBtn = itemHtml.querySelector('.cancel-note-btn');
                     const noteDisplay = itemHtml.querySelector('.subitem-note');
                     const notePlaceholder = itemHtml.querySelector('.subitem-note-placeholder');
 
                     checkbox.checked = my.listState[listKey].items[itemKey]?.checked || false;
 
+                    /*
                     editNoteBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const noteContainer = editNoteBtn.parentElement;
@@ -1106,6 +1240,7 @@ ccm.files["ccm.checklist.js"] = {
                         await self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
                     });
 
+
                     cancelNoteBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         noteEditForm.style.display = 'none';
@@ -1136,6 +1271,7 @@ ccm.files["ccm.checklist.js"] = {
                         deadlineDisplay.textContent = newDeadline ? `Fällig: ${formatDate(newDeadline)}` : '';
                         await self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
                     });
+                    */
 
                     function parentElementForId(rootElement, itemId) {
                         return rootElement.querySelector(`.subitem[data-id="${itemId}"]`);
@@ -1192,6 +1328,7 @@ ccm.files["ccm.checklist.js"] = {
                         }
                     };
 
+                    /*
                     checkbox.addEventListener('change', async () => {
                         my.listState[listKey].items[itemKey].checked = checkbox.checked;
 
@@ -1232,7 +1369,7 @@ ccm.files["ccm.checklist.js"] = {
 
                         await self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
                     });
-
+                    */
                     if (!isEndPoint) {
                         item.items.forEach(subItem => {
                             renderItem(listKey, subItem, subitemList, listContent, itemKey);
