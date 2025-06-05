@@ -116,29 +116,32 @@ ccm.files["ccm.checklist.js"] = {
             
             `,
             renderItem:`
-                
-                <div class="%itemClassName%" data-id="%itemKey%" id="item-root-%itemKey%">
-                    <div class="%headerClassName%">
-                        <input type="checkbox" id="%checkboxId%" class="%checkboxClassName%" %checkboxChecked% onchange="%onCheckboxChange%">
-                        <label for="%checkboxId%" class="%titleClassName%">%itemName%</label>
-                        <input type="date" class="deadline-picker" value="%deadlineValue%" onchange="%onDeadlineChange%">
-                        %subitemProgressHTML%
-                    </div>
+                    <div class="%isEndPoint%" id=%itemKey%>
+                      <div class="%isEndPoint%--header">
+                            <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox">
+                            <label for="%itemKey%" class="%isEndPoint%--title">%itemName%</label>
+                            <input type="date" class="deadline-picker" value=%itemDeadline%>
+
+                            <!--<span class="deadline-display">%itemDeadlineFaellig%</span>-->
+                            %subitemProgress%
+                            </div>
+
                     <div class="note-container">
-                        <p class="subitem-note" style="display: %noteDisplayStyle%;">%noteTextContent%</p>
-                        <p class="subitem-note-placeholder" style="display: %notePlaceholderDisplayStyle%;">Noch keine Notiz vorhanden</p>
-                        <button class="edit-note-btn" title="%editNoteButtonTitle%" onclick="%onEditNote%" style="display: %editNoteButtonDisplayStyle%;">✎</button>
-                        <div class="note-edit-form" style="display: none;">
-                            <textarea class="note-input" rows="3" placeholder="Notiz eingeben...">%noteTextareaContent%</textarea>
-                            <button class="save-note-btn" onclick="%onSaveNote%">Speichern</button>
-                            <button class="cancel-note-btn" onclick="%onCancelNote%">Abbrechen</button>
-                        </div>
+                    <p class="%subItemNodeClass%">%noteShow%</p>
+                    <button class="edit-note-btn" title="%noteTitle%">✎</button>
+            
+                    <p class="subitem-note">%itemNote%</p>
+                    <button class="edit-note-btn" title="%editNote%">✎</button>
+                    
+                    <div class="note-edit-form" style="display: none;">
+                        <textarea class="note-input" rows="3" placeholder="Notiz eingeben...">%item.Note%</textarea>
+                        <button class="save-note-btn">Speichern</button>
+                        <button class="cancel-note-btn">Abbrechen</button>
                     </div>
-                    %subitemListContainerHTML%
+                   %subItemList%   
                 </div>
-            `
-
-
+                
+            `,
 
         }
     },
@@ -1001,44 +1004,34 @@ ccm.files["ccm.checklist.js"] = {
                         console.log(`Initialisiere itemState für ${itemKey} in ${listKey}`);
                         my.listState[listKey].items[itemKey] = {checked: false, collapsed: false};
                     }
-
                     console.log('Rendering item:', {listKey, itemKey, isEndPoint, subitemProgress, item});
                    const isEndpointSubitem= isEndPoint ? 'point-item' : 'subitem'
 
 
 
-                        const itemHtml = document.createElement('div');
+                    const itemHtml = document.createElement('div');
                     itemHtml.className = isEndPoint ? 'point-item' : 'subitem';
                     itemHtml.dataset.id = itemKey;
-                    itemHtml.innerHTML = `
-                        <div class="${isEndPoint ? 'point' : 'subitem'}-header">
-                            <input type="checkbox" id="${itemKey}" class="${isEndPoint ? 'point' : 'subitem'}-checkbox">
-                            <label for="${itemKey}" class="${isEndPoint ? 'point' : 'subitem'}-title">${item.name}</label>
-                            <input type="date" class="deadline-picker" value="${item.deadline || ''}">
 
-                            <!--<span class="deadline-display">${item.deadline ? `Fällig: ${formatDate(item.deadline)}` : ''}</span>-->
-                            ${!isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : ''}
-                        </div>
+                    $.setContent(itemHtml, $.html(self.html.renderItem, {
+                        isEndPoint: isEndPoint ? 'point' : 'subitem',
+                        itemName: item.name,
+                        itemKey: itemKey,
+                        itemDeadline: item.deadline || '',
+                        itemDeadlineFaellig: item.deadline ? `Fällig: ${formatDate(item.deadline)}` : '',
+                        subitemProgress: !isEndPoint ? ('<span class="subitem-progress">' + Math.round(subitemProgress) + '</span>') : '' ,
+                        subItemNodeClass: item.node? 'subitem-node' : 'subitem-note-placeholder',
+                        noteShow: item.note ? item.note : 'Noch keine Notiz vorhanden',
+                        noteTitle: item.note ? 'Notiz bearbeiten' : 'Notiz hinzufügen',
+                        itemNote: item.note || '',
+                        subItemList: !isEndPoint ? '<div class="subitem-list"></div>' : '',
 
-                        <div class="note-container">
-                            ${item.note ? `
-                                <p class="subitem-note">${item.note}</p>
-                                <button class="edit-note-btn" title="Notiz bearbeiten">✎</button>
-                            ` : `
-                                <p class="subitem-note-placeholder">Noch keine Notiz vorhanden</p>
-                                <button class="edit-note-btn" title="Notiz hinzufügen">✎</button>
-                            `}
-                            <div class="note-edit-form" style="display: none;">
-                                <textarea class="note-input" rows="3" placeholder="Notiz eingeben...">${item.note || ''}</textarea>
-                                <button class="save-note-btn">Speichern</button>
-                                <button class="cancel-note-btn">Abbrechen</button>
-                            </div>
-                        </div>
-                        ${!isEndPoint ? '<div class="subitem-list"></div>' : ''}
-                    `;
+
+                    }));
+
                     parentElement.appendChild(itemHtml);
 
-                    const checkbox = itemHtml.querySelector(`.${isEndPoint ? 'point' : 'subitem'}-checkbox`);
+                    const checkbox = itemHtml.querySelector(`.${isEndPoint ? 'point' : 'subitem'}--checkbox`);
                     const subitemList = itemHtml.querySelector('.subitem-list');
                     const deadlinePicker = itemHtml.querySelector('.deadline-picker');
                     const editNoteBtn = itemHtml.querySelector('.edit-note-btn');
