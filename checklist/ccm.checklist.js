@@ -94,6 +94,52 @@ ccm.files["ccm.checklist.js"] = {
                     %subitemListContainerHTML%
                 </div>
             `,
+            renderList:`
+                    <div class="item-header">
+                                    <h3>%listTitle%</h3>
+                                    <div class="progress-prozent"></div>
+                                    <div>
+                                        <button class="edit-list" onclick=%onEditButton%>Bearbeiten</button>
+                                        <button class="delete-list" onclick=%onDeledeButton%>Löschen</button>
+                                    </div>
+                                </div>
+                                <button class="toggle-item" onclick=%onClickToggelButton%>▼</button>
+                                
+                                <div class="item-content">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill"></div>
+                                    </div>
+                                    <div class="subitem-list"></div>
+                                </div>
+            
+            
+            
+            `,
+            renderItem:`
+                
+                <div class="%itemClassName%" data-id="%itemKey%" id="item-root-%itemKey%">
+                    <div class="%headerClassName%">
+                        <input type="checkbox" id="%checkboxId%" class="%checkboxClassName%" %checkboxChecked% onchange="%onCheckboxChange%">
+                        <label for="%checkboxId%" class="%titleClassName%">%itemName%</label>
+                        <input type="date" class="deadline-picker" value="%deadlineValue%" onchange="%onDeadlineChange%">
+                        %subitemProgressHTML%
+                    </div>
+                    <div class="note-container">
+                        <p class="subitem-note" style="display: %noteDisplayStyle%;">%noteTextContent%</p>
+                        <p class="subitem-note-placeholder" style="display: %notePlaceholderDisplayStyle%;">Noch keine Notiz vorhanden</p>
+                        <button class="edit-note-btn" title="%editNoteButtonTitle%" onclick="%onEditNote%" style="display: %editNoteButtonDisplayStyle%;">✎</button>
+                        <div class="note-edit-form" style="display: none;">
+                            <textarea class="note-input" rows="3" placeholder="Notiz eingeben...">%noteTextareaContent%</textarea>
+                            <button class="save-note-btn" onclick="%onSaveNote%">Speichern</button>
+                            <button class="cancel-note-btn" onclick="%onCancelNote%">Abbrechen</button>
+                        </div>
+                    </div>
+                    %subitemListContainerHTML%
+                </div>
+            `
+
+
+
         }
     },
     Instance: function () {
@@ -682,60 +728,58 @@ ccm.files["ccm.checklist.js"] = {
                             const listHtml = document.createElement('div');
                             listHtml.className = 'list-item';
                             listHtml.dataset.id = key;
-                            listHtml.innerHTML = `
-                                <div class="item-header">
-                                    <h3>${listTitle}</h3>
-                                    <div class="progress-prozent"></div>
-                                    <div>
-                                        <button class="edit-list">Bearbeiten</button>
-                                        <button class="delete-list">Löschen</button>
-                                    </div>
-                                </div>
-                                <button class="toggle-item">▼</button>
-                                
-                                <div class="item-content">
-                                    <div class="progress-bar">
-                                        <div class="progress-fill"></div>
-                                    </div>
-                                    <div class="subitem-list"></div>
-                                </div>
-                            `;
+
+                            //listHtml.innerHTML = self.ccm.helper.html(self.html.previewList, {listTitle: listTitle});
+                            /*
+                                                const subitemList = listHtml.querySelector('.subitem-list');
+                                                const addSubitemButton = listHtml.querySelector('.add-subitem');
+                                                const listInput = listHtml.querySelector('.list-input');
+                                                const subitemNameInput = listHtml.querySelector('.subitem-name');
+                                                const confirmSubitemButton = listHtml.querySelector('.confirm-subitem');
+
+                             */
+
+                            $.setContent(listHtml, $.html(self.html.renderList, {
+                                listTitle: listTitle,
+                                onDeledeButton: () => {
+                                    delete my.listsData[key];
+                                    delete my.listState[key];
+                                    itemElement.removeChild(listHtml);
+                                    self.store.set({
+                                        key: "checklist_data",
+                                        listsData: my.listsData,
+                                        listState: my.listState
+                                    });
+                                },
+                                onClickToggelButton: () => {
+                                    my.listState[key].collapsed = !my.listState[key].collapsed;
+                                    itemContent.style.display = my.listState[key].collapsed ? 'none' : 'block';
+                                    toggleButton.textContent = my.listState[key].collapsed ? '▶' : '▼';
+                                    self.store.set({
+                                        key: "checklist_data",
+                                        listsData: my.listsData,
+                                        listState: my.listState
+                                    });
+                                },
+
+                                onEditButton: () => self.editList(key),
+
+
+                            }));
+
+
                             itemElement.appendChild(listHtml);
 
                             const itemContent = listHtml.querySelector('.item-content');
                             const subitemList = listHtml.querySelector('.subitem-list');
                             const toggleButton = listHtml.querySelector('.toggle-item');
                             const editButton = listHtml.querySelector('.edit-list');
-                            const deleteButton = listHtml.querySelector('.delete-list');
 
-                            deleteButton.addEventListener('click', () => {
-                                delete my.listsData[key];
-                                delete my.listState[key];
-                                itemElement.removeChild(listHtml);
-                                self.store.set({
-                                    key: "checklist_data",
-                                    listsData: my.listsData,
-                                    listState: my.listState
-                                });
-                            })
 
                             if (my.listState[key].collapsed) {
                                 itemContent.style.display = 'none';
                                 toggleButton.textContent = '▶';
                             }
-
-                            toggleButton.addEventListener('click', async () => {
-                                my.listState[key].collapsed = !my.listState[key].collapsed;
-                                itemContent.style.display = my.listState[key].collapsed ? 'none' : 'block';
-                                toggleButton.textContent = my.listState[key].collapsed ? '▶' : '▼';
-                                await self.store.set({
-                                    key: "checklist_data",
-                                    listsData: my.listsData,
-                                    listState: my.listState
-                                });
-                            });
-
-                            editButton.addEventListener('click', () => self.editList(key));
 
                             my.listsData[key].forEach(item => {
                                 renderItem(key, item, subitemList, itemContent, '');
@@ -755,8 +799,195 @@ ccm.files["ccm.checklist.js"] = {
                     }
                 }
 
+        /*        function renderItem(listKey, item, parentElement, listContent, parentKey) {
+                    const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
+                    const isEndPoint = item.items.length === 0;
+                    const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(listKey, itemKey, item.items, itemKey);
 
-                function renderItem(listKey, item, parentElement, listContent, parentKey) {
+                    // Initialisiere listState, falls nicht vorhanden
+                    if (!my.listState[listKey]) {
+                        console.log(`Initialisiere listState für ${listKey} in renderItem`);
+                        my.listState[listKey] = { items: {}, collapsed: false };
+                        initializeState(listKey, my.listsData[listKey], my.listState[listKey]);
+                    }
+                    if (!my.listState[listKey].items[itemKey]) {
+                        console.log(`Initialisiere itemState für ${itemKey} in ${listKey}`);
+                        my.listState[listKey].items[itemKey] = { checked: false, collapsed: false };
+                    }
+
+                    console.log('Rendering item:', { listKey, itemKey, isEndPoint, subitemProgress, item });
+
+                    // Erstelle das HTML mit renderItemTemplate
+                    const itemHtml = document.createElement('div');
+                    $.setContent(itemHtml, $.html(self.html.renderItemTemplate, {
+                        itemClassName: isEndPoint ? 'point-item' : 'subitem',
+                        itemKey: itemKey,
+                        headerClassName: isEndPoint ? 'point-header' : 'subitem-header',
+                        checkboxId: itemKey,
+                        checkboxClassName: isEndPoint ? 'point-checkbox' : 'subitem-checkbox',
+                        checkboxChecked: my.listState[listKey].items[itemKey].checked ? 'checked' : '',
+                        titleClassName: isEndPoint ? 'point-title' : 'subitem-title',
+                        itemName: item.name,
+                        deadlineValue: item.deadline || '',
+                        subitemProgressHTML: !isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : '',
+                        noteDisplayStyle: item.note ? 'block' : 'none',
+                        noteTextContent: item.note || '',
+                        notePlaceholderDisplayStyle: item.note ? 'none' : 'block',
+                        editNoteButtonTitle: item.note ? 'Notiz bearbeiten' : 'Notiz hinzufügen',
+                        editNoteButtonDisplayStyle: 'inline-block',
+                        noteTextareaContent: item.note || '',
+                        subitemListContainerHTML: !isEndPoint ? '<div class="subitem-list"></div>' : '',
+                        onCheckboxChange: async () => {
+                            my.listState[listKey].items[itemKey].checked = !my.listState[listKey].items[itemKey].checked;
+                            console.log(`Checkbox für ${itemKey} geändert. Neuer Zustand: ${my.listState[listKey].items[itemKey].checked}`);
+
+                            if (!isEndPoint) {
+                                updateSubitemPoints(listKey, item.items, itemKey, my.listState[listKey].items[itemKey].checked);
+                                const subitemList = itemHtml.querySelector('.subitem-list');
+                                subitemList.innerHTML = '';
+                                item.items.forEach(subItem => {
+                                    renderItem(listKey, subItem, subitemList, listContent, itemKey);
+                                });
+                                const progressElement = itemHtml.querySelector('.subitem-progress');
+                                if (progressElement) {
+                                    progressElement.textContent = `${Math.round(calculateSubitemProgress(listKey, itemKey, item.items, itemKey))}%`;
+                                }
+                            }
+
+                            updateParentState(itemKey, listKey, listContent);
+
+                            const progress = calculateProgress(listKey, my.listsData[listKey]);
+                            const listItem = listContent.closest('.list-item');
+                            const progressFill = listContent.querySelector('.progress-fill');
+                            const progressProzent = listItem.querySelector('.progress-prozent');
+
+                            if (progressFill && progressProzent) {
+                                progressFill.style.width = `${Math.round(progress)}%`;
+                                progressProzent.innerText = `${Math.round(progress)}%`;
+                            } else {
+                                console.warn('Progress elements not found:', { progressFill, progressProzent });
+                            }
+
+                            if (progress === 100) {
+                                listItem.classList.add('completed');
+                            } else {
+                                listItem.classList.remove('completed');
+                            }
+
+                            await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
+                        },
+                        onDeadlineChange: async (event) => {
+                            const newDeadline = event.target.value || null;
+
+                            function updateDeadline(items) {
+                                for (const currentItem of items) {
+                                    if (currentItem.key === item.key) {
+                                        currentItem.deadline = newDeadline;
+                                        return true;
+                                    }
+                                    if (updateDeadline(currentItem.items)) return true;
+                                }
+                                return false;
+                            }
+
+                            updateDeadline(my.listsData[listKey]);
+                            await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
+                        },
+                        onEditNote: (event) => {
+                            event.stopPropagation();
+                            const noteContainer = itemHtml.querySelector('.note-container');
+                            const noteDisplay = noteContainer.querySelector('.subitem-note');
+                            const notePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
+                            const editNoteBtn = noteContainer.querySelector('.edit-note-btn');
+                            const noteEditForm = noteContainer.querySelector('.note-edit-form');
+                            const noteInput = noteEditForm.querySelector('.note-input');
+
+                            if (noteDisplay) noteDisplay.style.display = 'none';
+                            if (notePlaceholder) notePlaceholder.style.display = 'none';
+                            editNoteBtn.style.display = 'none';
+                            noteEditForm.style.display = 'block';
+                            noteInput.focus();
+                        },
+                        onSaveNote: async (event) => {
+                            event.stopPropagation();
+                            const noteContainer = itemHtml.querySelector('.note-container');
+                            const noteEditForm = noteContainer.querySelector('.note-edit-form');
+                            const noteInput = noteEditForm.querySelector('.note-input');
+                            const editNoteBtn = noteContainer.querySelector('.edit-note-btn');
+                            const noteDisplay = noteContainer.querySelector('.subitem-note');
+                            const notePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
+
+                            const newNote = noteInput.value.trim();
+
+                            function updateNote(items, targetKey, updatedNote) {
+                                for (let current of items) {
+                                    if (current.key === targetKey) {
+                                        current.note = updatedNote;
+                                        return true;
+                                    }
+                                    if (current.items && updateNote(current.items, targetKey, updatedNote)) return true;
+                                }
+                                return false;
+                            }
+
+                            updateNote(my.listsData[listKey], item.key, newNote);
+
+                            noteEditForm.style.display = 'none';
+                            editNoteBtn.style.display = 'inline-block';
+
+                            if (newNote) {
+                                if (noteDisplay) {
+                                    noteDisplay.textContent = newNote;
+                                    noteDisplay.style.display = 'block';
+                                } else {
+                                    const newNoteDisplay = document.createElement('p');
+                                    newNoteDisplay.className = 'subitem-note';
+                                    newNoteDisplay.textContent = newNote;
+                                    noteContainer.insertBefore(newNoteDisplay, editNoteBtn);
+                                    if (notePlaceholder) notePlaceholder.remove();
+                                }
+                            } else {
+                                if (noteDisplay) {
+                                    const newPlaceholder = document.createElement('p');
+                                    newPlaceholder.className = 'subitem-note-placeholder';
+                                    newPlaceholder.textContent = 'Noch keine Notiz vorhanden';
+                                    noteContainer.insertBefore(newPlaceholder, editNoteBtn);
+                                    noteDisplay.remove();
+                                } else if (notePlaceholder) {
+                                    notePlaceholder.style.display = 'block';
+                                }
+                            }
+
+                            await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
+                        },
+                        onCancelNote: (event) => {
+                            event.stopPropagation();
+                            const noteContainer = itemHtml.querySelector('.note-container');
+                            const noteEditForm = noteContainer.querySelector('.note-edit-form');
+                            const noteDisplay = noteContainer.querySelector('.subitem-note');
+                            const notePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
+                            const editNoteBtn = noteContainer.querySelector('.edit-note-btn');
+
+                            noteEditForm.style.display = 'none';
+                            editNoteBtn.style.display = 'inline-block';
+                            if (item.note) {
+                                if (noteDisplay) noteDisplay.style.display = 'block';
+                            } else {
+                                if (notePlaceholder) notePlaceholder.style.display = 'block';
+                            }
+                        }
+                    }));
+
+                    parentElement.appendChild(itemHtml);
+
+                    // Rendern der Unterpunkte, falls es keine Endpunkte sind
+                    if (!isEndPoint) {
+                        const subitemList = itemHtml.querySelector('.subitem-list');
+                        item.items.forEach(subItem => {
+                            renderItem(listKey, subItem, subitemList, listContent, itemKey);
+                        });
+                    }
+                } */function renderItem(listKey, item, parentElement, listContent, parentKey) {
                     const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
                     const isEndPoint = item.items.length === 0;
                     const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(listKey, itemKey, item.items, itemKey);
@@ -772,8 +1003,11 @@ ccm.files["ccm.checklist.js"] = {
                     }
 
                     console.log('Rendering item:', {listKey, itemKey, isEndPoint, subitemProgress, item});
+                   const isEndpointSubitem= isEndPoint ? 'point-item' : 'subitem'
 
-                    const itemHtml = document.createElement('div');
+
+
+                        const itemHtml = document.createElement('div');
                     itemHtml.className = isEndPoint ? 'point-item' : 'subitem';
                     itemHtml.dataset.id = itemKey;
                     itemHtml.innerHTML = `
@@ -785,7 +1019,7 @@ ccm.files["ccm.checklist.js"] = {
                             <!--<span class="deadline-display">${item.deadline ? `Fällig: ${formatDate(item.deadline)}` : ''}</span>-->
                             ${!isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : ''}
                         </div>
-                        
+
                         <div class="note-container">
                             ${item.note ? `
                                 <p class="subitem-note">${item.note}</p>
