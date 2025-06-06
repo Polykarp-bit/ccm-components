@@ -118,7 +118,7 @@ ccm.files["ccm.checklist.js"] = {
             renderItem:`
                     <div class="%isEndPoint%" id=%itemKey%>
                       <div class="%isEndPoint%--header">
-                            <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox" onchange="%onCheckboxChange%">
+                            <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox" checked="%checkboxChecked%" onchange="%onCheckboxChange%" >
                             <label for="%itemKey%" class="%isEndPoint%--title">%itemName%</label>
                             <input type="date" class="deadline-picker" value=%itemDeadline% onclick="%onDeadlinePicker%">
 
@@ -302,6 +302,7 @@ ccm.files["ccm.checklist.js"] = {
                     my.currentItems = [];
                 });
 
+
                 function renderPreview(listKey, items) {
                     previewList.innerHTML = '';
                     const listTitle = listKey;
@@ -411,7 +412,6 @@ ccm.files["ccm.checklist.js"] = {
                                         });
                                     }
 
-
                 function updateItemNameInTempList(itemsArray, targetItemKey, updatedName) {
                     for (let i = 0; i < itemsArray.length; i++) {
                         if (itemsArray[i].key === targetItemKey) {
@@ -426,8 +426,6 @@ ccm.files["ccm.checklist.js"] = {
                     }
                     return false;
                 }
-
-
 
                 function renderPreviewItem(item, parentElement, parentKey) {
                     const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
@@ -516,22 +514,27 @@ ccm.files["ccm.checklist.js"] = {
                             }
                             item.items.push(newSubitem);
 
-                            if (my.currentItems && Array.isArray(my.currentItems)) {
-                                my.currentItems.push(newSubitem);
-                            }
-                            // Beibehaltung der ursprünglichen Logik bezüglich tempList.items, falls spezifisch so gewollt:
-                            if (isEndPoint) { // Nur wenn das Item vorher ein Endpunkt war
-                                if (my.tempList && my.tempList.items && my.tempList.items.includes(item)) {
-                                    // Wenn das ursprüngliche item ein Top-Level item war und das neue Subitem auch als Top-Level
-                                    // (oder eine andere spezifische Bedingung). Dies ist ungewöhnlich.
-                                    my.tempList.items.push(newSubitem); // Überdenke diese Zeile, falls newSubitem nur ein Kind sein soll.
-                                }
-                            }
 
+                            /*function addToCurrentItems(items, targetKey, newItem) {
+                                for (let current of items) {
+                                    if (current.key === targetKey) {
+                                        if (!current.items) current.items = [];
+                                        current.items.push(newItem);
+                                        return true;
+                                    }
+                                    if (current.items && addToCurrentItems(current.items, targetKey, newItem)) return true;
+                                }
+                                return false;
+                            }*/
+                            //addToCurrentItems(my.currentItems, item.key, newSubitem);
+
+                            // Entferne die fehlerhafte Bedingung
+                            // if (isEndPoint) { if (my.tempList.items.includes(item)) { my.tempList.items.push(newSubitem); } }
 
                             renderPreview(my.tempList.key, my.tempList.items);
                             subitemNameInputForNew.value = '';
                             subitemInputContainer.classList.remove('active');
+
                         },
                         saveItemName: () => {
                             e.stopPropagation();
@@ -727,7 +730,7 @@ ccm.files["ccm.checklist.js"] = {
                                 initializeState(key, my.listsData[key], my.listState[key]);
                             }
 
-                            const listTitle = key
+                            const listTitle = key;
                             const listHtml = document.createElement('div');
                             listHtml.className = 'list-item';
                             listHtml.dataset.id = key;
@@ -767,9 +770,7 @@ ccm.files["ccm.checklist.js"] = {
 
                                 onEditButton: () => self.editList(key),
 
-
                             }));
-
 
                             itemElement.appendChild(listHtml);
 
@@ -777,7 +778,6 @@ ccm.files["ccm.checklist.js"] = {
                             const subitemList = listHtml.querySelector('.subitem-list');
                             const toggleButton = listHtml.querySelector('.toggle-item');
                             const editButton = listHtml.querySelector('.edit-list');
-
 
                             if (my.listState[key].collapsed) {
                                 itemContent.style.display = 'none';
@@ -802,195 +802,197 @@ ccm.files["ccm.checklist.js"] = {
                     }
                 }
 
-        /*        function renderItem(listKey, item, parentElement, listContent, parentKey) {
-                    const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
-                    const isEndPoint = item.items.length === 0;
-                    const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(listKey, itemKey, item.items, itemKey);
+                /*        function renderItem(listKey, item, parentElement, listContent, parentKey) {
+                            const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
+                            const isEndPoint = item.items.length === 0;
+                            const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(listKey, itemKey, item.items, itemKey);
 
-                    // Initialisiere listState, falls nicht vorhanden
-                    if (!my.listState[listKey]) {
-                        console.log(`Initialisiere listState für ${listKey} in renderItem`);
-                        my.listState[listKey] = { items: {}, collapsed: false };
-                        initializeState(listKey, my.listsData[listKey], my.listState[listKey]);
-                    }
-                    if (!my.listState[listKey].items[itemKey]) {
-                        console.log(`Initialisiere itemState für ${itemKey} in ${listKey}`);
-                        my.listState[listKey].items[itemKey] = { checked: false, collapsed: false };
-                    }
+                            // Initialisiere listState, falls nicht vorhanden
+                            if (!my.listState[listKey]) {
+                                console.log(`Initialisiere listState für ${listKey} in renderItem`);
+                                my.listState[listKey] = { items: {}, collapsed: false };
+                                initializeState(listKey, my.listsData[listKey], my.listState[listKey]);
+                            }
+                            if (!my.listState[listKey].items[itemKey]) {
+                                console.log(`Initialisiere itemState für ${itemKey} in ${listKey}`);
+                                my.listState[listKey].items[itemKey] = { checked: false, collapsed: false };
+                            }
 
-                    console.log('Rendering item:', { listKey, itemKey, isEndPoint, subitemProgress, item });
+                            console.log('Rendering item:', { listKey, itemKey, isEndPoint, subitemProgress, item });
 
-                    // Erstelle das HTML mit renderItemTemplate
-                    const itemHtml = document.createElement('div');
-                    $.setContent(itemHtml, $.html(self.html.renderItemTemplate, {
-                        itemClassName: isEndPoint ? 'point-item' : 'subitem',
-                        itemKey: itemKey,
-                        headerClassName: isEndPoint ? 'point-header' : 'subitem-header',
-                        checkboxId: itemKey,
-                        checkboxClassName: isEndPoint ? 'point-checkbox' : 'subitem-checkbox',
-                        checkboxChecked: my.listState[listKey].items[itemKey].checked ? 'checked' : '',
-                        titleClassName: isEndPoint ? 'point-title' : 'subitem-title',
-                        itemName: item.name,
-                        deadlineValue: item.deadline || '',
-                        subitemProgressHTML: !isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : '',
-                        noteDisplayStyle: item.note ? 'block' : 'none',
-                        noteTextContent: item.note || '',
-                        notePlaceholderDisplayStyle: item.note ? 'none' : 'block',
-                        editNoteButtonTitle: item.note ? 'Notiz bearbeiten' : 'Notiz hinzufügen',
-                        editNoteButtonDisplayStyle: 'inline-block',
-                        noteTextareaContent: item.note || '',
-                        subitemListContainerHTML: !isEndPoint ? '<div class="subitem-list"></div>' : '',
-                        onCheckboxChange: async () => {
-                            my.listState[listKey].items[itemKey].checked = !my.listState[listKey].items[itemKey].checked;
-                            console.log(`Checkbox für ${itemKey} geändert. Neuer Zustand: ${my.listState[listKey].items[itemKey].checked}`);
+                            // Erstelle das HTML mit renderItemTemplate
+                            const itemHtml = document.createElement('div');
+                            $.setContent(itemHtml, $.html(self.html.renderItemTemplate, {
+                                itemClassName: isEndPoint ? 'point-item' : 'subitem',
+                                itemKey: itemKey,
+                                headerClassName: isEndPoint ? 'point-header' : 'subitem-header',
+                                checkboxId: itemKey,
+                                checkboxClassName: isEndPoint ? 'point-checkbox' : 'subitem-checkbox',
+                                checkboxChecked: my.listState[listKey].items[itemKey].checked ? 'checked' : '',
+                                titleClassName: isEndPoint ? 'point-title' : 'subitem-title',
+                                itemName: item.name,
+                                deadlineValue: item.deadline || '',
+                                subitemProgressHTML: !isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : '',
+                                noteDisplayStyle: item.note ? 'block' : 'none',
+                                noteTextContent: item.note || '',
+                                notePlaceholderDisplayStyle: item.note ? 'none' : 'block',
+                                editNoteButtonTitle: item.note ? 'Notiz bearbeiten' : 'Notiz hinzufügen',
+                                editNoteButtonDisplayStyle: 'inline-block',
+                                noteTextareaContent: item.note || '',
+                                subitemListContainerHTML: !isEndPoint ? '<div class="subitem-list"></div>' : '',
+                                onCheckboxChange: async () => {
+                                    my.listState[listKey].items[itemKey].checked = !my.listState[listKey].items[itemKey].checked;
+                                    console.log(`Checkbox für ${itemKey} geändert. Neuer Zustand: ${my.listState[listKey].items[itemKey].checked}`);
 
+                                    if (!isEndPoint) {
+                                        updateSubitemPoints(listKey, item.items, itemKey, my.listState[listKey].items[itemKey].checked);
+                                        const subitemList = itemHtml.querySelector('.subitem-list');
+                                        subitemList.innerHTML = '';
+                                        item.items.forEach(subItem => {
+                                            renderItem(listKey, subItem, subitemList, listContent, itemKey);
+                                        });
+                                        const progressElement = itemHtml.querySelector('.subitem-progress');
+                                        if (progressElement) {
+                                            progressElement.textContent = `${Math.round(calculateSubitemProgress(listKey, itemKey, item.items, itemKey))}%`;
+                                        }
+                                    }
+
+                                    updateParentState(itemKey, listKey, listContent);
+
+                                    const progress = calculateProgress(listKey, my.listsData[listKey]);
+                                    const listItem = listContent.closest('.list-item');
+                                    const progressFill = listContent.querySelector('.progress-fill');
+                                    const progressProzent = listItem.querySelector('.progress-prozent');
+
+                                    if (progressFill && progressProzent) {
+                                        progressFill.style.width = `${Math.round(progress)}%`;
+                                        progressProzent.innerText = `${Math.round(progress)}%`;
+                                    } else {
+                                        console.warn('Progress elements not found:', { progressFill, progressProzent });
+                                    }
+
+                                    if (progress === 100) {
+                                        listItem.classList.add('completed');
+                                    } else {
+                                        listItem.classList.remove('completed');
+                                    }
+
+                                    await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
+                                },
+                                onDeadlineChange: async (event) => {
+                                    const newDeadline = event.target.value || null;
+
+                                    function updateDeadline(items) {
+                                        for (const currentItem of items) {
+                                            if (currentItem.key === item.key) {
+                                                currentItem.deadline = newDeadline;
+                                                return true;
+                                            }
+                                            if (updateDeadline(currentItem.items)) return true;
+                                        }
+                                        return false;
+                                    }
+
+                                    updateDeadline(my.listsData[listKey]);
+                                    await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
+                                },
+                                onEditNote: (event) => {
+                                    event.stopPropagation();
+                                    const noteContainer = itemHtml.querySelector('.note-container');
+                                    const noteDisplay = noteContainer.querySelector('.subitem-note');
+                                    const notePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
+                                    const editNoteBtn = noteContainer.querySelector('.edit-note-btn');
+                                    const noteEditForm = noteContainer.querySelector('.note-edit-form');
+                                    const noteInput = noteEditForm.querySelector('.note-input');
+
+                                    if (noteDisplay) noteDisplay.style.display = 'none';
+                                    if (notePlaceholder) notePlaceholder.style.display = 'none';
+                                    editNoteBtn.style.display = 'none';
+                                    noteEditForm.style.display = 'block';
+                                    noteInput.focus();
+                                },
+                                onSaveNote: async (event) => {
+                                    event.stopPropagation();
+                                    const noteContainer = itemHtml.querySelector('.note-container');
+                                    const noteEditForm = noteContainer.querySelector('.note-edit-form');
+                                    const noteInput = noteEditForm.querySelector('.note-input');
+                                    const editNoteBtn = noteContainer.querySelector('.edit-note-btn');
+                                    const noteDisplay = noteContainer.querySelector('.subitem-note');
+                                    const notePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
+
+                                    const newNote = noteInput.value.trim();
+
+                                    function updateNote(items, targetKey, updatedNote) {
+                                        for (let current of items) {
+                                            if (current.key === targetKey) {
+                                                current.note = updatedNote;
+                                                return true;
+                                            }
+                                            if (current.items && updateNote(current.items, targetKey, updatedNote)) return true;
+                                        }
+                                        return false;
+                                    }
+
+                                    updateNote(my.listsData[listKey], item.key, newNote);
+
+                                    noteEditForm.style.display = 'none';
+                                    editNoteBtn.style.display = 'inline-block';
+
+                                    if (newNote) {
+                                        if (noteDisplay) {
+                                            noteDisplay.textContent = newNote;
+                                            noteDisplay.style.display = 'block';
+                                        } else {
+                                            const newNoteDisplay = document.createElement('p');
+                                            newNoteDisplay.className = 'subitem-note';
+                                            newNoteDisplay.textContent = newNote;
+                                            noteContainer.insertBefore(newNoteDisplay, editNoteBtn);
+                                            if (notePlaceholder) notePlaceholder.remove();
+                                        }
+                                    } else {
+                                        if (noteDisplay) {
+                                            const newPlaceholder = document.createElement('p');
+                                            newPlaceholder.className = 'subitem-note-placeholder';
+                                            newPlaceholder.textContent = 'Noch keine Notiz vorhanden';
+                                            noteContainer.insertBefore(newPlaceholder, editNoteBtn);
+                                            noteDisplay.remove();
+                                        } else if (notePlaceholder) {
+                                            notePlaceholder.style.display = 'block';
+                                        }
+                                    }
+
+                                    await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
+                                },
+                                onCancelNote: (event) => {
+                                    event.stopPropagation();
+                                    const noteContainer = itemHtml.querySelector('.note-container');
+                                    const noteEditForm = noteContainer.querySelector('.note-edit-form');
+                                    const noteDisplay = noteContainer.querySelector('.subitem-note');
+                                    const notePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
+                                    const editNoteBtn = noteContainer.querySelector('.edit-note-btn');
+
+                                    noteEditForm.style.display = 'none';
+                                    editNoteBtn.style.display = 'inline-block';
+                                    if (item.note) {
+                                        if (noteDisplay) noteDisplay.style.display = 'block';
+                                    } else {
+                                        if (notePlaceholder) notePlaceholder.style.display = 'block';
+                                    }
+                                }
+                            }));
+
+                            parentElement.appendChild(itemHtml);
+
+                            // Rendern der Unterpunkte, falls es keine Endpunkte sind
                             if (!isEndPoint) {
-                                updateSubitemPoints(listKey, item.items, itemKey, my.listState[listKey].items[itemKey].checked);
                                 const subitemList = itemHtml.querySelector('.subitem-list');
-                                subitemList.innerHTML = '';
                                 item.items.forEach(subItem => {
                                     renderItem(listKey, subItem, subitemList, listContent, itemKey);
                                 });
-                                const progressElement = itemHtml.querySelector('.subitem-progress');
-                                if (progressElement) {
-                                    progressElement.textContent = `${Math.round(calculateSubitemProgress(listKey, itemKey, item.items, itemKey))}%`;
-                                }
                             }
+                        } */
 
-                            updateParentState(itemKey, listKey, listContent);
-
-                            const progress = calculateProgress(listKey, my.listsData[listKey]);
-                            const listItem = listContent.closest('.list-item');
-                            const progressFill = listContent.querySelector('.progress-fill');
-                            const progressProzent = listItem.querySelector('.progress-prozent');
-
-                            if (progressFill && progressProzent) {
-                                progressFill.style.width = `${Math.round(progress)}%`;
-                                progressProzent.innerText = `${Math.round(progress)}%`;
-                            } else {
-                                console.warn('Progress elements not found:', { progressFill, progressProzent });
-                            }
-
-                            if (progress === 100) {
-                                listItem.classList.add('completed');
-                            } else {
-                                listItem.classList.remove('completed');
-                            }
-
-                            await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
-                        },
-                        onDeadlineChange: async (event) => {
-                            const newDeadline = event.target.value || null;
-
-                            function updateDeadline(items) {
-                                for (const currentItem of items) {
-                                    if (currentItem.key === item.key) {
-                                        currentItem.deadline = newDeadline;
-                                        return true;
-                                    }
-                                    if (updateDeadline(currentItem.items)) return true;
-                                }
-                                return false;
-                            }
-
-                            updateDeadline(my.listsData[listKey]);
-                            await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
-                        },
-                        onEditNote: (event) => {
-                            event.stopPropagation();
-                            const noteContainer = itemHtml.querySelector('.note-container');
-                            const noteDisplay = noteContainer.querySelector('.subitem-note');
-                            const notePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
-                            const editNoteBtn = noteContainer.querySelector('.edit-note-btn');
-                            const noteEditForm = noteContainer.querySelector('.note-edit-form');
-                            const noteInput = noteEditForm.querySelector('.note-input');
-
-                            if (noteDisplay) noteDisplay.style.display = 'none';
-                            if (notePlaceholder) notePlaceholder.style.display = 'none';
-                            editNoteBtn.style.display = 'none';
-                            noteEditForm.style.display = 'block';
-                            noteInput.focus();
-                        },
-                        onSaveNote: async (event) => {
-                            event.stopPropagation();
-                            const noteContainer = itemHtml.querySelector('.note-container');
-                            const noteEditForm = noteContainer.querySelector('.note-edit-form');
-                            const noteInput = noteEditForm.querySelector('.note-input');
-                            const editNoteBtn = noteContainer.querySelector('.edit-note-btn');
-                            const noteDisplay = noteContainer.querySelector('.subitem-note');
-                            const notePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
-
-                            const newNote = noteInput.value.trim();
-
-                            function updateNote(items, targetKey, updatedNote) {
-                                for (let current of items) {
-                                    if (current.key === targetKey) {
-                                        current.note = updatedNote;
-                                        return true;
-                                    }
-                                    if (current.items && updateNote(current.items, targetKey, updatedNote)) return true;
-                                }
-                                return false;
-                            }
-
-                            updateNote(my.listsData[listKey], item.key, newNote);
-
-                            noteEditForm.style.display = 'none';
-                            editNoteBtn.style.display = 'inline-block';
-
-                            if (newNote) {
-                                if (noteDisplay) {
-                                    noteDisplay.textContent = newNote;
-                                    noteDisplay.style.display = 'block';
-                                } else {
-                                    const newNoteDisplay = document.createElement('p');
-                                    newNoteDisplay.className = 'subitem-note';
-                                    newNoteDisplay.textContent = newNote;
-                                    noteContainer.insertBefore(newNoteDisplay, editNoteBtn);
-                                    if (notePlaceholder) notePlaceholder.remove();
-                                }
-                            } else {
-                                if (noteDisplay) {
-                                    const newPlaceholder = document.createElement('p');
-                                    newPlaceholder.className = 'subitem-note-placeholder';
-                                    newPlaceholder.textContent = 'Noch keine Notiz vorhanden';
-                                    noteContainer.insertBefore(newPlaceholder, editNoteBtn);
-                                    noteDisplay.remove();
-                                } else if (notePlaceholder) {
-                                    notePlaceholder.style.display = 'block';
-                                }
-                            }
-
-                            await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
-                        },
-                        onCancelNote: (event) => {
-                            event.stopPropagation();
-                            const noteContainer = itemHtml.querySelector('.note-container');
-                            const noteEditForm = noteContainer.querySelector('.note-edit-form');
-                            const noteDisplay = noteContainer.querySelector('.subitem-note');
-                            const notePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
-                            const editNoteBtn = noteContainer.querySelector('.edit-note-btn');
-
-                            noteEditForm.style.display = 'none';
-                            editNoteBtn.style.display = 'inline-block';
-                            if (item.note) {
-                                if (noteDisplay) noteDisplay.style.display = 'block';
-                            } else {
-                                if (notePlaceholder) notePlaceholder.style.display = 'block';
-                            }
-                        }
-                    }));
-
-                    parentElement.appendChild(itemHtml);
-
-                    // Rendern der Unterpunkte, falls es keine Endpunkte sind
-                    if (!isEndPoint) {
-                        const subitemList = itemHtml.querySelector('.subitem-list');
-                        item.items.forEach(subItem => {
-                            renderItem(listKey, subItem, subitemList, listContent, itemKey);
-                        });
-                    }
-                } */function renderItem(listKey, item, parentElement, listContent, parentKey) {
+                function renderItem(listKey, item, parentElement, listContent, parentKey) {
                     const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
                     const isEndPoint = item.items.length === 0;
                     const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(listKey, itemKey, item.items, itemKey);
@@ -1005,8 +1007,7 @@ ccm.files["ccm.checklist.js"] = {
                         my.listState[listKey].items[itemKey] = {checked: false, collapsed: false};
                     }
                     console.log('Rendering item:', {listKey, itemKey, isEndPoint, subitemProgress, item});
-                   const isEndpointSubitem= isEndPoint ? 'point-item' : 'subitem'
-
+                    const isEndpointSubitem = isEndPoint ? 'point-item' : 'subitem'
 
 
                     const itemHtml = document.createElement('div');
@@ -1019,13 +1020,14 @@ ccm.files["ccm.checklist.js"] = {
                         itemKey: itemKey,
                         itemDeadline: item.deadline || '',
                         itemDeadlineFaellig: item.deadline ? `Fällig: ${formatDate(item.deadline)}` : '',
-                        subitemProgress: !isEndPoint ? ('<span class="subitem-progress">' + Math.round(subitemProgress) + '</span>') : '' ,
-                        subItemNodeClass: item.node? 'subitem-node' : 'subitem-note-placeholder',
+                        subitemProgress: !isEndPoint ? ('<span class="subitem-progress">' + Math.round(subitemProgress) + '</span>') : '',
+                        subItemNodeClass: item.node ? 'subitem-node' : 'subitem-note-placeholder',
                         noteShow: item.note ? item.note : 'Noch keine Notiz vorhanden',
                         noteTitle: item.note ? 'Notiz bearbeiten' : 'Notiz hinzufügen',
                         itemNote: item.note || '',
                         subItemList: !isEndPoint ? '<div class="subitem-list"></div>' : '',
-                        checkbox: my.listState[listKey].items[itemKey]?.checked || "false",
+                        checkboxChecked: my.listState[listKey].items[itemKey]?.checked ? true : false,
+
 
                         onEditeNode: (e) => {
                             e.stopPropagation();
@@ -1042,7 +1044,7 @@ ccm.files["ccm.checklist.js"] = {
                             nodeEditForm.style.display = 'block';
                             nodeInput.focus();
                         },
-                        onSaveNoteButton:(e) => {
+                        onSaveNoteButton: (e) => {
                             e.stopPropagation();
                             const newNote = noteInput.value.trim();
 
@@ -1091,7 +1093,7 @@ ccm.files["ccm.checklist.js"] = {
                             }
                             self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
                         },
-                        onCancelNoteBtn:(e)=> {
+                        onCancelNoteBtn: (e) => {
                             e.stopPropagation();
                             noteEditForm.style.display = 'none';
                             editNoteBtn.style.display = '';
@@ -1157,7 +1159,11 @@ ccm.files["ccm.checklist.js"] = {
                                 listItem.classList.remove('completed');
                             }
 
-                            await self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
+                            await self.store.set({
+                                key: "checklist_data",
+                                listsData: my.listsData,
+                                listState: my.listState
+                            });
                         }
 
 
@@ -1274,7 +1280,7 @@ ccm.files["ccm.checklist.js"] = {
                     */
 
                     function parentElementForId(rootElement, itemId) {
-                        return rootElement.querySelector(`.subitem[data-id="${itemId}"]`);
+                        return rootElement.querySelector(`[data-id="${itemId}"]`);
                     }
 
                     function findChildItemsInData(items, targetKeyPart, currentParentKey) {
@@ -1291,18 +1297,27 @@ ccm.files["ccm.checklist.js"] = {
                     }
 
                     const updateParentState = (itemId, currentListKey, currentListContent) => {
+                        console.log("-------------")
+                        console.log(itemId)
                         const parts = itemId.split('_');
                         if (parts.length <= 3) return;
+                        //     console.log('Update parent state for', {itemId, currentListKey, currentListContent});
+                        parts.pop();
+                        parts.pop();
+                        parts.pop();
 
-                        parts.pop();
-                        parts.pop();
-                        parts.pop();
                         const parentId = parts.join('_');
                         console.log("parent id: " + parentId);
+                        console.log(currentListContent + " currentListKey: " + parentId);
+                        console.log(currentListContent);
 
+                        console.log("current content" + currentListContent)
+                        console.log("parentId" + parentId)
                         const parentItemInState = my.listState[currentListKey].items[parentId];
-                        const parentElementInDOM = parentElementForId(currentListContent, parentId);
+                        const parentElementInDOM = parentElementForId(currentListContent, parentId);//hir nullllll
 
+                        console.log('parent item in state:' + (parentItemInState));
+                        console.log('parent item in parentElementInDOM:' + (parentElementInDOM));
                         if (parentItemInState && parentElementInDOM) {
                             const childItems = findChildItemsInData(my.listsData[currentListKey], parentId.split('_').pop(), parts.slice(0, -1).join('_'));
 
@@ -1310,12 +1325,16 @@ ccm.files["ccm.checklist.js"] = {
                                 const childKeyInState = `${parentId}_${child.key}`;
                                 return my.listState[currentListKey].items[childKeyInState]?.checked;
                             });
+                            console.log('allChildrenChecked:' + (allChildrenChecked));
 
                             parentItemInState.checked = allChildrenChecked;
-                            const parentCheckboxInDOM = parentElementInDOM.querySelector('.subitem-checkbox');
+                            const parentCheckboxInDOM = parentElementInDOM.querySelector('.subitem--checkbox, .point--checkbox');
+                            // console.log(parentCheckboxInDOM)
+                            console.log("alle kinder" + parentCheckboxInDOM)
 
                             if (parentCheckboxInDOM) {
                                 parentCheckboxInDOM.checked = allChildrenChecked;
+                                console.log('parent checkbox in dom:' + (parentCheckboxInDOM));
                             }
 
                             const parentProgressElement = parentElementInDOM.querySelector('.subitem-progress');
