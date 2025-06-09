@@ -11,42 +11,62 @@ ccm.files["ccm.checklist.js"] = {
     config: {
         store: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_checklist_data"}],
         css: ["ccm.load", "./resources/style.css"],
-        "helper": ["ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-7.2.0.mjs"],
+        text: {
+            previewListText: "Vorschau der Listee",
+            listName: "Listen-Name (z.B. Projekt 2024)",
+            firstItemName: "Erstes Listenobjekt (z.B. Aufgabe 1)",
+            listCreateButtonText: "Liste erstellen",
+            saveListText: "Liste speichern",
+            myListText: "Meine Listen",
+            cancelText: "Abbrechen",
+            addListObjectText: "Listenobjekt hinzufügen",
+            addText: "Hinzufügen",
+            secondItemNameText: "Objekt-Name (z.B. Aufgabe 2)",
+            addSubpointText: "Unterpunkt hinzufügen",
+            deadlineText: "Fälligkeitsdatum",
+            removeText: "Enfernen",
+            subPointText: 'Unterpunkt-Name (z.B. Unteraufgabe)',
+            editText: "Bearbeiten",
+            deleteText: "Löschen",
+            saveText: "Speichern",
+            writeNoteText: "Notiz eingeben..."
+        },
+        helper: ["ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-7.2.0.mjs"],
         html: {
             main: `
                 <div class="container">
-                    <h1>Meine Listen</h1>
+                    <h1>%myListText%</h1>
                     <div class="create-list">
-                        <input type="text" id="list-name" placeholder="Listen-Name (z.B. Projekt 2024)">
-                        <input type="text" id="first-item-name" placeholder="Erstes Listenobjekt (z.B. Aufgabe 1)">
-                        <button id="start-create">Liste erstellen</button>
+                        <input type="text" id="list-name" placeholder="%listName%">
+                        <input type="text" id="first-item-name" placeholder="%firstItemNameText%">
+                        <button id="start-create" onclick="%onStartCreateButton%">%listCreateButtonText%</button>
                     </div>
                     <div class="list-form" style="display: none;">
                         <div class="preview-section">
-                            <h3>Vorschau der Liste</h3>
+                            <h3>%previewListText%</h3>
                             <div id="preview-list"></div>
                         </div>
-                        <button id="save-list">Liste speichern</button>
-                        <button class="cancel-button">Abbrechen</button>
+                        <button id="save-list" onclick="%onSaveListButton%">%saveListText%</button>
+                        <button class="cancel-button" onclick="%onCancelListButton%">%cancel%</button>
                     </div>
                     <div id="items"></div>
                 </div>
-            `, previewList: `
+            `,
+            previewList: `
         
                     <div class="item-header">
                         <h3>%listTitle%</h3>
                     </div>
                     <div class="item-content">
                         <div class="subitem-list"></div>
-                        <button class="add-subitem" onclick="%onAddSubmitItem%">Listenobjekt hinzufügen</button>
+                        <button class="add-subitem" onclick="%onAddSubmitItem%">%addListObject%</button>
                         <div class="list-input">
-                            <input type="text" class="list-item-name" placeholder="Objekt-Name (z.B. Aufgabe 2)">
-                            <button class="confirm-subitem" onclick="%onConfirmSubitem%">Hinzufügen</button>
+                            <input type="text" class="list-item-name" placeholder="%secondItemName%">
+                            <button class="confirm-subitem" onclick="%onConfirmSubitem%">%addText%</button>
                         </div>
-                    </div>
-              
-                    
-    `,  renderpreviewList:`
+                    </div>      
+    `,
+            renderpreviewList:`
     
            <div class='%isEndpoint%' id=%itemKey%>
             <div class='%isEnpointHeader%'>
@@ -57,50 +77,27 @@ ccm.files["ccm.checklist.js"] = {
                     </div>
                 </div>
             </div>
-            <div class="deadline-group"> <label for="%deadlineGroupId%">Deadline</label>
+            <div class="deadline-group"> <label for="%deadlineGroupId%">%deadlineText%</label>
                 <input type="date" id="%deadlineGroupId%" class="deadline-picker" value="%deadlinePickerValue%" onchange="%onDeadlineChange%" /> %progressSpanHTML%
             </div>
             <div class='action-button-group'>
                 <button class='add-subitem' onclick='%onAddSubitem%'>
-                    Unterpunkt hinzufügen </button>
-                <button class='remove-subitem' onclick='%onRemoveSubitem%'>Entfernen</button>
+                    %addSubpointText% </button>
+                <button class='remove-subitem' onclick='%onRemoveSubitem%'>%removeText%</button>
             </div>
             <div class='subitem-input'>
-                <input type='text' class='subitem-name' placeholder='Unterpunkt-Name (z.B. Unteraufgabe)' /> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
+                <input type='text' class='subitem-name' placeholder= "%subPointName%"/> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
             </div>
             <div class="subitem-list-children"></div>
         </div>
-    
     `,
-            renderItemTemplate: `
-                <div class="%itemClassName%" data-id="%itemKey%" id="item-root-%itemKey%">
-                    <div class="%headerClassName%">
-                        <input type="checkbox" id="%checkboxId%" class="%checkboxClassName%" %checkboxChecked% onchange="%onCheckboxChange%">
-                        <label for="%checkboxId%" class="%titleClassName%">%itemName%</label>
-                        <input type="date" class="deadline-picker" value="%deadlineValue%" onchange="%onDeadlineChange%">
-                        %subitemProgressHTML%
-                    </div>
-                    <div class="note-container">
-                        <p class="subitem-note" style="display: %noteDisplayStyle%;">%noteTextContent%</p>
-                        <p class="subitem-note-placeholder" style="display: %notePlaceholderDisplayStyle%;">Noch keine Notiz vorhanden</p>
-                        <button class="edit-note-btn" title="%editNoteButtonTitle%" onclick="%onEditNote%" style="display: %editNoteButtonDisplayStyle%;">✎</button>
-                        
-                        <div class="note-edit-form" style="display: none;"> {/* Bearbeitungsformular initial versteckt */}
-                            <textarea class="note-input" rows="3" placeholder="Notiz eingeben...">%noteTextareaContent%</textarea>
-                            <button class="save-note-btn" onclick="%onSaveNote%">Speichern</button>
-                            <button class="cancel-note-btn" onclick="%onCancelNote%">Abbrechen</button>
-                        </div>
-                    </div>
-                    %subitemListContainerHTML%
-                </div>
-            `,
             renderList:`
                     <div class="item-header">
                                     <h3>%listTitle%</h3>
                                     <div class="progress-prozent"></div>
                                     <div>
-                                        <button class="edit-list" onclick=%onEditButton%>Bearbeiten</button>
-                                        <button class="delete-list" onclick=%onDeledeButton%>Löschen</button>
+                                        <button class="edit-list" onclick=%onEditButton%>%editText%</button>
+                                        <button class="delete-list" onclick=%onDeledeButton%>%deleteText%</button>
                                     </div>
                                 </div>
                                 <button class="toggle-item" onclick=%onClickToggelButton%>▼</button>
@@ -111,9 +108,6 @@ ccm.files["ccm.checklist.js"] = {
                                     </div>
                                     <div class="subitem-list"></div>
                                 </div>
-            
-            
-            
             `,
             renderItem:`
                     <div class="%isEndPoint%" id=%itemKey%>
@@ -131,18 +125,16 @@ ccm.files["ccm.checklist.js"] = {
                     <button class="edit-note-btn" title="%noteTitle%" onclick=%onEditeNode%>✎</button>
             
                     <p class="subitem-note">%itemNote%</p>
-                    <button class="edit-note-btn" title="%editNote%">✎</button>
+                   <!--<button class="edit-note-btn" title="%editNote%">✎</button>-->
                     
                     <div class="note-edit-form" style="display: none;">
-                        <textarea class="note-input" rows="3" placeholder="Notiz eingeben...">%item.Note%</textarea>
-                        <button class="save-note-btn" onclick="%onSaveNoteButton%">Speichern</button>
-                        <button class="cancel-note-btn" onclick="%onCancelNoteBtn%">Abbrechen</button>
+                        <textarea class="note-input" rows="3" placeholder="%writeNoteText%">%item.Note%</textarea>
+                        <button class="save-note-btn" onclick="%onSaveNoteButton%">%saveText%</button>
+                        <button class="cancel-note-btn" onclick="%onCancelNoteBtn%">%cancelText%</button>
                     </div>
                    %subItemList%   
                 </div>
-                
             `,
-
         }
     },
     Instance: function () {
@@ -185,8 +177,8 @@ ccm.files["ccm.checklist.js"] = {
                 self.element.innerHTML = `<p>Error initializing store: ${e.message}</p>`;
             }
         };
-        this.events = {
 
+        this.events = {
             onAddSubitem: (itemKey, event) => {
                 console.log(event)
                 if (event) event.stopPropagation();
@@ -217,1200 +209,1290 @@ ccm.files["ccm.checklist.js"] = {
                     console.error(`onAddSubitem: '.subitem-name' Input nicht im subitemInputContainer für itemKey '${itemKey}' gefunden.`);
                 }
             },
+            onStartCreateButton: (createListForm, listForm, previewList) => {
+                console.log("ich bin drin")
+                const listName = createListForm.querySelector('#list-name').value.trim();
+                const firstItemName = createListForm.querySelector('#first-item-name').value.trim();
+                if (!listName || !firstItemName) {
+                    alert('Bitte geben Sie einen Listennamen und ein erstes Listenobjekt ein.');
+                    return;
+                }
+                my.tempList = {
+                    key: listName.replace(/\s+/g, ''),
+                    items: []
+                };
+                my.currentItems = [];
+                previewList.innerHTML = '';
 
+                const firstItemKey = `item_${firstItemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
+                const firstItem = {key: firstItemKey, name: firstItemName, items: [], deadline: null};
+                my.tempList.items.push(firstItem);
+                my.currentItems.push(firstItem);
+
+                renderPreview(my.tempList.key, my.tempList.items);
+
+                listForm.style.display = 'block';
+                createListForm.querySelector('#list-name').value = '';
+                createListForm.querySelector('#first-item-name').value = '';
+
+            },
+            onSaveListButton: async (listForm, previewList, itemElement) => {
+                if (!my.tempList || my.tempList.items.length === 0) {
+                    alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
+                    return;
+                }
+
+                my.listsData[my.tempList.key] = my.tempList.items;
+                if (!my.listState[my.tempList.key]) {
+                    my.listState[my.tempList.key] = {items: {}, collapsed: false};
+                }
+                initializeState(my.tempList.key, my.tempList.items, my.listState[my.tempList.key]);
+
+                self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState})
+                    .then(() => console.log('Daten erfolgreich gespeichert:', my))
+                    .catch(e => {
+                        console.error('Fehler beim Speichern:', e);
+                        alert('Fehler beim Speichern der Liste. Bitte überprüfe die Konsole.');
+                    });
+
+                await renderLists(itemElement);
+
+                listForm.style.display = 'none';
+                previewList.innerHTML = '';
+                my.tempList = null;
+                my.currentItems = [];
+
+            },
+            onCancelListButton: (listForm, previewList) => {
+                listForm.style.display = 'none';
+                my.tempList = null;
+                my.currentItems = [];
+                previewList.innerHTML = '';
+            },
+            onAddSubmitItem: () => {
+                const listInput = self.element.querySelector('.list-input');
+                listInput.classList.toggle('active');
+                const subitemNameInput = self.element.querySelector('.list-item-name');
+                subitemNameInput.focus();
+            },
+            onConfirmSubitem: (listInput) => {
+                const subitemNameInput = self.element.querySelector('.list-item-name');
+                const subitemName = subitemNameInput.value.trim();
+                if (!subitemName) {
+                    alert('Bitte geben Sie einen Namen für das Listenobjekt ein.');
+                    return;
+                }
+                const subitemKey = `item_${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
+                const newSubitem = {key: subitemKey, name: subitemName, items: [], deadline: null};
+
+                my.tempList.items.push(newSubitem);
+                my.currentItems.push(newSubitem);
+                console.log('New item added:', newSubitem);
+                console.log('Updated tempList:', JSON.stringify(my.tempList, null, 2));
+                console.log('Updated currentItems:', JSON.stringify(my.currentItems, null, 2));
+
+                renderPreview(my.tempList.key, my.tempList.items);
+                subitemNameInput.value = '';
+                listInput.classList.remove('active');
+            },
+            confirmSubitem: (itemKey, item,event) => {
+                if (event) event.stopPropagation();
+                console.log("fuckfuckfuckfuckfuckfuck"+itemKey)
+                const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
+
+                if (!currentItemRenderedRoot) {
+                    console.error(`confirmSubitem: Element mit ID '${itemKey}' nicht gefunden!`);
+                    return;
+                }
+
+                const subitemInputContainer = currentItemRenderedRoot.querySelector('.subitem-input');
+                if (!subitemInputContainer) {
+                    console.error(`confirmSubitem: '.subitem-input' nicht in Element mit ID '${itemKey}' gefunden.`);
+                    console.log("Inhalt von currentItemRenderedRoot (ID: " + itemKey + "):", currentItemRenderedRoot.innerHTML);
+                    return;
+                }
+
+                const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
+                if (!subitemNameInputForNew) {
+                    console.error(`confirmSubitem: '.subitem-name' Input nicht im subitemInputContainer für itemKey '${itemKey}' gefunden.`);
+                    return;
+                }
+
+                const subitemName = subitemNameInputForNew.value.trim();
+                if (!subitemName) {
+                    alert('Bitte geben Sie einen Namen für den Unterpunkt ein.');
+                    subitemNameInputForNew.focus();
+                    return;
+                }
+
+                const newSubitemKey = `subitem_${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
+                const newSubitem = { key: newSubitemKey, name: subitemName, items: [], deadline: null, note: "" };
+
+                if (!item.items) {
+                    item.items = [];
+                }
+                item.items.push(newSubitem);
+
+
+                renderPreview(my.tempList.key, my.tempList.items);
+                subitemNameInputForNew.value = '';
+                subitemInputContainer.classList.remove('active');
+
+
+            },
+            saveItemName: (event) => {
+                event.stopPropagation();
+                const newName = nameInput.value.trim();
+                if (newName && newName !== item.name) {
+                    if (updateItemNameInTempList(my.tempList.items, item.key, newName)) {
+                        renderPreview(my.tempList.key, my.tempList.items);
+                    } else {
+                        console.error(`Konnte Item mit Key ${item.key} zum Umbenennen nicht in tempList finden.`);
+                        nameEditForm.style.display = 'none';
+                        titleDisplay.style.display = '';
+                        editNameIcon.style.display = '';
+                    }
+                } else if (!newName) {
+                    alert('Der Item-Name darf nicht leer sein.');
+                    nameInput.focus();
+                } else {
+                    nameEditForm.style.display = 'none';
+                    titleDisplay.style.display = '';
+                    editNameIcon.style.display = '';
+                }
+            },
+            cancelNameButton: () => {
+
+                e.stopPropagation();
+                nameEditForm.style.display = 'none';
+                titleDisplay.style.display = '';
+                editNameIcon.style.display = '';
+
+            },
+            /*onRemoveSubitem: (item) => {
+                if (my.tempList.items.length === 1 && item.items.length === 0 && !parentKey) {
+                    alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
+                    return;
+                }
+
+                function removeItemRecursive(items, targetKey) {
+                    for (let i = 0; i < items.length; i++) {
+                        if (items[i].key === targetKey) {
+                            items.splice(i, 1);
+                            return true;
+                        }
+                        if (items[i].items && removeItemRecursive(items[i].items, targetKey)) return true;
+                    }
+                    return false;
+                }
+
+                removeItemRecursive(my.tempList.items, item.key);
+
+                if (my.currentItems && Array.isArray(my.currentItems)) {
+                    function collectAllItemKeys(itemsArr, keysSet = new Set()) {
+                        itemsArr.forEach(it => {
+                            keysSet.add(it.key);
+                            if (it.items) collectAllItemKeys(it.items, keysSet);
+                        });
+                        return keysSet;
+                    }
+
+                    const keysInTempList = collectAllItemKeys(my.tempList.items);
+                    my.currentItems = my.currentItems.filter(ci => keysInTempList.has(ci.key));
+                }
+                renderPreview(my.tempList.key, my.tempList.items);
+            },*/
+            onDeadlineChange: (event) => { // Handler for deadline change
+                if (event) event.stopPropagation(); // Optional, if bubbling is an issue
+                const newDeadline = event.target.value || null;
+                function updateDeadlineRecursive(items, targetKey, deadlineValue) {
+                    for (let current of items) {
+                        if (current.key === targetKey) {
+                            current.deadline = deadlineValue;
+                            return true;
+                        }
+                        if (current.items && updateDeadlineRecursive(current.items, targetKey, deadlineValue)) return true;
+                    }
+                    return false;
+                }
+                if (updateDeadlineRecursive(my.tempList.items, item.key, newDeadline)) {
+                    renderPreview(my.tempList.key, my.tempList.items); // Re-render preview to reflect changes
+                }
+            },
+            /*confirmSubitem: (event) => {
+                    if (event) event.stopPropagation();
+                    console.log("fuckfuckfuckfuckfuckfuck"+itemKey)
+                    const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
+
+                    if (!currentItemRenderedRoot) {
+                        console.error(`confirmSubitem: Element mit ID '${itemKey}' nicht gefunden!`);
+                        return;
+                    }
+
+                    const subitemInputContainer = currentItemRenderedRoot.querySelector('.subitem-input');
+                    if (!subitemInputContainer) {
+                        console.error(`confirmSubitem: '.subitem-input' nicht in Element mit ID '${itemKey}' gefunden.`);
+                        console.log("Inhalt von currentItemRenderedRoot (ID: " + itemKey + "):", currentItemRenderedRoot.innerHTML);
+                        return;
+                    }
+
+                    const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
+                    if (!subitemNameInputForNew) {
+                        console.error(`confirmSubitem: '.subitem-name' Input nicht im subitemInputContainer für itemKey '${itemKey}' gefunden.`);
+                        return;
+                    }
+
+                    const subitemName = subitemNameInputForNew.value.trim();
+                    if (!subitemName) {
+                        alert('Bitte geben Sie einen Namen für den Unterpunkt ein.');
+                        subitemNameInputForNew.focus();
+                        return;
+                    }
+
+                    const newSubitemKey = `subitem_${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
+                    const newSubitem = { key: newSubitemKey, name: subitemName, items: [], deadline: null, note: "" };
+
+                    if (!item.items) {
+                        item.items = [];
+                    }
+                    item.items.push(newSubitem);
+
+
+                    renderPreview(my.tempList.key, my.tempList.items);
+                    subitemNameInputForNew.value = '';
+                    subitemInputContainer.classList.remove('active');
+
+                }, */
+            saveItemName: () => {
+                e.stopPropagation();
+                const newName = nameInput.value.trim();
+                if (newName && newName !== item.name) {
+                    if (updateItemNameInTempList(my.tempList.items, item.key, newName)) {
+                        renderPreview(my.tempList.key, my.tempList.items);
+                    } else {
+                        console.error(`Konnte Item mit Key ${item.key} zum Umbenennen nicht in tempList finden.`);
+                        nameEditForm.style.display = 'none';
+                        titleDisplay.style.display = '';
+                        editNameIcon.style.display = '';
+                    }
+                } else if (!newName) {
+                    alert('Der Item-Name darf nicht leer sein.');
+                    nameInput.focus();
+                } else {
+                    nameEditForm.style.display = 'none';
+                    titleDisplay.style.display = '';
+                    editNameIcon.style.display = '';
+                }
+            },
+            cancelNameButton: () => {
+                e.stopPropagation();
+                nameEditForm.style.display = 'none';
+                titleDisplay.style.display = '';
+                editNameIcon.style.display = '';
+            },
+            onRemoveSubitem: (item,parentKey) => {
+                if (my.tempList.items.length === 1 && item.items.length === 0 && !parentKey) {
+                    alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
+                    return;
+                }
+
+                function removeItemRecursive(items, targetKey) {
+                    for (let i = 0; i < items.length; i++) {
+                        if (items[i].key === targetKey) {
+                            items.splice(i, 1);
+                            return true;
+                        }
+                        if (items[i].items && removeItemRecursive(items[i].items, targetKey)) return true;
+                    }
+                    return false;
+                }
+
+                removeItemRecursive(my.tempList.items, item.key);
+
+                if (my.currentItems && Array.isArray(my.currentItems)) {
+                    function collectAllItemKeys(itemsArr, keysSet = new Set()) {
+                        itemsArr.forEach(it => {
+                            keysSet.add(it.key);
+                            if (it.items) collectAllItemKeys(it.items, keysSet);
+                        });
+                        return keysSet;
+                    }
+
+                    const keysInTempList = collectAllItemKeys(my.tempList.items);
+                    my.currentItems = my.currentItems.filter(ci => keysInTempList.has(ci.key));
+                }
+                renderPreview(my.tempList.key, my.tempList.items);
+            },
+            onDeadlineChange: (event) => { // Handler for deadline change
+                if (event) event.stopPropagation(); // Optional, if bubbling is an issue
+                const newDeadline = event.target.value || null;
+                function updateDeadlineRecursive(items, targetKey, deadlineValue) {
+                    for (let current of items) {
+                        if (current.key === targetKey) {
+                            current.deadline = deadlineValue;
+                            return true;
+                        }
+                        if (current.items && updateDeadlineRecursive(current.items, targetKey, deadlineValue)) return true;
+                    }
+                    return false;
+                }
+                if (updateDeadlineRecursive(my.tempList.items, item.key, newDeadline)) {
+                    renderPreview(my.tempList.key, my.tempList.items); // Re-render preview to reflect changes
+                }
+            }
 
         }
 
         this.start = async () => {
             try {
-                self.element.innerHTML = '';
-                self.element.appendChild(self.ccm.helper.html(self.html.main));
+                const itemHtml = document.createElement('div');
+
+                $.setContent(itemHtml, $.html(self.html.main, {
+                    previewListText: self.text.previewListText,
+                    firstItemNameText: self.text.firstItemName,
+                    listName: self.text.listName,
+                    listCreateButtonText: self.text.listCreateButtonText,
+                    saveListText: self.text.saveListText,
+                    myListText: self.text.myListText,
+                    cancelText: self.text.cancelText,
+                    onStartCreateButton:   () => self.events.onStartCreateButton(createListForm, listForm, previewList),
+                    onSaveListButton: () => self.events.onSaveListButton(listForm, previewList, itemElement),
+                    onCancelListButton: () => self.events.onCancelListButton(listForm, previewList),
+                   /* onStartCreateButton: () => {
+                        console.log("ich bin drin")
+                        const listName = createListForm.querySelector('#list-name').value.trim();
+                        const firstItemName = createListForm.querySelector('#first-item-name').value.trim();
+                        if (!listName || !firstItemName) {
+                            alert('Bitte geben Sie einen Listennamen und ein erstes Listenobjekt ein.');
+                            return;
+                        }
+                        my.tempList = {
+                            key: listName.replace(/\s+/g, ''),
+                            items: []
+                        };
+                        my.currentItems = [];
+                        previewList.innerHTML = '';
+
+                        const firstItemKey = `item_${firstItemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
+                        const firstItem = {key: firstItemKey, name: firstItemName, items: [], deadline: null};
+                        my.tempList.items.push(firstItem);
+                        my.currentItems.push(firstItem);
+
+                        renderPreview(my.tempList.key, my.tempList.items);
+
+                        listForm.style.display = 'block';
+                        createListForm.querySelector('#list-name').value = '';
+                        createListForm.querySelector('#first-item-name').value = '';
+
+                    }, //hier auslagern
+                    onSaveListButton: () => {
+                        if (!my.tempList || my.tempList.items.length === 0) {
+                            alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
+                            return;
+                        }
+
+                        my.listsData[my.tempList.key] = my.tempList.items;
+                        if (!my.listState[my.tempList.key]) {
+                            my.listState[my.tempList.key] = {items: {}, collapsed: false};
+                        }
+                        initializeState(my.tempList.key, my.tempList.items, my.listState[my.tempList.key]);
+
+                        self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState})
+                            .then(() => console.log('Daten erfolgreich gespeichert:', my))
+                            .catch(e => {
+                                console.error('Fehler beim Speichern:', e);
+                                alert('Fehler beim Speichern der Liste. Bitte überprüfe die Konsole.');
+                            });
+
+                        renderLists(itemElement);
+
+                        listForm.style.display = 'none';
+                        previewList.innerHTML = '';
+                        my.tempList = null;
+                        my.currentItems = [];
+                    }, //hier auslagern
+                    onCancelListButton: () => {
+                        listForm.style.display = 'none';
+                        my.tempList = null;
+                        my.currentItems = [];
+                        previewList.innerHTML = '';
+                    }*/ //hier kann man auslagern
+                }));
+
+                $.append(self.element, itemHtml);
 
                 const createListForm = self.element.querySelector('.create-list');
                 const listForm = self.element.querySelector('.list-form');
-                const startCreateButton = createListForm.querySelector('#start-create');
-                const saveListButton = listForm.querySelector('#save-list');
-                const cancelButton = listForm.querySelector('.cancel-button');
                 const previewList = self.element.querySelector('#preview-list');
                 const itemElement = self.element.querySelector('#items');
 
-                function formatDate(isoDate) {
-                    if (!isoDate) return '';
-                    const date = new Date(isoDate);
-                    return date.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'});
-                }
-
-                startCreateButton.addEventListener('click', () => {
-                    const listName = createListForm.querySelector('#list-name').value.trim();
-                    const firstItemName = createListForm.querySelector('#first-item-name').value.trim();
-                    if (!listName || !firstItemName) {
-                        alert('Bitte geben Sie einen Listennamen und ein erstes Listenobjekt ein.');
-                        return;
-                    }
-                    my.tempList = {
-                        key: listName.replace(/\s+/g, ''),
-                        items: []
-                    };
-                    my.currentItems = [];
-                    previewList.innerHTML = '';
-
-                    const firstItemKey = `item_${firstItemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
-                    const firstItem = {key: firstItemKey, name: firstItemName, items: [], deadline: null};
-                    my.tempList.items.push(firstItem);
-                    my.currentItems.push(firstItem);
-
-                    renderPreview(my.tempList.key, my.tempList.items);
-
-                    listForm.style.display = 'block';
-                    createListForm.querySelector('#list-name').value = '';
-                    createListForm.querySelector('#first-item-name').value = '';
-                });
-
-                cancelButton.addEventListener('click', () => {
-                    listForm.style.display = 'none';
-                    my.tempList = null;
-                    my.currentItems = [];
-                    previewList.innerHTML = '';
-                });
-
-                saveListButton.addEventListener('click', async () => {
-                    if (!my.tempList || my.tempList.items.length === 0) {
-                        alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
-                        return;
-                    }
-
-                    my.listsData[my.tempList.key] = my.tempList.items;
-                    if (!my.listState[my.tempList.key]) {
-                        my.listState[my.tempList.key] = {items: {}, collapsed: false};
-                    }
-                    initializeState(my.tempList.key, my.tempList.items, my.listState[my.tempList.key]);
-
-                    try {
-                        await self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
-                        console.log('Daten erfolgreich gespeichert:', await self.store.get("checklist_data"));
-                    } catch (e) {
-                        console.error('Fehler beim Speichern:', e);
-                        alert('Fehler beim Speichern der Liste. Bitte überprüfe die Konsole.');
-                        return;
-                    }
-
-                    await renderLists(itemElement);
-
-                    listForm.style.display = 'none';
-                    previewList.innerHTML = '';
-                    my.tempList = null;
-                    my.currentItems = [];
-                });
-
-
-                function renderPreview(listKey, items) {
-                    previewList.innerHTML = '';
-                    const listTitle = listKey;
-                    const listHtml = document.createElement('div');
-                    listHtml.className = 'list-item';
-                    //listHtml.innerHTML = self.ccm.helper.html(self.html.previewList, {listTitle: listTitle});
-/*
-                    const subitemList = listHtml.querySelector('.subitem-list');
-                    const addSubitemButton = listHtml.querySelector('.add-subitem');
-                    const listInput = listHtml.querySelector('.list-input');
-                    const subitemNameInput = listHtml.querySelector('.subitem-name');
-                    const confirmSubitemButton = listHtml.querySelector('.confirm-subitem');
-
- */
-
-                    $.setContent(listHtml, $.html(self.html.previewList, {
-                        listTitle: listTitle,
-                        dataItemId: "1",
-                        onAddSubmitItem: () =>{
-                            const listInput = self.element.querySelector('.list-input');
-                            listInput.classList.toggle('active');
-                            const subitemNameInput = self.element.querySelector('.list-item-name');
-                            subitemNameInput.focus();
-                        },
-                        onConfirmSubitem: () => {
-                            const subitemNameInput = self.element.querySelector('.list-item-name');
-                            console.log(self.element.querySelectorAll('.list-item-name'))
-                            const subitemName = subitemNameInput.value.trim();
-                            if (!subitemName) {
-                                alert('Bitte geben Sie einen Namen für das Listenobjekt ein.');
-                                return;
-                            }
-                            const subitemKey = `item_${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
-                            const newSubitem = {key: subitemKey, name: subitemName, items: [], deadline: null};
-
-                            my.tempList.items.push(newSubitem);
-                            my.currentItems.push(newSubitem);
-                            console.log('New item added:', newSubitem);
-                            console.log('Updated tempList:', JSON.stringify(my.tempList, null, 2));
-                            console.log('Updated currentItems:', JSON.stringify(my.currentItems, null, 2));
-
-                            renderPreview(my.tempList.key, my.tempList.items);
-                            subitemNameInput.value = '';
-                            listInput.classList.remove('active');
-                        },
-
-
-
-                    }));
-                       /* `
-                        <div class="item-header">
-                            <h3>${listTitle}</h3>
-                        </div>
-                        <div class="item-content">
-                            <div class="subitem-list"></div>
-                            <button class="add-subitem">Listenobjekt hinzufügen</button>
-                            <div class="list-input">
-                                <input type="text" class="subitem-name" placeholder="Objekt-Name (z.B. Aufgabe 2)">
-                                <button class="confirm-subitem">Hinzufügen</button>
-                            </div>
-                        </div>
-                    `;*/
-                    //previewList.appendChild(listHtml);
-                    //$.append(previewList, self.ccm.helper.html(self.html.previewList, {listTitle: listTitle}));
-                 //   console.log('listHtml appended to previewList:', listHtml);
-                    $.append(previewList, listHtml);
-
-                    const subitemList = listHtml.querySelector('.subitem-list');
-                    const addSubitemButton = listHtml.querySelector('.add-subitem');
-                    const listInput = listHtml.querySelector('.list-input');
-                    const subitemNameInput = listHtml.querySelector('.subitem-name');
-                    const confirmSubitemButton = listHtml.querySelector('.confirm-subitem');
-
-/*
-                    addSubitemButton.addEventListener('click', () => {
-                        listInput.classList.toggle('active');
-                        subitemNameInput.focus();
-                    });
-
- */
-                    /*
-                                        confirmSubitemButton.addEventListener('click', () => {
-                                            const subitemName = subitemNameInput.value.trim();
-                                            if (!subitemName) {
-                                                alert('Bitte geben Sie einen Namen für das Listenobjekt ein.');
-                                                return;
-                                            }
-                                            const subitemKey = `item_${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
-                                            const newSubitem = {key: subitemKey, name: subitemName, items: [], deadline: null};
-
-                                            my.tempList.items.push(newSubitem);
-                                            my.currentItems.push(newSubitem);
-                                            console.log('New item added:', newSubitem);
-                                            console.log('Updated tempList:', JSON.stringify(my.tempList, null, 2));
-                                            console.log('Updated currentItems:', JSON.stringify(my.currentItems, null, 2));
-
-                                            renderPreview(my.tempList.key, my.tempList.items);
-                                            subitemNameInput.value = '';
-                                            ltInput.classList.remove('active');
-                                        });
-                       */
-                                        //$.append(previewList, listHtml);
-
-                                        items.forEach(item => {
-                                            console.log('Rendering item in preview:', item);
-                                            renderPreviewItem(item, listHtml.querySelector('.subitem-list'), '');
-                                        });
-                                    }
-
-                function updateItemNameInTempList(itemsArray, targetItemKey, updatedName) {
-                    for (let i = 0; i < itemsArray.length; i++) {
-                        if (itemsArray[i].key === targetItemKey) {
-                            itemsArray[i].name = updatedName;
-                            return true;
-                        }
-                        if (itemsArray[i].items && itemsArray[i].items.length > 0) {
-                            if (updateItemNameInTempList(itemsArray[i].items, targetItemKey, updatedName)) {
-                                return true;
-                            }
-                        }
-                    }
-                    return false;
-                }
-
-                function renderPreviewItem(item, parentElement, parentKey) {
-                    const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
-           //         console.log(" parent element"+ parentElement)
-                    const isEndPoint = item.items.length === 0;
-                    const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(my.tempList.key, itemKey, item.items, itemKey);
-                    const deadlineGroupId= `deadline_preview_${itemKey.replace(/\W/g, '_')}`;
-
-                    console.log('Rendering preview item (editable name):', {
-                        itemKey,
-                        isEndPoint,
-                        subitemProgress,
-                        item
-                    });
-
-                    const itemHtml = document.createElement('div');
-                    itemHtml.className = isEndPoint ? 'point-item' : 'subitem';
-                    itemHtml.dataset.id = itemKey;
-
-                    $.setContent(itemHtml, $.html(self.html.renderpreviewList, {
-                        itemKey: itemKey,
-                        isEndPointHeader: `${isEndPoint ? 'point' : 'subitem'}-header`,
-
-                        isEndPoint: isEndPoint ? 'point-item' : 'subitem',
-                        deadlineGroupId: deadlineGroupId,
-
-                        progressSpanHTML : !isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : '',
-
-                        ediName: (e) => {
-                            if (e) e.stopPropagation();
-                            const currentItemRenderedRoot = document.getElementById(itemKey);
-                            if (!currentItemRenderedRoot) return;
-
-                            const titleDisplay = currentItemRenderedRoot.querySelector('.' + (isEndPoint ? 'point' : 'subitem') + '-title'); // oder deine %isEndpointTitle% Klasse
-                            const editNameIcon = currentItemRenderedRoot.querySelector('.edit-item-name-btn'); // der Button selbst
-                            const nameEditForm = currentItemRenderedRoot.querySelector('.item-name-edit-form');
-                            const nameInput = nameEditForm.querySelector('.item-name-input-field');
-
-                            if (titleDisplay) titleDisplay.style.display = 'none';
-                            // if (editNameIcon) editNameIcon.style.display = 'none'; // Der Icon-Button wurde geklickt
-                            if (nameEditForm) nameEditForm.style.display = 'flex';
-                            if (nameInput) {
-                                nameInput.value = item.name; // 'item' ist aus dem Scope von renderPreviewItem
-                                nameInput.focus();
-                            }},
-
-
-                        itemName: item.name,
-                        deadlinePickerValue: item.deadline || '',
-                        onAddSubitem: () => self.events.onAddSubitem(itemKey),
-                        confirmSubitem: (e) => {
-                            if (e) e.stopPropagation();
-                            console.log("fuckfuckfuckfuckfuckfuck"+itemKey)
-                            const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
-
-                            if (!currentItemRenderedRoot) {
-                                console.error(`confirmSubitem: Element mit ID '${itemKey}' nicht gefunden!`);
-                                return;
-                            }
-
-                            const subitemInputContainer = currentItemRenderedRoot.querySelector('.subitem-input');
-                            if (!subitemInputContainer) {
-                                console.error(`confirmSubitem: '.subitem-input' nicht in Element mit ID '${itemKey}' gefunden.`);
-                                console.log("Inhalt von currentItemRenderedRoot (ID: " + itemKey + "):", currentItemRenderedRoot.innerHTML);
-                                return;
-                            }
-
-                            const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
-                            if (!subitemNameInputForNew) {
-                                console.error(`confirmSubitem: '.subitem-name' Input nicht im subitemInputContainer für itemKey '${itemKey}' gefunden.`);
-                                return;
-                            }
-
-                            const subitemName = subitemNameInputForNew.value.trim();
-                            if (!subitemName) {
-                                alert('Bitte geben Sie einen Namen für den Unterpunkt ein.');
-                                subitemNameInputForNew.focus();
-                                return;
-                            }
-
-                            const newSubitemKey = `subitem_${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
-                            const newSubitem = { key: newSubitemKey, name: subitemName, items: [], deadline: null, note: "" };
-
-                            if (!item.items) {
-                                item.items = [];
-                            }
-                            item.items.push(newSubitem);
-
-
-                            /*function addToCurrentItems(items, targetKey, newItem) {
-                                for (let current of items) {
-                                    if (current.key === targetKey) {
-                                        if (!current.items) current.items = [];
-                                        current.items.push(newItem);
-                                        return true;
-                                    }
-                                    if (current.items && addToCurrentItems(current.items, targetKey, newItem)) return true;
-                                }
-                                return false;
-                            }*/
-                            //addToCurrentItems(my.currentItems, item.key, newSubitem);
-
-                            // Entferne die fehlerhafte Bedingung
-                            // if (isEndPoint) { if (my.tempList.items.includes(item)) { my.tempList.items.push(newSubitem); } }
-
-                            renderPreview(my.tempList.key, my.tempList.items);
-                            subitemNameInputForNew.value = '';
-                            subitemInputContainer.classList.remove('active');
-
-                        },
-                        saveItemName: () => {
-                            e.stopPropagation();
-                            const newName = nameInput.value.trim();
-                            if (newName && newName !== item.name) {
-                                if (updateItemNameInTempList(my.tempList.items, item.key, newName)) {
-                                    renderPreview(my.tempList.key, my.tempList.items);
-                                } else {
-                                    console.error(`Konnte Item mit Key ${item.key} zum Umbenennen nicht in tempList finden.`);
-                                    nameEditForm.style.display = 'none';
-                                    titleDisplay.style.display = '';
-                                    editNameIcon.style.display = '';
-                                }
-                            } else if (!newName) {
-                                alert('Der Item-Name darf nicht leer sein.');
-                                nameInput.focus();
-                            } else {
-                                nameEditForm.style.display = 'none';
-                                titleDisplay.style.display = '';
-                                editNameIcon.style.display = '';
-                            }
-                        },
-                        cancelNameButton: () => {
-                            e.stopPropagation();
-                            nameEditForm.style.display = 'none';
-                            titleDisplay.style.display = '';
-                            editNameIcon.style.display = '';
-                        },
-                        onRemoveSubitem: () => {
-                                if (my.tempList.items.length === 1 && item.items.length === 0 && !parentKey) {
-                                    alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
-                                    return;
-                                }
-
-                                function removeItemRecursive(items, targetKey) {
-                                    for (let i = 0; i < items.length; i++) {
-                                        if (items[i].key === targetKey) {
-                                            items.splice(i, 1);
-                                            return true;
-                                        }
-                                        if (items[i].items && removeItemRecursive(items[i].items, targetKey)) return true;
-                                    }
-                                    return false;
-                                }
-
-                                removeItemRecursive(my.tempList.items, item.key);
-
-                                if (my.currentItems && Array.isArray(my.currentItems)) {
-                                    function collectAllItemKeys(itemsArr, keysSet = new Set()) {
-                                        itemsArr.forEach(it => {
-                                            keysSet.add(it.key);
-                                            if (it.items) collectAllItemKeys(it.items, keysSet);
-                                        });
-                                        return keysSet;
-                                    }
-
-                                    const keysInTempList = collectAllItemKeys(my.tempList.items);
-                                    my.currentItems = my.currentItems.filter(ci => keysInTempList.has(ci.key));
-                                }
-                                renderPreview(my.tempList.key, my.tempList.items);
-                            },
-
-                        onDeadlineChange: (event) => { // Handler for deadline change
-                            if (event) event.stopPropagation(); // Optional, if bubbling is an issue
-                            const newDeadline = event.target.value || null;
-                            function updateDeadlineRecursive(items, targetKey, deadlineValue) {
-                                for (let current of items) {
-                                    if (current.key === targetKey) {
-                                        current.deadline = deadlineValue;
-                                        return true;
-                                    }
-                                    if (current.items && updateDeadlineRecursive(current.items, targetKey, deadlineValue)) return true;
-                                }
-                                return false;
-                            }
-                            if (updateDeadlineRecursive(my.tempList.items, item.key, newDeadline)) {
-                                renderPreview(my.tempList.key, my.tempList.items); // Re-render preview to reflect changes
-                            }
-                        }
-
-
-                    }))
-
-                    $.append(parentElement,itemHtml)
-
-
-                    // 4. Recursive Call for Sub-items
-                    if (!isEndPoint) {
-                        const subitemListDisplayContainer = itemHtml.querySelector('.subitem-list-children');
-                        if (subitemListDisplayContainer) {
-                            console.log(`Item '${item.name}' (Key: ${itemKey}) hat ${item.items.length} Sub-Items. Rufe Rekursion auf.`);
-                            item.items.forEach(subItem => {
-                                console.log(`  -> Rekursiver Aufruf für Sub-Item:`, JSON.parse(JSON.stringify(subItem)), `ParentKey für Rekursion: ${itemKey}`);
-                                renderPreviewItem(subItem, subitemListDisplayContainer, itemKey);
-                            });
-                        }
-                    }
-                }
-
-                this.editList = async (listKey) => {
-                    my.tempList = {
-                        key: listKey,
-                        items: JSON.parse(JSON.stringify(my.listsData[listKey]))
-                    };
-                    my.currentItems = [];
-                    previewList.innerHTML = '';
-
-                    function populateCurrentItems(items) {
-                        items.forEach(item => {
-                            my.currentItems.push(item);
-                            populateCurrentItems(item.items);
-                        });
-                    }
-
-                    populateCurrentItems(my.tempList.items);
-
-                    renderPreview(my.tempList.key, my.tempList.items);
-                    listForm.style.display = 'block';
-                };
-
-                function initializeState(listKey, items, state = my.listState[listKey], parentKey = '') {
-                    if (!state) {
-                        state = {items: {}, collapsed: false};
-                        my.listState[listKey] = state;
-                    }
-                    items.forEach(item => {
-                        const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
-                        state.items[itemKey] = state.items[itemKey] || {checked: false, collapsed: false};
-                        initializeState(listKey, item.items, state, itemKey);
-                    });
-                    console.log(`Initialized state for ${listKey}:`, JSON.stringify(state, null, 2));
-                }
-
-                function calculateProgress(listKey, items, parentKey = '') {
-                    let totalPoints = 0;
-                    let checkedPoints = 0;
-
-                    function countPoints(items, currentParentKey = '') {
-                        items.forEach(item => {
-                            const itemKey = currentParentKey ? `${currentParentKey}_${item.key}` : item.key;
-                            if (item.items.length === 0) {
-                                totalPoints++;
-                                if (my.listState[listKey]?.items[itemKey]?.checked) {
-                                    checkedPoints++;
-                                }
-                            } else {
-                                countPoints(item.items, itemKey);
-                            }
-                        });
-                    }
-
-                    countPoints(items, parentKey);
-                    return totalPoints > 0 ? (checkedPoints / totalPoints) * 100 : 0;
-                }
-
-                function calculateSubitemProgress(listKey, subitemKey, items, parentKey = '') {
-                    let totalPoints = 0;
-                    let checkedPoints = 0;
-
-                    function countPoints(items, currentParentKey = '') {
-                        items.forEach(item => {
-                            const itemKey = currentParentKey ? `${currentParentKey}_${item.key}` : item.key;
-                            if (item.items.length === 0) {
-                                totalPoints++;
-                                if (my.listState[listKey]?.items[itemKey]?.checked) {
-                                    checkedPoints++;
-                                }
-                            } else {
-                                countPoints(item.items, itemKey);
-                            }
-                        });
-                    }
-
-                    countPoints(items, parentKey);
-                    const progress = totalPoints > 0 ? (checkedPoints / totalPoints) * 100 : 0;
-                    return isNaN(progress) ? 0 : progress;
-                }
-
-                // Render lists
-                async function renderLists(itemElement) {
-                    try {
-                        itemElement.innerHTML = '';
-                        console.log('Rendering lists with data:', JSON.stringify(my.listsData, null, 2));
-
-                        for (const key of Object.keys(my.listsData)) {
-                            if (!my.listsData[key] || !Array.isArray(my.listsData[key])) {
-                                console.warn(`Ungültige Daten für Liste ${key}, überspringe...`);
-                                continue;
-                            }
-                            if (!my.listState[key]) {
-                                console.log(`Initialisiere listState für ${key} in renderLists`);
-                                my.listState[key] = {items: {}, collapsed: false};
-                                initializeState(key, my.listsData[key], my.listState[key]);
-                            }
-
-                            const listTitle = key;
-                            const listHtml = document.createElement('div');
-                            listHtml.className = 'list-item';
-                            listHtml.dataset.id = key;
-
-                            //listHtml.innerHTML = self.ccm.helper.html(self.html.previewList, {listTitle: listTitle});
-                            /*
-                                                const subitemList = listHtml.querySelector('.subitem-list');
-                                                const addSubitemButton = listHtml.querySelector('.add-subitem');
-                                                const listInput = listHtml.querySelector('.list-input');
-                                                const subitemNameInput = listHtml.querySelector('.subitem-name');
-                                                const confirmSubitemButton = listHtml.querySelector('.confirm-subitem');
-
-                             */
-
-                            $.setContent(listHtml, $.html(self.html.renderList, {
-                                listTitle: listTitle,
-                                onDeledeButton: () => {
-                                    delete my.listsData[key];
-                                    delete my.listState[key];
-                                    itemElement.removeChild(listHtml);
-                                    self.store.set({
-                                        key: "checklist_data",
-                                        listsData: my.listsData,
-                                        listState: my.listState
-                                    });
-                                },
-                                onClickToggelButton: () => {
-                                    my.listState[key].collapsed = !my.listState[key].collapsed;
-                                    itemContent.style.display = my.listState[key].collapsed ? 'none' : 'block';
-                                    toggleButton.textContent = my.listState[key].collapsed ? '▶' : '▼';
-                                    self.store.set({
-                                        key: "checklist_data",
-                                        listsData: my.listsData,
-                                        listState: my.listState
-                                    });
-                                },
-
-                                onEditButton: () => self.editList(key),
-
-                            }));
-
-                            itemElement.appendChild(listHtml);
-
-                            const itemContent = listHtml.querySelector('.item-content');
-                            const subitemList = listHtml.querySelector('.subitem-list');
-                            const toggleButton = listHtml.querySelector('.toggle-item');
-                            const editButton = listHtml.querySelector('.edit-list');
-
-                            if (my.listState[key].collapsed) {
-                                itemContent.style.display = 'none';
-                                toggleButton.textContent = '▶';
-                            }
-
-                            my.listsData[key].forEach(item => {
-                                renderItem(key, item, subitemList, itemContent, '');
-                            });
-
-                            const progress = calculateProgress(key, my.listsData[key]);
-                            listHtml.querySelector('.progress-fill').style.width = `${Math.round(progress)}%`;
-                            const progressProzent = listHtml.querySelector('.progress-prozent');
-                            progressProzent.innerText = `${Math.round(progress)}%`;
-                            if (progress === 100) {
-                                listHtml.classList.add('completed');
-                            }
-                        }
-                    } catch (e) {
-                        console.error("Fehler beim Rendern der Listen:", e);
-                        itemElement.innerHTML = `<p>Error rendering lists: ${e.message}</p>`;
-                    }
-                }
-
-                /*        function renderItem(listKey, item, parentElement, listContent, parentKey) {
-                            const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
-                            const isEndPoint = item.items.length === 0;
-                            const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(listKey, itemKey, item.items, itemKey);
-
-                            // Initialisiere listState, falls nicht vorhanden
-                            if (!my.listState[listKey]) {
-                                console.log(`Initialisiere listState für ${listKey} in renderItem`);
-                                my.listState[listKey] = { items: {}, collapsed: false };
-                                initializeState(listKey, my.listsData[listKey], my.listState[listKey]);
-                            }
-                            if (!my.listState[listKey].items[itemKey]) {
-                                console.log(`Initialisiere itemState für ${itemKey} in ${listKey}`);
-                                my.listState[listKey].items[itemKey] = { checked: false, collapsed: false };
-                            }
-
-                            console.log('Rendering item:', { listKey, itemKey, isEndPoint, subitemProgress, item });
-
-                            // Erstelle das HTML mit renderItemTemplate
-                            const itemHtml = document.createElement('div');
-                            $.setContent(itemHtml, $.html(self.html.renderItemTemplate, {
-                                itemClassName: isEndPoint ? 'point-item' : 'subitem',
-                                itemKey: itemKey,
-                                headerClassName: isEndPoint ? 'point-header' : 'subitem-header',
-                                checkboxId: itemKey,
-                                checkboxClassName: isEndPoint ? 'point-checkbox' : 'subitem-checkbox',
-                                checkboxChecked: my.listState[listKey].items[itemKey].checked ? 'checked' : '',
-                                titleClassName: isEndPoint ? 'point-title' : 'subitem-title',
-                                itemName: item.name,
-                                deadlineValue: item.deadline || '',
-                                subitemProgressHTML: !isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : '',
-                                noteDisplayStyle: item.note ? 'block' : 'none',
-                                noteTextContent: item.note || '',
-                                notePlaceholderDisplayStyle: item.note ? 'none' : 'block',
-                                editNoteButtonTitle: item.note ? 'Notiz bearbeiten' : 'Notiz hinzufügen',
-                                editNoteButtonDisplayStyle: 'inline-block',
-                                noteTextareaContent: item.note || '',
-                                subitemListContainerHTML: !isEndPoint ? '<div class="subitem-list"></div>' : '',
-                                onCheckboxChange: async () => {
-                                    my.listState[listKey].items[itemKey].checked = !my.listState[listKey].items[itemKey].checked;
-                                    console.log(`Checkbox für ${itemKey} geändert. Neuer Zustand: ${my.listState[listKey].items[itemKey].checked}`);
-
-                                    if (!isEndPoint) {
-                                        updateSubitemPoints(listKey, item.items, itemKey, my.listState[listKey].items[itemKey].checked);
-                                        const subitemList = itemHtml.querySelector('.subitem-list');
-                                        subitemList.innerHTML = '';
-                                        item.items.forEach(subItem => {
-                                            renderItem(listKey, subItem, subitemList, listContent, itemKey);
-                                        });
-                                        const progressElement = itemHtml.querySelector('.subitem-progress');
-                                        if (progressElement) {
-                                            progressElement.textContent = `${Math.round(calculateSubitemProgress(listKey, itemKey, item.items, itemKey))}%`;
-                                        }
-                                    }
-
-                                    updateParentState(itemKey, listKey, listContent);
-
-                                    const progress = calculateProgress(listKey, my.listsData[listKey]);
-                                    const listItem = listContent.closest('.list-item');
-                                    const progressFill = listContent.querySelector('.progress-fill');
-                                    const progressProzent = listItem.querySelector('.progress-prozent');
-
-                                    if (progressFill && progressProzent) {
-                                        progressFill.style.width = `${Math.round(progress)}%`;
-                                        progressProzent.innerText = `${Math.round(progress)}%`;
-                                    } else {
-                                        console.warn('Progress elements not found:', { progressFill, progressProzent });
-                                    }
-
-                                    if (progress === 100) {
-                                        listItem.classList.add('completed');
-                                    } else {
-                                        listItem.classList.remove('completed');
-                                    }
-
-                                    await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
-                                },
-                                onDeadlineChange: async (event) => {
-                                    const newDeadline = event.target.value || null;
-
-                                    function updateDeadline(items) {
-                                        for (const currentItem of items) {
-                                            if (currentItem.key === item.key) {
-                                                currentItem.deadline = newDeadline;
-                                                return true;
-                                            }
-                                            if (updateDeadline(currentItem.items)) return true;
-                                        }
-                                        return false;
-                                    }
-
-                                    updateDeadline(my.listsData[listKey]);
-                                    await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
-                                },
-                                onEditNote: (event) => {
-                                    event.stopPropagation();
-                                    const noteContainer = itemHtml.querySelector('.note-container');
-                                    const noteDisplay = noteContainer.querySelector('.subitem-note');
-                                    const notePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
-                                    const editNoteBtn = noteContainer.querySelector('.edit-note-btn');
-                                    const noteEditForm = noteContainer.querySelector('.note-edit-form');
-                                    const noteInput = noteEditForm.querySelector('.note-input');
-
-                                    if (noteDisplay) noteDisplay.style.display = 'none';
-                                    if (notePlaceholder) notePlaceholder.style.display = 'none';
-                                    editNoteBtn.style.display = 'none';
-                                    noteEditForm.style.display = 'block';
-                                    noteInput.focus();
-                                },
-                                onSaveNote: async (event) => {
-                                    event.stopPropagation();
-                                    const noteContainer = itemHtml.querySelector('.note-container');
-                                    const noteEditForm = noteContainer.querySelector('.note-edit-form');
-                                    const noteInput = noteEditForm.querySelector('.note-input');
-                                    const editNoteBtn = noteContainer.querySelector('.edit-note-btn');
-                                    const noteDisplay = noteContainer.querySelector('.subitem-note');
-                                    const notePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
-
-                                    const newNote = noteInput.value.trim();
-
-                                    function updateNote(items, targetKey, updatedNote) {
-                                        for (let current of items) {
-                                            if (current.key === targetKey) {
-                                                current.note = updatedNote;
-                                                return true;
-                                            }
-                                            if (current.items && updateNote(current.items, targetKey, updatedNote)) return true;
-                                        }
-                                        return false;
-                                    }
-
-                                    updateNote(my.listsData[listKey], item.key, newNote);
-
-                                    noteEditForm.style.display = 'none';
-                                    editNoteBtn.style.display = 'inline-block';
-
-                                    if (newNote) {
-                                        if (noteDisplay) {
-                                            noteDisplay.textContent = newNote;
-                                            noteDisplay.style.display = 'block';
-                                        } else {
-                                            const newNoteDisplay = document.createElement('p');
-                                            newNoteDisplay.className = 'subitem-note';
-                                            newNoteDisplay.textContent = newNote;
-                                            noteContainer.insertBefore(newNoteDisplay, editNoteBtn);
-                                            if (notePlaceholder) notePlaceholder.remove();
-                                        }
-                                    } else {
-                                        if (noteDisplay) {
-                                            const newPlaceholder = document.createElement('p');
-                                            newPlaceholder.className = 'subitem-note-placeholder';
-                                            newPlaceholder.textContent = 'Noch keine Notiz vorhanden';
-                                            noteContainer.insertBefore(newPlaceholder, editNoteBtn);
-                                            noteDisplay.remove();
-                                        } else if (notePlaceholder) {
-                                            notePlaceholder.style.display = 'block';
-                                        }
-                                    }
-
-                                    await self.store.set({ key: "checklist_data", listsData: my.listsData, listState: my.listState });
-                                },
-                                onCancelNote: (event) => {
-                                    event.stopPropagation();
-                                    const noteContainer = itemHtml.querySelector('.note-container');
-                                    const noteEditForm = noteContainer.querySelector('.note-edit-form');
-                                    const noteDisplay = noteContainer.querySelector('.subitem-note');
-                                    const notePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
-                                    const editNoteBtn = noteContainer.querySelector('.edit-note-btn');
-
-                                    noteEditForm.style.display = 'none';
-                                    editNoteBtn.style.display = 'inline-block';
-                                    if (item.note) {
-                                        if (noteDisplay) noteDisplay.style.display = 'block';
-                                    } else {
-                                        if (notePlaceholder) notePlaceholder.style.display = 'block';
-                                    }
-                                }
-                            }));
-
-                            parentElement.appendChild(itemHtml);
-
-                            // Rendern der Unterpunkte, falls es keine Endpunkte sind
-                            if (!isEndPoint) {
-                                const subitemList = itemHtml.querySelector('.subitem-list');
-                                item.items.forEach(subItem => {
-                                    renderItem(listKey, subItem, subitemList, listContent, itemKey);
-                                });
-                            }
-                        } */
-
-                function renderItem(listKey, item, parentElement, listContent, parentKey) {
-                    const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
-                    const isEndPoint = item.items.length === 0;
-                    const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(listKey, itemKey, item.items, itemKey);
-
-                    if (!my.listState[listKey]) {
-                        console.log(`Initialisiere listState für ${listKey} in renderItem`);
-                        my.listState[listKey] = {items: {}, collapsed: false};
-                        initializeState(listKey, my.listsData[listKey], my.listState[listKey]);
-                    }
-                    if (!my.listState[listKey].items[itemKey]) {
-                        console.log(`Initialisiere itemState für ${itemKey} in ${listKey}`);
-                        my.listState[listKey].items[itemKey] = {checked: false, collapsed: false};
-                    }
-                    console.log('Rendering item:', {listKey, itemKey, isEndPoint, subitemProgress, item});
-                    const isEndpointSubitem = isEndPoint ? 'point-item' : 'subitem'
-
-
-                    const itemHtml = document.createElement('div');
-                    itemHtml.className = isEndPoint ? 'point-item' : 'subitem';
-                    itemHtml.dataset.id = itemKey;
-
-                    $.setContent(itemHtml, $.html(self.html.renderItem, {
-                        isEndPoint: isEndPoint ? 'point' : 'subitem',
-                        itemName: item.name,
-                        itemKey: itemKey,
-                        itemDeadline: item.deadline || '',
-                        itemDeadlineFaellig: item.deadline ? `Fällig: ${formatDate(item.deadline)}` : '',
-                        subitemProgress: !isEndPoint ? ('<span class="subitem-progress">' + Math.round(subitemProgress) + '</span>') : '',
-                        subItemNodeClass: item.node ? 'subitem-node' : 'subitem-note-placeholder',
-                        noteShow: item.note ? item.note : 'Noch keine Notiz vorhanden',
-                        noteTitle: item.note ? 'Notiz bearbeiten' : 'Notiz hinzufügen',
-                        itemNote: item.note || '',
-                        subItemList: !isEndPoint ? '<div class="subitem-list"></div>' : '',
-                        checkboxChecked: my.listState[listKey].items[itemKey]?.checked ? true : false,
-
-
-                        onEditeNode: (e) => {
-                            e.stopPropagation();
-                            const nodeContainer = itemHtml.querySelector('.note-container');
-                            const nodeDisplay = nodeContainer.querySelector('.subitem-node');
-                            const nodePlaceholder = nodeContainer.querySelector('.subitem-note-placeholder');
-                            const editNodeBtn = nodeContainer.querySelector('.edit-note-btn');
-                            const nodeEditForm = nodeContainer.querySelector('.note-edit-form');
-                            const nodeInput = nodeEditForm.querySelector('.note-input');
-
-                            if (nodeDisplay) nodeDisplay.style.display = 'none';
-                            if (nodePlaceholder) nodePlaceholder.style.display = 'none';
-                            editNodeBtn.style.display = 'none';
-                            nodeEditForm.style.display = 'block';
-                            nodeInput.focus();
-                        },
-                        onSaveNoteButton: (e) => {
-                            e.stopPropagation();
-                            const newNote = noteInput.value.trim();
-
-                            function updateNote(items, targetKey, updatedNote) {
-                                for (let current of items) {
-                                    if (current.key === targetKey) {
-                                        current.note = updatedNote;
-                                        return true;
-                                    }
-                                    if (current.items && updateNote(current.items, targetKey, updatedNote)) return true;
-                                }
-                                return false;
-                            }
-
-                            updateNote(my.listsData[listKey], item.key, newNote);
-
-                            const noteContainer = noteEditForm.parentElement;
-                            const currentNoteDisplay = noteContainer.querySelector('.subitem-note');
-                            const currentNotePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
-
-                            noteEditForm.style.display = 'none';
-                            editNoteBtn.style.display = '';
-
-                            if (newNote) {
-                                if (currentNoteDisplay) {
-                                    currentNoteDisplay.textContent = newNote;
-                                    currentNoteDisplay.style.display = '';
-                                } else if (currentNotePlaceholder) {
-                                    const newNoteDisplay = document.createElement('p');
-                                    newNoteDisplay.className = 'subitem-note';
-                                    newNoteDisplay.textContent = newNote;
-                                    noteContainer.insertBefore(newNoteDisplay, editNoteBtn);
-                                    currentNotePlaceholder.remove();
-                                }
-                            } else {
-                                if (currentNoteDisplay) {
-
-                                    const newPlaceholder = document.createElement('p');
-                                    newPlaceholder.className = 'subitem-note-placeholder';
-                                    newPlaceholder.textContent = 'Notiz hinzufügen';
-                                    noteContainer.insertBefore(newPlaceholder, editNoteBtn);
-                                    currentNoteDisplay.remove();
-                                } else if (currentNotePlaceholder) {
-                                    currentNotePlaceholder.style.display = '';
-                                }
-                            }
-                            self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
-                        },
-                        onCancelNoteBtn: (e) => {
-                            e.stopPropagation();
-                            noteEditForm.style.display = 'none';
-                            editNoteBtn.style.display = '';
-                            if (item.note) {
-                                if (noteDisplay) noteDisplay.style.display = '';
-                            } else {
-                                if (notePlaceholder) notePlaceholder.style.display = '';
-                            }
-                        },
-                        onDeadlinePicker: (e) => {
-                            const newDeadline = e.target.value || null;
-
-                            function updateDeadline(items) {
-                                for (const currentItem of items) {
-                                    if (currentItem.key === item.key) {
-                                        currentItem.deadline = newDeadline;
-                                        return true;
-                                    }
-                                    if (updateDeadline(currentItem.items)) return true;
-                                }
-                                return false;
-                            }
-
-                            updateDeadline(my.listsData[listKey]);
-                            const deadlineDisplay = itemHtml.querySelector('.deadline-display');
-                            deadlineDisplay.textContent = newDeadline ? `Fällig: ${formatDate(newDeadline)}` : '';
-                            self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
-                        },
-                        onCheckboxChange: async (e) => {
-                            my.listState[listKey].items[itemKey].checked = e.target.checked;
-                            console.log(`Checkbox für ${itemKey} geändert. Neuer Zustand: ${my.listState[listKey].items[itemKey].checked}`);
-
-                            if (!isEndPoint) {
-                                updateSubitemPoints(listKey, item.items, itemKey, my.listState[listKey].items[itemKey].checked);
-                                const subitemList = itemHtml.querySelector('.subitem-list');
-                                subitemList.innerHTML = '';
-                                item.items.forEach(subItem => {
-                                    renderItem(listKey, subItem, subitemList, listContent, itemKey);
-                                });
-                                const progressElement = itemHtml.querySelector('.subitem-progress');
-                                if (progressElement) {
-                                    progressElement.textContent = `${Math.round(calculateSubitemProgress(listKey, itemKey, item.items, itemKey))}%`;
-                                }
-                            }
-
-                            updateParentState(itemKey, listKey, listContent);
-
-                            const progress = calculateProgress(listKey, my.listsData[listKey]);
-                            const listItem = listContent.closest('.list-item');
-                            const progressFill = listContent.querySelector('.progress-fill');
-                            const progressProzent = listItem.querySelector('.progress-prozent');
-
-                            if (progressFill && progressProzent) {
-                                progressFill.style.width = `${Math.round(progress)}%`;
-                                progressProzent.innerText = `${Math.round(progress)}%`;
-                            } else {
-                                console.warn('Progress elements not found:', {progressFill, progressProzent});
-                            }
-
-                            if (progress === 100) {
-                                listItem.classList.add('completed');
-                            } else {
-                                listItem.classList.remove('completed');
-                            }
-
-                            await self.store.set({
-                                key: "checklist_data",
-                                listsData: my.listsData,
-                                listState: my.listState
-                            });
-                        }
-
-
-                    }));
-
-                    parentElement.appendChild(itemHtml);
-                    //          const saveNoteBtn = itemHtml.querySelector('.save-note-btn');
-                    //       const cancelNoteBtn = itemHtml.querySelector('.cancel-note-btn');
-                    //     const deadlinePicker = itemHtml.querySelector('.deadline-picker');
-                    const checkbox = itemHtml.querySelector(`.${isEndPoint ? 'point' : 'subitem'}--checkbox`);
-                    const subitemList = itemHtml.querySelector('.subitem-list');
-                    const editNoteBtn = itemHtml.querySelector('.edit-note-btn');
-                    const noteEditForm = itemHtml.querySelector('.note-edit-form');
-                    const noteInput = itemHtml.querySelector('.note-input');
-                    const noteDisplay = itemHtml.querySelector('.subitem-note');
-                    const notePlaceholder = itemHtml.querySelector('.subitem-note-placeholder');
-
-                    checkbox.checked = my.listState[listKey].items[itemKey]?.checked || false;
-
-                    /*
-                    editNoteBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const noteContainer = editNoteBtn.parentElement;
-                        const currentNoteDisplay = noteContainer.querySelector('.subitem-note');
-                        const currentNotePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
-                        if (currentNoteDisplay) currentNoteDisplay.style.display = 'none';
-                        if (currentNotePlaceholder) currentNotePlaceholder.style.display = 'none';
-                        editNoteBtn.style.display = 'none';
-                        noteEditForm.style.display = 'block';
-                        noteInput.focus();
-                    });
-
-                    saveNoteBtn.addEventListener('click', async (e) => {
-                        e.stopPropagation();
-                        const newNote = noteInput.value.trim();
-
-                        function updateNote(items, targetKey, updatedNote) {
-                            for (let current of items) {
-                                if (current.key === targetKey) {
-                                    current.note = updatedNote;
-                                    return true;
-                                }
-                                if (current.items && updateNote(current.items, targetKey, updatedNote)) return true;
-                            }
-                            return false;
-                        }
-
-                        updateNote(my.listsData[listKey], item.key, newNote);
-
-                        const noteContainer = noteEditForm.parentElement;
-                        const currentNoteDisplay = noteContainer.querySelector('.subitem-note');
-                        const currentNotePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
-
-                        noteEditForm.style.display = 'none';
-                        editNoteBtn.style.display = '';
-
-                        if (newNote) {
-                            if (currentNoteDisplay) {
-                                currentNoteDisplay.textContent = newNote;
-                                currentNoteDisplay.style.display = '';
-                            } else if (currentNotePlaceholder) {
-                                const newNoteDisplay = document.createElement('p');
-                                newNoteDisplay.className = 'subitem-note';
-                                newNoteDisplay.textContent = newNote;
-                                noteContainer.insertBefore(newNoteDisplay, editNoteBtn);
-                                currentNotePlaceholder.remove();
-                            }
-                        } else {
-                            if (currentNoteDisplay) {
-
-                                const newPlaceholder = document.createElement('p');
-                                newPlaceholder.className = 'subitem-note-placeholder';
-                                newPlaceholder.textContent = 'Notiz hinzufügen';
-                                noteContainer.insertBefore(newPlaceholder, editNoteBtn);
-                                currentNoteDisplay.remove();
-                            } else if (currentNotePlaceholder) {
-                                currentNotePlaceholder.style.display = '';
-                            }
-                        }
-                        await self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
-                    });
-
-
-                    cancelNoteBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        noteEditForm.style.display = 'none';
-                        editNoteBtn.style.display = '';
-                        if (item.note) {
-                            if (noteDisplay) noteDisplay.style.display = '';
-                        } else {
-                            if (notePlaceholder) notePlaceholder.style.display = '';
-                        }
-                    });
-
-
-                    deadlinePicker.addEventListener('change', async () => {
-                        const newDeadline = deadlinePicker.value || null;
-
-                        function updateDeadline(items) {
-                            for (const currentItem of items) {
-                                if (currentItem.key === item.key) {
-                                    currentItem.deadline = newDeadline;
-                                    return true;
-                                }
-                                if (updateDeadline(currentItem.items)) return true;
-                            }
-                            return false;
-                        }
-
-                        updateDeadline(my.listsData[listKey]);
-                        deadlineDisplay.textContent = newDeadline ? `Fällig: ${formatDate(newDeadline)}` : '';
-                        await self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
-                    });
-                    */
-
-                    function parentElementForId(rootElement, itemId) {
-                        return rootElement.querySelector(`[data-id="${itemId}"]`);
-                    }
-
-                    function findChildItemsInData(items, targetKeyPart, currentParentKey) {
-                        for (const item of items) {
-                            const fullKey = currentParentKey ? `${currentParentKey}_${item.key}` : item.key;
-                            const keyPart = fullKey.split('_').pop();
-                            if (keyPart === targetKeyPart) {
-                                return item.items;
-                            }
-                            const found = findChildItemsInData(item.items, targetKeyPart, fullKey);
-                            if (found && found.length > 0) return found;
-                        }
-                        return [];
-                    }
-
-                    const updateParentState = (itemId, currentListKey, currentListContent) => {
-                        console.log("-------------")
-                        console.log(itemId)
-                        const parts = itemId.split('_');
-                        if (parts.length <= 3) return;
-                        //     console.log('Update parent state for', {itemId, currentListKey, currentListContent});
-                        parts.pop();
-                        parts.pop();
-                        parts.pop();
-
-                        const parentId = parts.join('_');
-                        console.log("parent id: " + parentId);
-                        console.log(currentListContent + " currentListKey: " + parentId);
-                        console.log(currentListContent);
-
-                        console.log("current content" + currentListContent)
-                        console.log("parentId" + parentId)
-                        const parentItemInState = my.listState[currentListKey].items[parentId];
-                        const parentElementInDOM = parentElementForId(currentListContent, parentId);//hir nullllll
-
-                        console.log('parent item in state:' + (parentItemInState));
-                        console.log('parent item in parentElementInDOM:' + (parentElementInDOM));
-                        if (parentItemInState && parentElementInDOM) {
-                            const childItems = findChildItemsInData(my.listsData[currentListKey], parentId.split('_').pop(), parts.slice(0, -1).join('_'));
-
-                            const allChildrenChecked = childItems.every(child => {
-                                const childKeyInState = `${parentId}_${child.key}`;
-                                return my.listState[currentListKey].items[childKeyInState]?.checked;
-                            });
-                            console.log('allChildrenChecked:' + (allChildrenChecked));
-
-                            parentItemInState.checked = allChildrenChecked;
-                            const parentCheckboxInDOM = parentElementInDOM.querySelector('.subitem--checkbox, .point--checkbox');
-                            // console.log(parentCheckboxInDOM)
-                            console.log("alle kinder" + parentCheckboxInDOM)
-
-                            if (parentCheckboxInDOM) {
-                                parentCheckboxInDOM.checked = allChildrenChecked;
-                                console.log('parent checkbox in dom:' + (parentCheckboxInDOM));
-                            }
-
-                            const parentProgressElement = parentElementInDOM.querySelector('.subitem-progress');
-                            if (parentProgressElement) {
-                                const parentSubitemProgress = calculateSubitemProgress(currentListKey, parentId, childItems, parentId);
-                                parentProgressElement.textContent = `${Math.round(parentSubitemProgress)}%`;
-                            }
-
-                            updateParentState(parentId, currentListKey, currentListContent);
-                        }
-                    };
-
-                    /*
-                    checkbox.addEventListener('change', async () => {
-                        my.listState[listKey].items[itemKey].checked = checkbox.checked;
-
-                        console.log(`Checkbox für ${itemKey} geändert. Neuer Zustand: ${my.listState[listKey].items[itemKey].checked}`);
-
-                        if (!isEndPoint) {
-                            updateSubitemPoints(listKey, item.items, itemKey, checkbox.checked);
-                            subitemList.innerHTML = '';
-                            item.items.forEach(subItem => {
-                                renderItem(listKey, subItem, subitemList, listContent, itemKey);
-                            });
-                            const subitemProgress = calculateSubitemProgress(listKey, itemKey, item.items, itemKey);
-                            const progressElement = itemHtml.querySelector('.subitem-progress');
-                            if (progressElement) {
-                                progressElement.textContent = `${Math.round(subitemProgress)}%`;
-                            }
-                        }
-
-                        updateParentState(itemKey, listKey, listContent);
-
-                        const progress = calculateProgress(listKey, my.listsData[listKey]);
-                        const listItem = listContent.closest('.list-item');
-                        const progressFill = listContent.querySelector('.progress-fill');
-                        const progressProzent = listItem.querySelector('.progress-prozent');
-
-                        if (progressFill && progressProzent) {
-                            progressFill.style.width = `${Math.round(progress)}%`;
-                            progressProzent.innerText = `${Math.round(progress)}%`;
-                        } else {
-                            console.warn('Progress elements not found:', {progressFill, progressProzent});
-                        }
-
-                        if (progress === 100) {
-                            listItem.classList.add('completed');
-                        } else {
-                            listItem.classList.remove('completed');
-                        }
-
-                        await self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
-                    });
-                    */
-                    if (!isEndPoint) {
-                        item.items.forEach(subItem => {
-                            renderItem(listKey, subItem, subitemList, listContent, itemKey);
-                        });
-                    }
-                }
-
-                function updateSubitemPoints(listKey, items, parentKey, checked) {
-                    items.forEach(item => {
-                        const itemKey = `${parentKey}_${item.key}`;
-                        if (my.listState[listKey].items[itemKey]) {
-                            my.listState[listKey].items[itemKey].checked = checked;
-                        }
-                        updateSubitemPoints(listKey, item.items, itemKey, checked);
-                    });
-                }
-
-                await renderLists(itemElement);
+                await renderLists(itemElement, previewList);
             } catch (e) {
                 console.error("Error in start method:", e);
                 self.element.innerHTML = `<p>Error: ${e.message}. Check console for details.</p>`;
             }
         };
+
+        function formatDate(isoDate) {
+            if (!isoDate) return '';
+            const date = new Date(isoDate);
+            return date.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'});
+        }
+
+        function renderPreview(listKey, items) {
+            const previewList = self.element.querySelector('#preview-list');
+            previewList.innerHTML = '';
+            const listTitle = listKey;
+            const listHtml = document.createElement('div');
+            listHtml.className = 'list-item';
+
+
+            $.setContent(listHtml, $.html(self.html.previewList, {
+                listTitle: listTitle,
+                dataItemId: "1",
+                addListObjectText: self.text.addListObjectText,
+                addText: self.text.addText,
+                secondItemNameText: self.text.secondItemNameText,
+                onAddSubmitItem: () => self.events.onAddSubmitItem(),
+                onConfirmSubitem: () => self.events.onConfirmSubitem(listInput),
+                /*onAddSubmitItem: () =>{
+                    const listInput = self.element.querySelector('.list-input');
+                    listInput.classList.toggle('active');
+                    const subitemNameInput = self.element.querySelector('.list-item-name');
+                    subitemNameInput.focus();
+                }, //hier kann man auslagern
+                onConfirmSubitem: () => {
+                    const subitemNameInput = self.element.querySelector('.list-item-name');
+                    console.log(self.element.querySelectorAll('.list-item-name'))
+                    const subitemName = subitemNameInput.value.trim();
+                    if (!subitemName) {
+                        alert('Bitte geben Sie einen Namen für das Listenobjekt ein.');
+                        return;
+                    }
+                    const subitemKey = `item_${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
+                    const newSubitem = {key: subitemKey, name: subitemName, items: [], deadline: null};
+
+                    my.tempList.items.push(newSubitem);
+                    my.currentItems.push(newSubitem);
+                    console.log('New item added:', newSubitem);
+                    console.log('Updated tempList:', JSON.stringify(my.tempList, null, 2));
+                    console.log('Updated currentItems:', JSON.stringify(my.currentItems, null, 2));
+
+                    renderPreview(my.tempList.key, my.tempList.items);
+                    subitemNameInput.value = '';
+                    listInput.classList.remove('active');
+                }, //hier auslagern*/
+            }));
+
+            $.append(previewList, listHtml);
+
+            const subitemList = listHtml.querySelector('.subitem-list');
+            const addSubitemButton = listHtml.querySelector('.add-subitem');
+            const listInput = listHtml.querySelector('.list-input');
+            const subitemNameInput = listHtml.querySelector('.subitem-name');
+            const confirmSubitemButton = listHtml.querySelector('.confirm-subitem');
+
+            items.forEach(item => {
+                console.log('Rendering item in preview:', item);
+                renderPreviewItem(item, listHtml.querySelector('.subitem-list'), '');
+            });
+        }
+
+        function updateItemNameInTempList(itemsArray, targetItemKey, updatedName) {
+            for (let i = 0; i < itemsArray.length; i++) {
+                if (itemsArray[i].key === targetItemKey) {
+                    itemsArray[i].name = updatedName;
+                    return true;
+                }
+                if (itemsArray[i].items && itemsArray[i].items.length > 0) {
+                    if (updateItemNameInTempList(itemsArray[i].items, targetItemKey, updatedName)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function renderPreviewItem(item, parentElement, parentKey) {
+            const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
+            //         console.log(" parent element"+ parentElement)
+            const isEndPoint = item.items.length === 0;
+            const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(my.tempList.key, itemKey, item.items, itemKey);
+            const deadlineGroupId= `deadline_preview_${itemKey.replace(/\W/g, '_')}`;
+
+            console.log('Rendering preview item (editable name):', {
+                itemKey,
+                isEndPoint,
+                subitemProgress,
+                item
+            });
+
+            const itemHtml = document.createElement('div');
+            itemHtml.className = isEndPoint ? 'point-item' : 'subitem';
+            itemHtml.dataset.id = itemKey;
+
+            $.setContent(itemHtml, $.html(self.html.renderpreviewList, {
+                itemKey: itemKey,
+                isEndPointHeader: `${isEndPoint ? 'point' : 'subitem'}-header`,
+                addSubpointText: self.text.addSubpointText,
+                isEndPoint: isEndPoint ? 'point-item' : 'subitem',
+                deadlineGroupId: deadlineGroupId,
+                deadlineText: self.text.deadlineText,
+                removeText: self.text.removeText,
+                subPointName : self.text.subPointName,
+
+                progressSpanHTML : !isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : '',
+
+                // hier: was das? ungenutzt?
+                ediName: (e) => {
+                    if (e) e.stopPropagation();
+                    const currentItemRenderedRoot = document.getElementById(itemKey);
+                    if (!currentItemRenderedRoot) return;
+
+                    const titleDisplay = currentItemRenderedRoot.querySelector('.' + (isEndPoint ? 'point' : 'subitem') + '-title'); // oder deine %isEndpointTitle% Klasse
+                    const editNameIcon = currentItemRenderedRoot.querySelector('.edit-item-name-btn'); // der Button selbst
+                    const nameEditForm = currentItemRenderedRoot.querySelector('.item-name-edit-form');
+                    const nameInput = nameEditForm.querySelector('.item-name-input-field');
+
+                    if (titleDisplay) titleDisplay.style.display = 'none';
+                    // if (editNameIcon) editNameIcon.style.display = 'none'; // Der Icon-Button wurde geklickt
+                    if (nameEditForm) nameEditForm.style.display = 'flex';
+                    if (nameInput) {
+                        nameInput.value = item.name; // 'item' ist aus dem Scope von renderPreviewItem
+                        nameInput.focus();
+                    }},
+
+
+                itemName: item.name,
+                deadlinePickerValue: item.deadline || '',
+                onAddSubitem: () => self.events.onAddSubitem(itemKey),
+                //hier auslagern: kann man auch auslagern alles
+
+                confirmSubitem: () => self.events.confirmSubitem(itemKey, item),
+
+                saveItemName: () => self.events.saveItemName(itemKey),
+                cancelNameButton: () => self.events.cancelNameButton(itemKey),
+                onRemoveSubitem: () => self.events.onRemoveSubitem(item, parentKey),
+                onDeadlineChange: (event) => self.events.onDeadlineChange(event, itemKey),
+                /*
+                confirmSubitem: (e) => {
+                    if (e) e.stopPropagation();
+                    console.log("fuckfuckfuckfuckfuckfuck"+itemKey)
+                    const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
+
+                    if (!currentItemRenderedRoot) {
+                        console.error(`confirmSubitem: Element mit ID '${itemKey}' nicht gefunden!`);
+                        return;
+                    }
+
+                    const subitemInputContainer = currentItemRenderedRoot.querySelector('.subitem-input');
+                    if (!subitemInputContainer) {
+                        console.error(`confirmSubitem: '.subitem-input' nicht in Element mit ID '${itemKey}' gefunden.`);
+                        console.log("Inhalt von currentItemRenderedRoot (ID: " + itemKey + "):", currentItemRenderedRoot.innerHTML);
+                        return;
+                    }
+
+                    const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
+                    if (!subitemNameInputForNew) {
+                        console.error(`confirmSubitem: '.subitem-name' Input nicht im subitemInputContainer für itemKey '${itemKey}' gefunden.`);
+                        return;
+                    }
+
+                    const subitemName = subitemNameInputForNew.value.trim();
+                    if (!subitemName) {
+                        alert('Bitte geben Sie einen Namen für den Unterpunkt ein.');
+                        subitemNameInputForNew.focus();
+                        return;
+                    }
+
+                    const newSubitemKey = `subitem_${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
+                    const newSubitem = { key: newSubitemKey, name: subitemName, items: [], deadline: null, note: "" };
+
+                    if (!item.items) {
+                        item.items = [];
+                    }
+                    item.items.push(newSubitem);
+
+
+                    renderPreview(my.tempList.key, my.tempList.items);
+                    subitemNameInputForNew.value = '';
+                    subitemInputContainer.classList.remove('active');
+
+                },
+                saveItemName: () => {
+                    e.stopPropagation();
+                    const newName = nameInput.value.trim();
+                    if (newName && newName !== item.name) {
+                        if (updateItemNameInTempList(my.tempList.items, item.key, newName)) {
+                            renderPreview(my.tempList.key, my.tempList.items);
+                        } else {
+                            console.error(`Konnte Item mit Key ${item.key} zum Umbenennen nicht in tempList finden.`);
+                            nameEditForm.style.display = 'none';
+                            titleDisplay.style.display = '';
+                            editNameIcon.style.display = '';
+                        }
+                    } else if (!newName) {
+                        alert('Der Item-Name darf nicht leer sein.');
+                        nameInput.focus();
+                    } else {
+                        nameEditForm.style.display = 'none';
+                        titleDisplay.style.display = '';
+                        editNameIcon.style.display = '';
+                    }
+                },
+                cancelNameButton: () => {
+                    e.stopPropagation();
+                    nameEditForm.style.display = 'none';
+                    titleDisplay.style.display = '';
+                    editNameIcon.style.display = '';
+                },
+                onRemoveSubitem: () => {
+                    if (my.tempList.items.length === 1 && item.items.length === 0 && !parentKey) {
+                        alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
+                        return;
+                    }
+
+                    function removeItemRecursive(items, targetKey) {
+                        for (let i = 0; i < items.length; i++) {
+                            if (items[i].key === targetKey) {
+                                items.splice(i, 1);
+                                return true;
+                            }
+                            if (items[i].items && removeItemRecursive(items[i].items, targetKey)) return true;
+                        }
+                        return false;
+                    }
+
+                    removeItemRecursive(my.tempList.items, item.key);
+
+                    if (my.currentItems && Array.isArray(my.currentItems)) {
+                        function collectAllItemKeys(itemsArr, keysSet = new Set()) {
+                            itemsArr.forEach(it => {
+                                keysSet.add(it.key);
+                                if (it.items) collectAllItemKeys(it.items, keysSet);
+                            });
+                            return keysSet;
+                        }
+
+                        const keysInTempList = collectAllItemKeys(my.tempList.items);
+                        my.currentItems = my.currentItems.filter(ci => keysInTempList.has(ci.key));
+                    }
+                    renderPreview(my.tempList.key, my.tempList.items);
+                },
+                onDeadlineChange: (event) => { // Handler for deadline change
+                    if (event) event.stopPropagation(); // Optional, if bubbling is an issue
+                    const newDeadline = event.target.value || null;
+                    function updateDeadlineRecursive(items, targetKey, deadlineValue) {
+                        for (let current of items) {
+                            if (current.key === targetKey) {
+                                current.deadline = deadlineValue;
+                                return true;
+                            }
+                            if (current.items && updateDeadlineRecursive(current.items, targetKey, deadlineValue)) return true;
+                        }
+                        return false;
+                    }
+                    if (updateDeadlineRecursive(my.tempList.items, item.key, newDeadline)) {
+                        renderPreview(my.tempList.key, my.tempList.items); // Re-render preview to reflect changes
+                    }
+                }*/
+            }))
+
+            $.append(parentElement,itemHtml)
+
+            // 4. Recursive Call for Sub-items
+            if (!isEndPoint) {
+                const subitemListDisplayContainer = itemHtml.querySelector('.subitem-list-children');
+                if (subitemListDisplayContainer) {
+                    console.log(`Item '${item.name}' (Key: ${itemKey}) hat ${item.items.length} Sub-Items. Rufe Rekursion auf.`);
+                    item.items.forEach(subItem => {
+                        console.log(`  -> Rekursiver Aufruf für Sub-Item:`, JSON.parse(JSON.stringify(subItem)), `ParentKey für Rekursion: ${itemKey}`);
+                        renderPreviewItem(subItem, subitemListDisplayContainer, itemKey);
+                    });
+                }
+            }
+        }
+
+        function initializeState(listKey, items, state = my.listState[listKey], parentKey = '') {
+            if (!state) {
+                state = {items: {}, collapsed: false};
+                my.listState[listKey] = state;
+            }
+            items.forEach(item => {
+                const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
+                state.items[itemKey] = state.items[itemKey] || {checked: false, collapsed: false};
+                initializeState(listKey, item.items, state, itemKey);
+            });
+            console.log(`Initialized state for ${listKey}:`, JSON.stringify(state, null, 2));
+        }
+
+        function calculateProgress(listKey, items, parentKey = '') {
+            let totalPoints = 0;
+            let checkedPoints = 0;
+
+            function countPoints(items, currentParentKey = '') {
+                items.forEach(item => {
+                    const itemKey = currentParentKey ? `${currentParentKey}_${item.key}` : item.key;
+                    if (item.items.length === 0) {
+                        totalPoints++;
+                        if (my.listState[listKey]?.items[itemKey]?.checked) {
+                            checkedPoints++;
+                        }
+                    } else {
+                        countPoints(item.items, itemKey);
+                    }
+                });
+            }
+
+            countPoints(items, parentKey);
+            return totalPoints > 0 ? (checkedPoints / totalPoints) * 100 : 0;
+        }
+
+        function calculateSubitemProgress(listKey, subitemKey, items, parentKey = '') {
+            let totalPoints = 0;
+            let checkedPoints = 0;
+
+            function countPoints(items, currentParentKey = '') {
+                items.forEach(item => {
+                    const itemKey = currentParentKey ? `${currentParentKey}_${item.key}` : item.key;
+                    if (item.items.length === 0) {
+                        totalPoints++;
+                        if (my.listState[listKey]?.items[itemKey]?.checked) {
+                            checkedPoints++;
+                        }
+                    } else {
+                        countPoints(item.items, itemKey);
+                    }
+                });
+            }
+
+            countPoints(items, parentKey);
+            const progress = totalPoints > 0 ? (checkedPoints / totalPoints) * 100 : 0;
+            return isNaN(progress) ? 0 : progress;
+        }
+
+        async function renderLists(itemElement, previewList) {
+            try {
+                itemElement.innerHTML = '';
+                console.log('Rendering lists with data:', JSON.stringify(my.listsData, null, 2));
+
+                for (const key of Object.keys(my.listsData)) {
+                    if (!my.listsData[key] || !Array.isArray(my.listsData[key])) {
+                        console.warn(`Ungültige Daten für Liste ${key}, überspringe...`);
+                        continue;
+                    }
+                    if (!my.listState[key]) {
+                        console.log(`Initialisiere listState für ${key} in renderLists`);
+                        my.listState[key] = {items: {}, collapsed: false};
+                        initializeState(key, my.listsData[key], my.listState[key]);
+                    }
+
+                    const listTitle = key;
+                    const listHtml = document.createElement('div');
+                    listHtml.className = 'list-item';
+                    listHtml.dataset.id = key;
+
+
+                    $.setContent(listHtml, $.html(self.html.renderList, {
+                        listTitle: listTitle,
+                        deleteText: self.text.deleteText,
+                        editText: self.text.editText,
+                        onDeledeButton: () => {
+                            delete my.listsData[key];
+                            delete my.listState[key];
+                            itemElement.removeChild(listHtml);
+                            self.store.set({
+                                key: "checklist_data",
+                                listsData: my.listsData,
+                                listState: my.listState
+                            });
+                        },
+                        onClickToggelButton: () => {
+                            my.listState[key].collapsed = !my.listState[key].collapsed;
+                            itemContent.style.display = my.listState[key].collapsed ? 'none' : 'block';
+                            toggleButton.textContent = my.listState[key].collapsed ? '▶' : '▼';
+                            self.store.set({
+                                key: "checklist_data",
+                                listsData: my.listsData,
+                                listState: my.listState
+                            });
+                        },
+
+                        onEditButton: () => this.self.editList(key, previewList), // Hier wird die editList-Funktion aufgerufen
+
+                    }));
+
+                    this.editList = async (listKey, previewList) => {
+                        my.tempList = {
+                            key: listKey,
+                            items: JSON.parse(JSON.stringify(my.listsData[listKey]))
+                        };
+                        my.currentItems = [];
+                        previewList.innerHTML = '';
+
+                        function populateCurrentItems(items) {
+                            items.forEach(item => {
+                                my.currentItems.push(item);
+                                populateCurrentItems(item.items);
+                            });
+                        }
+
+                        populateCurrentItems(my.tempList.items);
+
+                        renderPreview(my.tempList.key, my.tempList.items);
+                        const listForm = self.element.querySelector('.list-form');
+                        listForm.style.display = 'block';
+                    };
+
+
+                    itemElement.appendChild(listHtml);
+
+                    const itemContent = listHtml.querySelector('.item-content');
+                    const subitemList = listHtml.querySelector('.subitem-list');
+                    const toggleButton = listHtml.querySelector('.toggle-item');
+                    const editButton = listHtml.querySelector('.edit-list');
+
+                    if (my.listState[key].collapsed) {
+                        itemContent.style.display = 'none';
+                        toggleButton.textContent = '▶';
+                    }
+
+                    my.listsData[key].forEach(item => {
+                        renderItem(key, item, subitemList, itemContent, '');
+                    });
+
+                    const progress = calculateProgress(key, my.listsData[key]);
+                    listHtml.querySelector('.progress-fill').style.width = `${Math.round(progress)}%`;
+                    const progressProzent = listHtml.querySelector('.progress-prozent');
+                    progressProzent.innerText = `${Math.round(progress)}%`;
+                    if (progress === 100) {
+                        listHtml.classList.add('completed');
+                    }
+                }
+            } catch (e) {
+                console.error("Fehler beim Rendern der Listen:", e);
+                itemElement.innerHTML = `<p>Error rendering lists: ${e.message}</p>`;
+            }
+        }
+
+        function renderItem(listKey, item, parentElement, listContent, parentKey) {
+            const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
+            const isEndPoint = item.items.length === 0;
+            const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(listKey, itemKey, item.items, itemKey);
+
+            if (!my.listState[listKey]) {
+                console.log(`Initialisiere listState für ${listKey} in renderItem`);
+                my.listState[listKey] = {items: {}, collapsed: false};
+                initializeState(listKey, my.listsData[listKey], my.listState[listKey]);
+            }
+            if (!my.listState[listKey].items[itemKey]) {
+                console.log(`Initialisiere itemState für ${itemKey} in ${listKey}`);
+                my.listState[listKey].items[itemKey] = {checked: false, collapsed: false};
+            }
+            console.log('Rendering item:', {listKey, itemKey, isEndPoint, subitemProgress, item});
+            const isEndpointSubitem = isEndPoint ? 'point-item' : 'subitem'
+
+
+            const itemHtml = document.createElement('div');
+            itemHtml.className = isEndPoint ? 'point-item' : 'subitem';
+            itemHtml.dataset.id = itemKey;
+
+            $.setContent(itemHtml, $.html(self.html.renderItem, {
+                isEndPoint: isEndPoint ? 'point' : 'subitem',
+                itemName: item.name,
+                saveText: self.text.saveText,
+                cancelText: self.text.cancelText,
+                writeNoteText: self.text.writeNoteText,
+                itemKey: itemKey,
+                itemDeadline: item.deadline || '',
+                itemDeadlineFaellig: item.deadline ? `Fällig: ${formatDate(item.deadline)}` : '',
+                subitemProgress: !isEndPoint ? ('<span class="subitem-progress">' + Math.round(subitemProgress) + '</span>') : '',
+                subItemNodeClass: item.node ? 'subitem-node' : 'subitem-note-placeholder',
+                noteShow: item.note ? item.note : 'Noch keine Notiz vorhanden',
+                noteTitle: item.note ? 'Notiz bearbeiten' : 'Notiz hinzufügen',
+                itemNote: item.note || '',
+                subItemList: !isEndPoint ? '<div class="subitem-list"></div>' : '',
+                checkboxChecked: my.listState[listKey].items[itemKey]?.checked ? true : false,
+
+
+                onEditeNode: (e) => {
+                    e.stopPropagation();
+                    const nodeContainer = itemHtml.querySelector('.note-container');
+                    const nodeDisplay = nodeContainer.querySelector('.subitem-node');
+                    const nodePlaceholder = nodeContainer.querySelector('.subitem-note-placeholder');
+                    const editNodeBtn = nodeContainer.querySelector('.edit-note-btn');
+                    const nodeEditForm = nodeContainer.querySelector('.note-edit-form');
+                    const nodeInput = nodeEditForm.querySelector('.note-input');
+
+                    if (nodeDisplay) nodeDisplay.style.display = 'none';
+                    if (nodePlaceholder) nodePlaceholder.style.display = 'none';
+                    editNodeBtn.style.display = 'none';
+                    nodeEditForm.style.display = 'block';
+                    nodeInput.focus();
+                },
+                onSaveNoteButton: (e) => {
+                    e.stopPropagation();
+                    const newNote = noteInput.value.trim();
+
+                    function updateNote(items, targetKey, updatedNote) {
+                        for (let current of items) {
+                            if (current.key === targetKey) {
+                                current.note = updatedNote;
+                                return true;
+                            }
+                            if (current.items && updateNote(current.items, targetKey, updatedNote)) return true;
+                        }
+                        return false;
+                    }
+
+                    updateNote(my.listsData[listKey], item.key, newNote);
+
+                    const noteContainer = noteEditForm.parentElement;
+                    const currentNoteDisplay = noteContainer.querySelector('.subitem-note');
+                    const currentNotePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
+
+                    noteEditForm.style.display = 'none';
+                    editNoteBtn.style.display = '';
+
+                    if (newNote) {
+                        if (currentNoteDisplay) {
+                            currentNoteDisplay.textContent = newNote;
+                            currentNoteDisplay.style.display = '';
+                        } else if (currentNotePlaceholder) {
+                            const newNoteDisplay = document.createElement('p');
+                            newNoteDisplay.className = 'subitem-note';
+                            newNoteDisplay.textContent = newNote;
+                            noteContainer.insertBefore(newNoteDisplay, editNoteBtn);
+                            currentNotePlaceholder.remove();
+                        }
+                    } else {
+                        if (currentNoteDisplay) {
+
+                            const newPlaceholder = document.createElement('p');
+                            newPlaceholder.className = 'subitem-note-placeholder';
+                            newPlaceholder.textContent = 'Notiz hinzufügen';
+                            noteContainer.insertBefore(newPlaceholder, editNoteBtn);
+                            currentNoteDisplay.remove();
+                        } else if (currentNotePlaceholder) {
+                            currentNotePlaceholder.style.display = '';
+                        }
+                    }
+                    self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
+                },
+                onCancelNoteBtn: (e) => {
+                    e.stopPropagation();
+                    noteEditForm.style.display = 'none';
+                    editNoteBtn.style.display = '';
+                    if (item.note) {
+                        if (noteDisplay) noteDisplay.style.display = '';
+                    } else {
+                        if (notePlaceholder) notePlaceholder.style.display = '';
+                    }
+                },
+                onDeadlinePicker: (e) => {
+                    const newDeadline = e.target.value || null;
+
+                    function updateDeadline(items) {
+                        for (const currentItem of items) {
+                            if (currentItem.key === item.key) {
+                                currentItem.deadline = newDeadline;
+                                return true;
+                            }
+                            if (updateDeadline(currentItem.items)) return true;
+                        }
+                        return false;
+                    }
+
+                    updateDeadline(my.listsData[listKey]);
+                    const deadlineDisplay = itemHtml.querySelector('.deadline-display');
+                    deadlineDisplay.textContent = newDeadline ? `Fällig: ${formatDate(newDeadline)}` : '';
+                    self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
+                },
+                //hier auslagern
+                onCheckboxChange: async (e) => {
+                    my.listState[listKey].items[itemKey].checked = e.target.checked;
+                    console.log(`Checkbox für ${itemKey} geändert. Neuer Zustand: ${my.listState[listKey].items[itemKey].checked}`);
+
+                    if (!isEndPoint) {
+                        updateSubitemPoints(listKey, item.items, itemKey, my.listState[listKey].items[itemKey].checked);
+                        const subitemList = itemHtml.querySelector('.subitem-list');
+                        subitemList.innerHTML = '';
+                        item.items.forEach(subItem => {
+                            renderItem(listKey, subItem, subitemList, listContent, itemKey);
+                        });
+                        const progressElement = itemHtml.querySelector('.subitem-progress');
+                        if (progressElement) {
+                            progressElement.textContent = `${Math.round(calculateSubitemProgress(listKey, itemKey, item.items, itemKey))}%`;
+                        }
+                    }
+
+                    updateParentState(itemKey, listKey, listContent);
+
+                    const progress = calculateProgress(listKey, my.listsData[listKey]);
+                    const listItem = listContent.closest('.list-item');
+                    const progressFill = listContent.querySelector('.progress-fill');
+                    const progressProzent = listItem.querySelector('.progress-prozent');
+
+                    if (progressFill && progressProzent) {
+                        progressFill.style.width = `${Math.round(progress)}%`;
+                        progressProzent.innerText = `${Math.round(progress)}%`;
+                    } else {
+                        console.warn('Progress elements not found:', {progressFill, progressProzent});
+                    }
+
+                    if (progress === 100) {
+                        listItem.classList.add('completed');
+                    } else {
+                        listItem.classList.remove('completed');
+                    }
+
+                    await self.store.set({
+                        key: "checklist_data",
+                        listsData: my.listsData,
+                        listState: my.listState
+                    });
+                }
+
+
+            }));
+
+            parentElement.appendChild(itemHtml);
+            //          const saveNoteBtn = itemHtml.querySelector('.save-note-btn');
+            //       const cancelNoteBtn = itemHtml.querySelector('.cancel-note-btn');
+            //     const deadlinePicker = itemHtml.querySelector('.deadline-picker');
+            const checkbox = itemHtml.querySelector(`.${isEndPoint ? 'point' : 'subitem'}--checkbox`);
+            const subitemList = itemHtml.querySelector('.subitem-list');
+            const editNoteBtn = itemHtml.querySelector('.edit-note-btn');
+            const noteEditForm = itemHtml.querySelector('.note-edit-form');
+            const noteInput = itemHtml.querySelector('.note-input');
+            const noteDisplay = itemHtml.querySelector('.subitem-note');
+            const notePlaceholder = itemHtml.querySelector('.subitem-note-placeholder');
+
+            checkbox.checked = my.listState[listKey].items[itemKey]?.checked || false;
+
+            /*
+            editNoteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const noteContainer = editNoteBtn.parentElement;
+                const currentNoteDisplay = noteContainer.querySelector('.subitem-note');
+                const currentNotePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
+                if (currentNoteDisplay) currentNoteDisplay.style.display = 'none';
+                if (currentNotePlaceholder) currentNotePlaceholder.style.display = 'none';
+                editNoteBtn.style.display = 'none';
+                noteEditForm.style.display = 'block';
+                noteInput.focus();
+            });
+
+            saveNoteBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const newNote = noteInput.value.trim();
+
+                function updateNote(items, targetKey, updatedNote) {
+                    for (let current of items) {
+                        if (current.key === targetKey) {
+                            current.note = updatedNote;
+                            return true;
+                        }
+                        if (current.items && updateNote(current.items, targetKey, updatedNote)) return true;
+                    }
+                    return false;
+                }
+
+                updateNote(my.listsData[listKey], item.key, newNote);
+
+                const noteContainer = noteEditForm.parentElement;
+                const currentNoteDisplay = noteContainer.querySelector('.subitem-note');
+                const currentNotePlaceholder = noteContainer.querySelector('.subitem-note-placeholder');
+
+                noteEditForm.style.display = 'none';
+                editNoteBtn.style.display = '';
+
+                if (newNote) {
+                    if (currentNoteDisplay) {
+                        currentNoteDisplay.textContent = newNote;
+                        currentNoteDisplay.style.display = '';
+                    } else if (currentNotePlaceholder) {
+                        const newNoteDisplay = document.createElement('p');
+                        newNoteDisplay.className = 'subitem-note';
+                        newNoteDisplay.textContent = newNote;
+                        noteContainer.insertBefore(newNoteDisplay, editNoteBtn);
+                        currentNotePlaceholder.remove();
+                    }
+                } else {
+                    if (currentNoteDisplay) {
+
+                        const newPlaceholder = document.createElement('p');
+                        newPlaceholder.className = 'subitem-note-placeholder';
+                        newPlaceholder.textContent = 'Notiz hinzufügen';
+                        noteContainer.insertBefore(newPlaceholder, editNoteBtn);
+                        currentNoteDisplay.remove();
+                    } else if (currentNotePlaceholder) {
+                        currentNotePlaceholder.style.display = '';
+                    }
+                }
+                await self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
+            });
+
+
+            cancelNoteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                noteEditForm.style.display = 'none';
+                editNoteBtn.style.display = '';
+                if (item.note) {
+                    if (noteDisplay) noteDisplay.style.display = '';
+                } else {
+                    if (notePlaceholder) notePlaceholder.style.display = '';
+                }
+            });
+
+
+            deadlinePicker.addEventListener('change', async () => {
+                const newDeadline = deadlinePicker.value || null;
+
+                function updateDeadline(items) {
+                    for (const currentItem of items) {
+                        if (currentItem.key === item.key) {
+                            currentItem.deadline = newDeadline;
+                            return true;
+                        }
+                        if (updateDeadline(currentItem.items)) return true;
+                    }
+                    return false;
+                }
+
+                updateDeadline(my.listsData[listKey]);
+                deadlineDisplay.textContent = newDeadline ? `Fällig: ${formatDate(newDeadline)}` : '';
+                await self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
+            });
+            */
+
+            function parentElementForId(rootElement, itemId) {
+                return rootElement.querySelector(`[data-id="${itemId}"]`);
+            }
+
+            function findChildItemsInData(items, targetKeyPart, currentParentKey) {
+                for (const item of items) {
+                    const fullKey = currentParentKey ? `${currentParentKey}_${item.key}` : item.key;
+                    const keyPart = fullKey.split('_').pop();
+                    if (keyPart === targetKeyPart) {
+                        return item.items;
+                    }
+                    const found = findChildItemsInData(item.items, targetKeyPart, fullKey);
+                    if (found && found.length > 0) return found;
+                }
+                return [];
+            }
+
+            const updateParentState = (itemId, currentListKey, currentListContent) => {
+                console.log("-------------")
+                console.log(itemId)
+                const parts = itemId.split('_');
+                if (parts.length <= 3) return;
+                //     console.log('Update parent state for', {itemId, currentListKey, currentListContent});
+                parts.pop();
+                parts.pop();
+                parts.pop();
+
+                const parentId = parts.join('_');
+                console.log("parent id: " + parentId);
+                console.log(currentListContent + " currentListKey: " + parentId);
+                console.log(currentListContent);
+
+                console.log("current content" + currentListContent)
+                console.log("parentId" + parentId)
+                const parentItemInState = my.listState[currentListKey].items[parentId];
+                const parentElementInDOM = parentElementForId(currentListContent, parentId);//hir nullllll
+
+                console.log('parent item in state:' + (parentItemInState));
+                console.log('parent item in parentElementInDOM:' + (parentElementInDOM));
+                if (parentItemInState && parentElementInDOM) {
+                    const childItems = findChildItemsInData(my.listsData[currentListKey], parentId.split('_').pop(), parts.slice(0, -1).join('_'));
+
+                    const allChildrenChecked = childItems.every(child => {
+                        const childKeyInState = `${parentId}_${child.key}`;
+                        return my.listState[currentListKey].items[childKeyInState]?.checked;
+                    });
+                    console.log('allChildrenChecked:' + (allChildrenChecked));
+
+                    parentItemInState.checked = allChildrenChecked;
+                    const parentCheckboxInDOM = parentElementInDOM.querySelector('.subitem--checkbox, .point--checkbox');
+                    // console.log(parentCheckboxInDOM)
+                    console.log("alle kinder" + parentCheckboxInDOM)
+
+                    if (parentCheckboxInDOM) {
+                        parentCheckboxInDOM.checked = allChildrenChecked;
+                        console.log('parent checkbox in dom:' + (parentCheckboxInDOM));
+                    }
+
+                    const parentProgressElement = parentElementInDOM.querySelector('.subitem-progress');
+                    if (parentProgressElement) {
+                        const parentSubitemProgress = calculateSubitemProgress(currentListKey, parentId, childItems, parentId);
+                        parentProgressElement.textContent = `${Math.round(parentSubitemProgress)}%`;
+                    }
+
+                    updateParentState(parentId, currentListKey, currentListContent);
+                }
+            };
+
+            /*
+            checkbox.addEventListener('change', async () => {
+                my.listState[listKey].items[itemKey].checked = checkbox.checked;
+
+                console.log(`Checkbox für ${itemKey} geändert. Neuer Zustand: ${my.listState[listKey].items[itemKey].checked}`);
+
+                if (!isEndPoint) {
+                    updateSubitemPoints(listKey, item.items, itemKey, checkbox.checked);
+                    subitemList.innerHTML = '';
+                    item.items.forEach(subItem => {
+                        renderItem(listKey, subItem, subitemList, listContent, itemKey);
+                    });
+                    const subitemProgress = calculateSubitemProgress(listKey, itemKey, item.items, itemKey);
+                    const progressElement = itemHtml.querySelector('.subitem-progress');
+                    if (progressElement) {
+                        progressElement.textContent = `${Math.round(subitemProgress)}%`;
+                    }
+                }
+
+                updateParentState(itemKey, listKey, listContent);
+
+                const progress = calculateProgress(listKey, my.listsData[listKey]);
+                const listItem = listContent.closest('.list-item');
+                const progressFill = listContent.querySelector('.progress-fill');
+                const progressProzent = listItem.querySelector('.progress-prozent');
+
+                if (progressFill && progressProzent) {
+                    progressFill.style.width = `${Math.round(progress)}%`;
+                    progressProzent.innerText = `${Math.round(progress)}%`;
+                } else {
+                    console.warn('Progress elements not found:', {progressFill, progressProzent});
+                }
+
+                if (progress === 100) {
+                    listItem.classList.add('completed');
+                } else {
+                    listItem.classList.remove('completed');
+                }
+
+                await self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
+            });
+            */
+            if (!isEndPoint) {
+                item.items.forEach(subItem => {
+                    renderItem(listKey, subItem, subitemList, listContent, itemKey);
+                });
+            }
+        }
+
+        function updateSubitemPoints(listKey, items, parentKey, checked) {
+            items.forEach(item => {
+                const itemKey = `${parentKey}_${item.key}`;
+                if (my.listState[listKey].items[itemKey]) {
+                    my.listState[listKey].items[itemKey].checked = checked;
+                }
+                updateSubitemPoints(listKey, item.items, itemKey, checked);
+            });
+        }
+
+
     }
 };
