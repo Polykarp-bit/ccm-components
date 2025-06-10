@@ -126,6 +126,35 @@ ccm.files["ccm.timetable.js"] = {
                     <div id="selected-schedule"></div>
                   </div>
                 `,
+                checkBoyStudyName:`<div class="study-group" data-study="${studyName}">
+                    <div class="study-item">
+                        <label>${studyName}</label>
+                    </div>
+                    <div class="semesters">`,
+
+                checkboxCoursItem:`
+                    <div class="study-group" data-study="${studyName}">
+                    <div class="study-item">
+                    <label>${studyName}</label>
+                    </div><div class="semesters">
+  
+                          `,
+                chekboxStudyEvent:
+                    `<div class="event-item">
+                      <input type="checkbox" class="event-checkbox" data-course-key="${kurs.key}" data-event-key="${event.key}" data-event-day="${normalizeDay(event.day)}" ${isChecked ? 'checked' : ''}>
+                      <label>${eventInfo}${kurs.value.createdBy === "student" ? ' [eigene Veranstaltung]' : ''}</label>
+                    </div>`,
+
+                checkboxSemester:`
+                    <div class="semester-group" data-semester="${semester}">
+                    <div class="semester-item">
+                        <input type="checkbox" class="semester-checkbox">
+                        <label>Semester ${semester}</label>
+                    </div>
+                    <div class="courses">
+                
+                `,
+
                 eventItem: `
                     <div class="event-form" data-index="%index%">
                       <div class="form-group">
