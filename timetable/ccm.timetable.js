@@ -126,34 +126,38 @@ ccm.files["ccm.timetable.js"] = {
                     <div id="selected-schedule"></div>
                   </div>
                 `,
-                checkBoyStudyName:`<div class="study-group" data-study="${studyName}">
-                    <div class="study-item">
-                        <label>${studyName}</label>
-                    </div>
-                    <div class="semesters">`,
 
-                checkboxCoursItem:`
-                    <div class="study-group" data-study="${studyName}">
-                    <div class="study-item">
-                    <label>${studyName}</label>
-                    </div><div class="semesters">
-  
-                          `,
-                chekboxStudyEvent:
-                    `<div class="event-item">
-                      <input type="checkbox" class="event-checkbox" data-course-key="${kurs.key}" data-event-key="${event.key}" data-event-day="${normalizeDay(event.day)}" ${isChecked ? 'checked' : ''}>
-                      <label>${eventInfo}${kurs.value.createdBy === "student" ? ' [eigene Veranstaltung]' : ''}</label>
+                checkboxStudyName:`
+                    <div class="study-group" data-study="%studyName%">
+                        <div class="study-item">
+                            <label>%studyName%</label>
+                        </div>
+                        <div class="semesters"></div>
                     </div>`,
 
                 checkboxSemester:`
-                    <div class="semester-group" data-semester="${semester}">
-                    <div class="semester-item">
-                        <input type="checkbox" class="semester-checkbox">
-                        <label>Semester ${semester}</label>
-                    </div>
-                    <div class="courses">
-                
-                `,
+                    <div class="semester-group" data-semester="%semester%">
+                        <div class="semester-item">
+                            <input type="checkbox" class="semester-checkbox">
+                            <label>Semester %semester%</label>
+                        </div>
+                        <div class="courses"><div>
+                    </div>`,
+
+                checkboxCourseItem:
+                    `<div class="course-group" data-course="%courseName%">
+                        <div class="course-item">
+                            <input type="checkbox" class="course-checkbox">
+                            <label>%courseName%</label>
+                        </div>
+                        <div class="courses"></div>
+                    </div>`,
+
+                checkboxStudyEvent:
+                    `<div class="event-item">
+                        <input type="checkbox" class="event-checkbox" data-course-key="%courseKey%" data-event-key="%eventKey%" data-event-day="%day%" checked=%isChecked%>
+                        <label>%eventInfo%</label>
+                    </div>`,
 
                 eventItem: `
                     <div class="event-form" data-index="%index%">
@@ -581,64 +585,55 @@ ccm.files["ccm.timetable.js"] = {
             });
             console.log(studyGroups)
 
-            let html = '';
-
             for (const studyName of Object.keys(studyGroups).sort()) {
-                html += `<div class="study-group" data-study="${studyName}">
-                    <div class="study-item">
-                        <label>${studyName}</label>
-                    </div>
-                    <div class="semesters">`;
+                const studyHtml = $.html(self.html.editView.checkboxStudyName, {
+                    studyName: studyName,
+                });
+                $.append(courseCheckboxList, studyHtml);
 
                 const semesters = studyGroups[studyName];
-
-
                 const semesterList = Object.keys(semesters).sort((a, b) => {
                     if (a === "N/A") return 1;
                     if (b === "N/A") return -1;
                     return parseInt(a) - parseInt(b);
                 });
 
-
                 for (const semester of semesterList) {
-                    html += `<div class="semester-group" data-semester="${semester}">
-                        <div class="semester-item">
-                            <input type="checkbox" class="semester-checkbox">
-                            <label>Semester ${semester}</label>
-                        </div>
-                        <div class="courses">`;
+                    const semesterHtml = $.html(self.html.editView.checkboxSemester, {
+                        semester: semester,
+                    });
+
+                    $.append(studyHtml.querySelector(".semesters"), semesterHtml);
 
                     const courses = semesters[semester];
                     for (const courseName of Object.keys(courses).sort()) {
                         const courseList = courses[courseName];
-                        html += `<div class="course-group" data-course="${courseName}">
-                            <div class="course-item">
-                                <input type="checkbox" class="course-checkbox">
-                                <label>${courseName}</label>
-                            </div>
-                            <div class="courses">`;
-
+                        const courseHtml = $.html(self.html.editView.checkboxCourseItem, {
+                            courseName: courseName,
+                        });
+                        $.append(semesterHtml.querySelector('.courses'), courseHtml);
 
                         for (const kurs of courseList) {
                             if (kurs?.value?.events) {
                                 for (const event of kurs.value.events) {
                                     const eventInfo = `${event.type} (${event.day}, ${event.from} - ${event.until}, Raum: ${event.room}${event.who ? `, Dozent: ${event.who}` : ''}${event.group ? `, Gruppe: ${event.group}` : ''}, ${event.period_from} - ${event.period_until})`;
                                     const isChecked = currentCourses.some(c => c.value.events.some(e => e.key === event.key)); // Prüfe, ob Event ausgewählt ist
-                                    html += `<div class="event-item">
-                                      <input type="checkbox" class="event-checkbox" data-course-key="${kurs.key}" data-event-key="${event.key}" data-event-day="${normalizeDay(event.day)}" ${isChecked ? 'checked' : ''}>
-                                      <label>${eventInfo}${kurs.value.createdBy === "student" ? ' [eigene Veranstaltung]' : ''}</label>
-                                    </div>`;
+
+                                    const eventItemHtml = self.ccm.helper.html(self.html.editView.checkboxStudyEvent, {
+                                        courseKey: kurs.key,
+                                        eventKey: event.key,
+                                        day: normalizeDay(event.day),
+                                        eventDay: normalizeDay(event.day),
+                                        isChecked: isChecked,
+                                        eventInfo: eventInfo + (kurs.value.createdBy === "student" ? ' [eigene Veranstaltung]' : ''),
+                                    });
+                                    $.append(courseHtml.querySelector('.courses'), eventItemHtml);
                                 }
                             }
                         }
-                        html += `</div></div>`;
                     }
-                    html += `</div></div>`;
                 }
-                html += `</div></div>`;
             }
-            courseCheckboxList.innerHTML = html;
-
             courseCheckboxList.querySelectorAll('.event-checkbox').forEach(checkbox => {
                 updateParentCheckboxes(checkbox);
             });
@@ -648,29 +643,31 @@ ccm.files["ccm.timetable.js"] = {
         };
 
         const updateParentCheckboxes = (eventCheckbox) => {
-            const eventItem = eventCheckbox.closest('.event-item');
-            const courseGroup = eventItem.closest('.course-group');
+            // Finde die übergeordneten Gruppen
+            const courseGroup = eventCheckbox.closest('.course-group');
+            if (!courseGroup) return;
             const semesterGroup = courseGroup.closest('.semester-group');
+            if (!semesterGroup) return;
 
-            const eventCheckboxes = courseGroup.querySelectorAll('.event-checkbox');
+            // 1. Kurs-Checkbox aktualisieren
             const courseCheckbox = courseGroup.querySelector('.course-checkbox');
+            const allEventCheckboxes = courseGroup.querySelectorAll('.event-checkbox');
 
-            const courseAllChecked = Array.from(eventCheckboxes).every(cb => cb.checked);
-            const courseSomeChecked = Array.from(eventCheckboxes).some(cb => cb.checked);
+            const allEventsChecked = Array.from(allEventCheckboxes).every(cb => cb.checked);
+            const someEventsChecked = Array.from(allEventCheckboxes).some(cb => cb.checked);
 
-            if (courseCheckbox) {
-                courseCheckbox.checked = courseAllChecked;
-                courseCheckbox.indeterminate = courseSomeChecked && !courseAllChecked;
-            }
+            courseCheckbox.checked = allEventsChecked;
+            courseCheckbox.indeterminate = someEventsChecked && !allEventsChecked;
 
+            // 2. Semester-Checkbox aktualisieren
             const semesterCheckbox = semesterGroup.querySelector('.semester-checkbox');
-            const courseCheckboxes = semesterGroup.querySelectorAll('.course-checkbox');
-            const semesterAllChecked = Array.from(courseCheckboxes).every(cb => cb.checked);
-            const semesterSomeChecked = Array.from(courseCheckboxes).some(cb => cb.checked || cb.indeterminate);
-            if (semesterCheckbox) {
-                semesterCheckbox.checked = semesterAllChecked;
-                semesterCheckbox.indeterminate = semesterSomeChecked && !semesterAllChecked;
-            }
+            const allCourseCheckboxes = semesterGroup.querySelectorAll('.course-checkbox');
+
+            const allCoursesChecked = Array.from(allCourseCheckboxes).every(cb => cb.checked && !cb.indeterminate);
+            const someCoursesChecked = Array.from(allCourseCheckboxes).some(cb => cb.checked || cb.indeterminate);
+
+            semesterCheckbox.checked = allCoursesChecked;
+            semesterCheckbox.indeterminate = someCoursesChecked && !allCoursesChecked;
         };
 
         const saveSelectedCourses = async () => {
@@ -701,166 +698,102 @@ ccm.files["ccm.timetable.js"] = {
             }
         };
 
+        // REPLACE the entire initCheckboxListeners function in your second file with this:
+
         const initCheckboxListeners = async (container, courseCheckboxList) => {
             const selectedScheduleContainer = container.querySelector('#selected-schedule');
 
-            courseCheckboxList.querySelectorAll('.semester-checkbox').forEach(checkbox => {
-                checkbox.addEventListener('change', async (e) => {
-                    const semesterGroup = e.target.closest('.semester-group');
-                    const eventCheckboxes = semesterGroup.querySelectorAll('.event-checkbox');
-                    eventCheckboxes.forEach(cb => {
-                        cb.checked = e.target.checked;
-                        const courseKey = cb.dataset.courseKey;
-                        const eventKey = cb.dataset.eventKey;
-                        const course = allCourses.find(k => k.key === courseKey);
-                        const event = course.value.events.find(e => e.key === eventKey);
+            const handleCheckboxChange = async (checkbox) => {
+                const courseKey = checkbox.dataset.courseKey;
+                const eventKey = checkbox.dataset.eventKey;
+                const isChecked = checkbox.checked;
 
-                        if (e.target.checked) {
-                            let courseInCurrent = currentCourses.find(c => c.key === courseKey);
-                            if (!courseInCurrent) {
-                                courseInCurrent = {
-                                    key: courseKey,
-                                    course: course.value.course,
-                                    value: {
-                                        course: course.value.course,
-                                        course_of_study: course.value.course_of_study,
-                                        createdBy: course.value.createdBy,
-                                        events: []
-                                    }
-                                };
-                                currentCourses.push(courseInCurrent);
+                const courseFromAll = allCourses.find(c => c.key === courseKey);
+                if (!courseFromAll) return;
+                const eventFromAll = courseFromAll.value.events.find(e => e.key === eventKey);
+                if (!eventFromAll) return;
+
+                // Find or create the course in our current selection
+                let courseInCurrent = currentCourses.find(c => c.key === courseKey);
+
+                if (isChecked) {
+                    // --- ADD EVENT ---
+                    if (!courseInCurrent) {
+                        courseInCurrent = {
+                            ...courseFromAll, // Copy properties from the original course
+                            value: {
+                                ...courseFromAll.value,
+                                events: [] // Start with an empty events array
                             }
-                            if (!courseInCurrent.value.events.some(e => e.key === eventKey)) {
-                                courseInCurrent.value.events.push(event);
-                                renderCourse(courseInCurrent, updateParentCheckboxes);
-                            }
-                        } else {
-                            const courseInCurrent = currentCourses.find(c => c.key === courseKey);
-                            if (courseInCurrent) {
-                                courseInCurrent.value.events = courseInCurrent.value.events.filter(e => e.key !== eventKey);
-                                if (courseInCurrent.value.events.length === 0) {
-                                    currentCourses = currentCourses.filter(c => c.key !== courseKey);
-                                    const courseElement = selectedScheduleContainer.querySelector(`.course-item[data-key="${courseKey}"]`);
-                                    if (courseElement) selectedScheduleContainer.removeChild(courseElement);
-                                } else {
-                                    const courseElement = selectedScheduleContainer.querySelector(`.course-item[data-key="${courseKey}"]`);
-                                    if (courseElement) selectedScheduleContainer.removeChild(courseElement);
-                                    renderCourse(courseInCurrent, updateParentCheckboxes);
-                                }
-                            }
-                        }
-                    });
-                    if (eventCheckboxes.length > 0) {
-                        eventCheckboxes.forEach(cb => updateParentCheckboxes(cb));
+                        };
+                        currentCourses.push(courseInCurrent);
                     }
-                    await saveSelectedCourses();
-                });
-            });
-
-            courseCheckboxList.querySelectorAll('.course-checkbox').forEach(checkbox => {
-                checkbox.addEventListener('change', async (e) => {
-                    const courseGroup = e.target.closest('.course-group');
-                    const eventCheckboxes = courseGroup.querySelectorAll('.event-checkbox');
-                    eventCheckboxes.forEach(cb => {
-                        cb.checked = e.target.checked;
-                        const courseKey = cb.dataset.courseKey;
-                        const eventKey = cb.dataset.eventKey;
-                        const course = allCourses.find(k => k.key === courseKey);
-                        const event = course.value.events.find(e => e.key === eventKey);
-
-                        if (e.target.checked) {
-                            let courseInCurrent = currentCourses.find(c => c.key === courseKey);
-                            if (!courseInCurrent) {
-                                courseInCurrent = {
-                                    key: courseKey,
-                                    course: course.value.course,
-                                    color: "",
-                                    note: "",
-                                    value: {
-                                        course: course.value.course,
-                                        course_of_study: course.value.course_of_study,
-                                        createdBy: course.value.createdBy,
-                                        events: []
-                                    }
-                                };
-                                currentCourses.push(courseInCurrent);
-                            }
-                            if (!courseInCurrent.value.events.some(e => e.key === eventKey)) {
-                                courseInCurrent.value.events.push(event);
-                                renderCourse(courseInCurrent, updateParentCheckboxes);
-                            }
-                        } else {
-                            const courseInCurrent = currentCourses.find(c => c.key === courseKey);
-                            if (courseInCurrent) {
-                                courseInCurrent.value.events = courseInCurrent.value.events.filter(e => e.key !== eventKey);
-                                if (courseInCurrent.value.events.length === 0) {
-                                    currentCourses = currentCourses.filter(c => c.key !== courseKey);
-                                    const courseElement = selectedScheduleContainer.querySelector(`.course-item[data-key="${courseKey}"]`);
-                                    if (courseElement) selectedScheduleContainer.removeChild(courseElement);
-                                } else {
-                                    const courseElement = selectedScheduleContainer.querySelector(`.course-item[data-key="${courseKey}"]`);
-                                    if (courseElement) selectedScheduleContainer.removeChild(courseElement);
-                                    renderCourse(courseInCurrent, updateParentCheckboxes);
-                                }
-                            }
-                        }
-                    });
-                    if (eventCheckboxes.length > 0) {
-                        updateParentCheckboxes(eventCheckboxes[0]);
+                    // Add event if it's not already there
+                    if (!courseInCurrent.value.events.some(e => e.key === eventKey)) {
+                        courseInCurrent.value.events.push({ ...eventFromAll });
                     }
-                    await saveSelectedCourses();
-                });
-            });
-
-            courseCheckboxList.querySelectorAll('.event-checkbox').forEach(checkbox => {
-                checkbox.addEventListener('change', async (e) => {
-                    const courseKey = e.target.dataset.courseKey;
-                    const eventKey = e.target.dataset.eventKey;
-                    const course = allCourses.find(k => k.key === courseKey);
-                    const event = course.value.events.find(e => e.key === eventKey);
-
-                    if (e.target.checked) {
-                        let courseInCurrent = currentCourses.find(c => c.key === courseKey);
-                        if (!courseInCurrent) {
-                            courseInCurrent = {
-                                key: courseKey,
-                                course: course.value.course,
-                                value: {
-                                    course: course.value.course,
-                                    course_of_study: course.value.course_of_study,
-                                    createdBy: course.value.createdBy,
-                                    events: []
-                                }
-                            };
-                            currentCourses.push(courseInCurrent);
-                        }
-
-                        if (!courseInCurrent.value.events.some(e => e.key === eventKey)) {
-                            courseInCurrent.value.events.push({
-                                ...event,
-                                color: event.color || "",
-                                note: event.note || ""
-                            });
-                            renderCourse(courseInCurrent, updateParentCheckboxes);
-                        }
-                    } else {
-                        const courseInCurrent = currentCourses.find(c => c.key === courseKey);
-                        if (courseInCurrent) {
-                            courseInCurrent.value.events = courseInCurrent.value.events.filter(e => e.key !== eventKey);
-                            if (courseInCurrent.value.events.length === 0) {
-                                currentCourses = currentCourses.filter(c => c.key !== courseKey);
-                                const courseElement = selectedScheduleContainer.querySelector(`.course-item[data-key="${courseKey}"]`);
-                                if (courseElement) selectedScheduleContainer.removeChild(courseElement);
-                            } else {
-                                const courseElement = selectedScheduleContainer.querySelector(`.course-item[data-key="${courseKey}"]`);
-                                if (courseElement) selectedScheduleContainer.removeChild(courseElement);
-                                renderCourse(courseInCurrent, updateParentCheckboxes);
-                            }
+                } else {
+                    // --- REMOVE EVENT ---
+                    if (courseInCurrent) {
+                        // Remove the specific event
+                        courseInCurrent.value.events = courseInCurrent.value.events.filter(e => e.key !== eventKey);
+                        // If the course now has no events, remove the entire course
+                        if (courseInCurrent.value.events.length === 0) {
+                            currentCourses = currentCourses.filter(c => c.key !== courseKey);
                         }
                     }
-                    updateParentCheckboxes(e.target);
-                    await saveSelectedCourses();
+                }
+            };
+
+            const redrawSelectedCourses = () => {
+                selectedScheduleContainer.innerHTML = ''; // Clear the view
+                currentCourses.forEach(course => {
+                    // Re-render each course that is still in the list
+                    if (course.value.events.length > 0) {
+                        renderCourse(course, updateParentCheckboxes);
+                    }
                 });
+            };
+
+            // ERSETZE den kompletten Listener in initCheckboxListeners
+            courseCheckboxList.addEventListener('change', async (e) => {
+                const target = e.target;
+                const isChecked = target.checked;
+
+                // Behandelt Klicks auf alle Checkbox-Typen
+                if (target.type === 'checkbox') {
+                    let affectedEvents = [];
+
+                    // Klick auf ein einzelnes Event
+                    if (target.classList.contains('event-checkbox')) {
+                        affectedEvents.push(target);
+                    }
+                    // Klick auf einen Kurs oder ein Semester propagiert nach unten
+                    else if (target.classList.contains('course-checkbox') || target.classList.contains('semester-checkbox')) {
+                        const parentGroup = target.closest('.course-group') || target.closest('.semester-group');
+                        affectedEvents = parentGroup.querySelectorAll('.event-checkbox');
+                    }
+
+                    // Datenmodell aktualisieren
+                    for (const cb of affectedEvents) {
+                        if (cb.checked !== isChecked) {
+                            cb.checked = isChecked;
+                        }
+                        await handleCheckboxChange(cb); // Funktion aus der vorherigen Lösung
+                    }
+
+                    // Visuelle Liste der ausgewählten Kurse neu zeichnen
+                    redrawSelectedCourses(); // Funktion aus der vorherigen Lösung
+
+                    // Zustand der übergeordneten Checkboxen korrigieren (VON UNTEN NACH OBEN)
+                    // Wir müssen nur von einem der geänderten Events starten
+                    if (affectedEvents.length > 0) {
+                        updateParentCheckboxes(affectedEvents[0]);
+                    }
+
+                    // Finale Daten speichern
+                    await saveSelectedCourses();
+                }
             });
         };
 
