@@ -234,9 +234,10 @@ ccm.files["ccm.timetable.js"] = {
                                     </div>
                                  <div class="event-color" id="event-color-container-%eventKey%">
                                     <label for="event-color-%eventKey%">Farbe:</label>
-                                    <select class="color-select" id="event-color-%eventKey%" onchange="%onChangeColor%">
-                                        %colorOptions%
-                                    </select>
+                                    <div class="event-color" id="event-color-container-%eventKey%">
+                                        <label for="event-color-%eventKey%">Farbe:</label>
+                                        <input type="color" class="color-picker" id="event-color-%eventKey%" value="%colorValue%">
+                                    </div>
                                 </div>
                                 <div class="course-actions">
                                     <button class="remove-event-button">Entfernen</button>
@@ -698,7 +699,6 @@ ccm.files["ccm.timetable.js"] = {
             }
         };
 
-        // REPLACE the entire initCheckboxListeners function in your second file with this:
 
         const initCheckboxListeners = async (container, courseCheckboxList) => {
             const selectedScheduleContainer = container.querySelector('#selected-schedule');
@@ -797,105 +797,101 @@ ccm.files["ccm.timetable.js"] = {
             });
         };
 
+        // ERSETZEN SIE IHRE KOMPLETTE renderCourse-Funktion MIT DIESER:
         const renderCourse = (course, updateParentCheckbox) => {
             const selectedScheduleContainer = self.element.querySelector('#selected-schedule');
+
             if (!course.value.events || !Array.isArray(course.value.events)) {
                 console.warn(`Kurs ${course.value.course} hat keine gültigen Events.`, course);
                 course.value.events = [];
             }
 
             course.value.events.forEach(event => {
-                if (!event.links) { // Sicherstellen, dass das Links-Array existiert
+                // --- 1. Veraltete Hilfsfunktionen wurden entfernt ---
+                // Die alten Funktionen `onChangeColor` und `renderColorOptions` gibt es hier nicht mehr.
+
+                if (!event.links) {
                     event.links = [];
                 }
 
-                // Prüfen, ob das Element schon existiert, um Duplikate zu vermeiden (wichtig bei re-render)
-                let courseHtmlNode = selectedScheduleContainer.querySelector(`.course-item .event-info[data-event-key="${event.key}"]`);
-                if (courseHtmlNode) {
-                    courseHtmlNode = courseHtmlNode.closest('.course-item'); // Das umschließende .course-item finden
-                    // Optional: Nur Links aktualisieren statt alles neu zu rendern, hier aber erstmal remove/add
-                    courseHtmlNode.remove();
+                // --- 2. Standardfarbe wird gesetzt ---
+                if (!event.color) {
+                    event.color = '#cccccc'; // Standardwert für den Farbwähler
                 }
-                const onChangeColor = async (e) => {
-                    const newColor = e.target.value;
-                    event.color = newColor;
-                    // Finde das DOM-Element und ändere die Farbe direkt (oder rendere das Item neu)
-                    const courseItem = selectedScheduleContainer.querySelector(`.event-info[data-event-key="${event.key}"]`).closest('.course-item');
-                    if(courseItem) courseItem.style.borderLeft = `5px solid ${newColor}`;
-                    await saveSelectedCourses();
-                };
-                const renderColorOptions = () => {
-                    const colors = ["#FFFFFF", "#FFADAD", "#FFD6A5", "#FDFFB6", "#CAFFBF", "#9BF6FF", "#A0C4FF", "#BDB2FF", "#FFC6FF"];
-                    return colors.map(color =>
-                        $.html`<option value="${color}" ${event.color === color ? 'selected' : ''}>${color}</option>`
-                    ).join('');
-                };
 
                 const courseHtml = document.createElement('div');
                 courseHtml.className = 'list-item';
 
+                // --- 3. HTML wird mit den korrekten Werten gefüllt ---
+                // Nur die benötigten Parameter `borderColor` und `colorValue` werden übergeben.
                 $.setContent(courseHtml, $.html(self.html.editView.courseItem, {
                     key: course.key,
                     courseTitle: course.value.course + " (" + event.type + ")" || "Unbekannter Kurs",
                     eventKey: event.key,
-                    eventTimeData: `${event.day}, ${event.from} - ${event.until}`,
-                    borderColor: event.color || '#ccc',
-                    colorOptions: renderColorOptions(),
-                    onChangeColor: onChangeColor,
+                    eventTimeData: `${event.day}, ${event.from} - ${event.until}, Raum: ${event.room}`,
+                    borderColor: event.color,
+                    colorValue: event.color
                 }));
+
                 $.append(selectedScheduleContainer, courseHtml);
 
+                // --- 4. Der korrekte Event Listener wird hinzugefügt ---
+                // Dieser Block hat in Ihrem Code gefehlt.
+                const colorPicker = courseHtml.querySelector(`#event-color-${event.key}`);
+                colorPicker.addEventListener('input', async (e) => {
+                    const newColor = e.target.value;
+                    event.color = newColor;
+
+                    const courseItemDiv = courseHtml.querySelector('.course-item');
+                    if (courseItemDiv) courseItemDiv.style.borderLeft = `5px solid ${newColor}`;
+
+                    await saveSelectedCourses();
+                });
+
+
+                // --- Der Rest der Funktion (Notizen, Links, etc.) bleibt wie gehabt ---
                 const noteContainer = courseHtml.querySelector(`#event-note-container-${event.key}`);
-                // ... (bestehende Logik für Notizen bleibt gleich)
                 if (event.note && event.note.trim() !== "") {
                     noteContainer.innerHTML = `
-                        <textarea class="event-note-textarea" id="event-note-${event.key}" placeholder="Deine Notiz...">${event.note}</textarea>
-                        <button type="button" class="save-note-button small-button">Notiz speichern</button>
-                    `;
+                <textarea class="event-note-textarea" id="event-note-${event.key}" placeholder="Deine Notiz...">${event.note}</textarea>
+                <button type="button" class="save-note-button small-button">Notiz speichern</button>
+            `;
                     noteContainer.querySelector('.save-note-button').addEventListener('click', async () => {
                         event.note = noteContainer.querySelector('textarea').value.trim();
                         await saveSelectedCourses();
-                        alert('Notiz gespeichert!'); // Feedback
+                        alert('Notiz gespeichert!');
                     });
-                    noteContainer.querySelector('textarea').addEventListener('input', async function handleInput() {
-                        // Optional: Auto-save on input, oder nur mit Button
-                    });
-
                 } else {
                     initAddNoteButton(noteContainer, event);
                 }
 
-                function initAddNoteButton(container, currentEvent) { // currentEvent statt event um Shadowing zu vermeiden
+                function initAddNoteButton(container, currentEvent) {
                     container.innerHTML = `<button class="add-note-button">Notiz hinzufügen</button>`;
                     const addNoteButton = container.querySelector('.add-note-button');
                     addNoteButton.addEventListener('click', () => {
                         container.innerHTML = `
-                            <textarea class="event-note-textarea" id="event-note-${currentEvent.key}" placeholder="Deine Notiz..."></textarea>
-                            <button type="button" class="save-note-button small-button">Notiz speichern</button>
-                        `;
+                    <textarea class="event-note-textarea" id="event-note-${currentEvent.key}" placeholder="Deine Notiz..."></textarea>
+                    <button type="button" class="save-note-button small-button">Notiz speichern</button>
+                `;
                         const newTextarea = container.querySelector(`#event-note-${currentEvent.key}`);
                         const saveButton = container.querySelector('.save-note-button');
-
                         saveButton.addEventListener('click', async () => {
                             currentEvent.note = newTextarea.value.trim();
                             await saveSelectedCourses();
                             alert('Notiz gespeichert!');
-                            // Ggf. Textarea wieder durch "Notiz bearbeiten" Button ersetzen oder Text anzeigen
                         });
                         newTextarea.focus();
                     });
                 }
-                // --- Link Management ---
 
-                //toDO auslagen in eigenständige template
                 const eventLinksSection = courseHtml.querySelector(`#event-links-section-${event.key}`);
-                const currentLinksDiv = eventLinksSection.querySelector(`.current-event-links`); // ID #current-event-links-${event.key} ist auch gut
+                const currentLinksDiv = eventLinksSection.querySelector(`.current-event-links`);
                 const addLinkInlineButton = eventLinksSection.querySelector('.add-link-inline-button');
                 const newLinkTitleInput = eventLinksSection.querySelector('.new-link-title-inline');
                 const newLinkUrlInput = eventLinksSection.querySelector('.new-link-url-inline');
 
                 const refreshLinksDisplay = () => {
-                    currentLinksDiv.innerHTML = ''; // Bestehende Links löschen
+                    currentLinksDiv.innerHTML = '';
                     if (event.links && event.links.length > 0) {
                         event.links.forEach(link => {
                             const linkDisplayItem = document.createElement('div');
@@ -905,12 +901,10 @@ ccm.files["ccm.timetable.js"] = {
                             linkAnchor.textContent = `${link.title || link.url}`;
                             linkAnchor.target = "_blank";
                             linkAnchor.rel = "noopener noreferrer";
-
                             const removeLinkBtn = document.createElement('button');
                             removeLinkBtn.textContent = 'Link entfernen';
                             removeLinkBtn.classList.add('remove-single-link-button', 'small-button');
                             removeLinkBtn.dataset.linkKey = link.key;
-
                             linkDisplayItem.appendChild(linkAnchor);
                             linkDisplayItem.appendChild(removeLinkBtn);
                             currentLinksDiv.appendChild(linkDisplayItem);
@@ -920,22 +914,19 @@ ccm.files["ccm.timetable.js"] = {
                     }
                 };
 
-                refreshLinksDisplay(); // Links initial anzeigen
+                refreshLinksDisplay();
 
                 addLinkInlineButton.addEventListener('click', async () => {
                     const title = newLinkTitleInput.value.trim();
-                    let url = newLinkUrlInput.value.trim(); // Wichtig: 'let' statt 'const' verwenden
-
+                    let url = newLinkUrlInput.value.trim();
                     if (url) {
-                        // URL normalisieren: https:// voranstellen, falls kein Schema vorhanden ist
-                        if (!url.match(/^https?:\/\//i)) { // Prüft auf http:// oder https:// am Anfang (case-insensitive)
+                        if (!url.match(/^https?:\/\//i)) {
                             url = 'https://' + url;
                         }
-
-                        if (!event.links) event.links = []; // Sicherstellen
+                        if (!event.links) event.links = [];
                         event.links.push({
                             key: self.ccm.helper.generateKey(),
-                            title: title || url, // Titel oder URL als Fallback
+                            title: title || url,
                             url: url
                         });
                         newLinkTitleInput.value = '';
@@ -958,29 +949,22 @@ ccm.files["ccm.timetable.js"] = {
                     }
                 });
 
-
                 courseHtml.querySelector('.remove-event-button').addEventListener('click', async () => {
-                    // ... (bestehende Logik zum Entfernen des Events bleibt gleich)
-                    console.log('Removing event with key:', event.key);
                     const courseInCurrent = currentCourses.find(c => c.key === course.key);
                     if (courseInCurrent) {
                         courseInCurrent.value.events = courseInCurrent.value.events.filter(e => e.key !== event.key);
                         if (courseInCurrent.value.events.length === 0) {
                             currentCourses = currentCourses.filter(c => c.key !== course.key);
                         }
-                        // Das Element selbst entfernen
-                        const itemToRemove = selectedScheduleContainer.querySelector(`.course-item .event-info[data-event-key="${event.key}"]`);
-                        if(itemToRemove) itemToRemove.closest('.course-item').remove();
-
+                        const itemToRemove = selectedScheduleContainer.querySelector(`.event-info[data-event-key="${event.key}"]`);
+                        if(itemToRemove) itemToRemove.closest('.list-item').remove();
 
                         const courseCheckboxList = self.element.querySelector('#course-checkbox-list');
                         const checkbox = courseCheckboxList.querySelector(`.event-checkbox[data-event-key="${event.key}"]`);
                         if (checkbox) {
                             checkbox.checked = false;
-                            if (typeof updateParentCheckboxes === 'function') { // Falls updateParentCheckboxes übergeben wurde
+                            if (typeof updateParentCheckboxes === 'function') {
                                 updateParentCheckboxes(checkbox);
-                            } else if (typeof updateParentCheckbox === 'function') { // Fallback auf alten Namen
-                                updateParentCheckbox(checkbox);
                             }
                         }
                         await saveSelectedCourses();
