@@ -1049,9 +1049,9 @@ ccm.files["ccm.timetable.js"] = {
             scheduleViewElement.addEventListener('click', async (e) => {
 
                 const clickedEvent = e.target.closest('.event');
+                const courseId = clickedEvent.getAttribute('data-course-id');
 
                 if (clickedEvent) {
-                    const courseId = clickedEvent.getAttribute('data-course-id');
                     const eventId = clickedEvent.getAttribute('data-event-id');
                     await self.openModal(courseId, eventId);
                     console.log("Clicked element:", courseId);
@@ -1063,6 +1063,8 @@ ccm.files["ccm.timetable.js"] = {
                     self.closeModal();
                     return;
                 }
+                this.onchange && this.onchange({event: "schedule", instance: this.self, studentId: studentId, courseId: courseId,});
+                console.log("Clicked close:", courseId);
             });
 
             const container = self.element.querySelector('#main-content');
