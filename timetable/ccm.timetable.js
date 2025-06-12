@@ -1055,7 +1055,7 @@ ccm.files["ccm.timetable.js"] = {
                 const clickedEvent = e.target.closest('.event');
                 const courseId = clickedEvent.getAttribute('data-course-id');
 
-                this.onchange && this.onchange({event: "schedule", instance: this.self, studentId: studentId, courseId: courseId,});
+                this.onchange && this.onchange({event: "schedule", instance: this, studentId: studentId, courseId: courseId,});
                 if (clickedEvent) {
                     const eventId = clickedEvent.getAttribute('data-event-id');
                     await self.openModal(courseId, eventId);
