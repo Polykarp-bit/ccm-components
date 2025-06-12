@@ -398,6 +398,10 @@ ccm.files["ccm.timetable.js"] = {
 
         };
 
+        this.getValue = () => {
+            return currentCourses;
+        }
+
         this.renderView = async () => {
             const toggleButton = self.element.querySelector('#toggle-view-button');
             // hier auch texte
