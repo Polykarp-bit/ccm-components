@@ -16,17 +16,20 @@ ccm.files["ccm.timetable.js"] = {
         // alle Kurse, die der Student ausgewählt hat
         studentStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_student_schedules"}],
         css: ["ccm.load", "./resources/style.css"],
+        // Bitte diesen Block komplett kopieren und einfügen
         text: {
             configureTimetableText: "Stundenplan Konfigurieren",
             timeTableText: "Stundenplan",
             plsLoggin: "Bitte logge dich ein, um deinen Stundenplan zu sehen",
-            timtableEditText: "Stundenplan bearbeiten",
-            addOwnCourseText: "Neuen Kurs Anlegen",
+            timetableEditText: "Stundenplan bearbeiten",
+            timeTableForText: "Stundenplan für ",
+            addOwnCourseText: "Neuen Kurs anlegen",
             addCourseText: "Kurs hinzufügen",
-            courseNameText: "Kursname: *",
+            courseNameText: "Kursname *",
             coursePlaceholderText: "z.B. Einführung in die ...",
             cancelText: "Abbrechen",
             addCourseDropdownText: "Kurs aus Curriculum hinzufügen ▼",
+            addCourseDropdownUpText: "Kurs aus Curriculum hinzufügen ▲",
             courseSearchPlaceholderText: "Kurs suchen ...",
             allDaysText: "Alle Tage",
             mondayText: "Montag",
@@ -61,38 +64,43 @@ ccm.files["ccm.timetable.js"] = {
             teacherPlaceholderText: "z.B. Prof. Müller",
             groupText: "Gruppe (optional)",
             groupPlaceholderText: "z.B. A",
-            removeEventButtonText: "Veranstaltung entfernen",
+            removeButtonText: "Veranstaltung entfernen",
             courseItemTitleText: "Kursname",
             eventTimeDataText: "Veranstaltungszeit",
             eventNoteText: "Notizen",
             eventColorText: "Farbe:",
             noNotesText: "Keine Notizen vorhanden",
             noLinksText: "Keine Links vorhanden",
-            roumText: "Raum *",
-            periodFromText: "Zeitraum Start *",
-            periodFromPlaceholderText: "z.B. 03.04.2025",
-            periodUntilText: "Zeitraum Ende *",
-            periodUntilPlaceholderText: "z.B. 26.06.2025",
-            whoText: "Dozent (optional)",
-            whoPlaceholderText: "z.B. Prof. Müller",
-            removeEvent: "Veranstaltung entfernen",
             semesterLabelText: "Semester ",
             linksLabelText: "Links:",
             linkTitleText: "Link Titel",
             linkUrlText: "Link URL",
             addLinkInlineButtonText: "Link hinzufügen",
-            noteText: "Notitzen",
-            noNoteText: "Keine Notitzen vorhanden",
+            noteText: "Notizen",
             eventItemRoomText: "Raum: ",
-            eventItemWhoText: "Dozent:",
+            eventItemWhoText: "Dozent: ",
             eventItemPeriodText: "Zeitraum: ",
-
-
+            toTimeText: "Zur Stundenplanansicht",
+            timetableConfigureText: "Stundenplan Konfigurieren",
+            ownCourseText: "[eigene Veranstaltung]",
+            noStudyText: "Ohne Studiengang",
+            nAText: "N/A",
+            previewListText: "Vorschau Liste", // Für mainTemplate
+            errorCourseNameRequired: "Bitte gib einen Kursnamen ein.",
+            errorAtLeastOneEvent: "Bitte füge mindestens eine Veranstaltung hinzu.",
+            errorAddCourseFailed: "Fehler beim Hinzufügen des Kurses. Bitte versuche es erneut.",
+            errorSaveCoursesFailed: "Fehler beim Speichern der Kurse. Bitte versuche es erneut.",
+            errorLoginRequired: "Bitte melde dich an, um fortzufahren.",
+            noteSaved: "Notiz gespeichert!",
+            errorLinkUrlRequired: "Bitte geben Sie eine URL für den Link ein.",
+            addNoteButtonText: "Notiz hinzufügen",
+            noLinksForEvent: "Keine Links für diese Veranstaltung vorhanden.",
+            removeLinkButtonText: "Link entfernen"
         },
+
         user: ["ccm.instance", "https://ccmjs.github.io/akless-components/user/ccm.user.js"],
         helper: ["ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-8.4.2.min.mjs"],
         html: {
-            // hier sind noch texte
             mainTemplate: `
                 <div id="main-template">
                     <div id="toggle-button">
@@ -107,7 +115,7 @@ ccm.files["ccm.timetable.js"] = {
             `,
             editView: {
                 main: `
-                  <h1>%timtableEditText%</h1>
+                  <h1>%timetableEditText%</h1>
                   <div id="schedule-container">
                     <div class="add-course-header">
                       <button id="add-course-button" onclick="%onAddCourseButton%">%addOwnCourseText%</button>
@@ -146,7 +154,7 @@ ccm.files["ccm.timetable.js"] = {
                   </div>
                 `,
 
-                checkboxStudyName:`
+                checkboxStudyName: `
                     <div class="study-group" data-study="%studyName%">
                         <div class="study-item">
                             <label>%studyName%</label>
@@ -154,7 +162,7 @@ ccm.files["ccm.timetable.js"] = {
                         <div class="semesters"></div>
                     </div>`,
 
-                checkboxSemester:`
+                checkboxSemester: `
                     <div class="semester-group" data-semester="%semester%">
                         <div class="semester-item">
                             <input type="checkbox" class="semester-checkbox">
@@ -272,9 +280,8 @@ ccm.files["ccm.timetable.js"] = {
                     </div>`
             },
             scheduleView: {
-                // hier sind noch texte
                 main: `
-                  <h1>Stundenplan für %studentId%</h1>
+                  <h1>%timeTableForText%</h1>
                   <div class="container">
                     <div class="section">
                       <div class="week-schedule">
@@ -312,9 +319,9 @@ ccm.files["ccm.timetable.js"] = {
                         %noteIcon%
                       </div>
                       <span>%time%</span><br>
-                      <span>Raum: %room%</span><br>
-                      <span>Dozent: %who%</span><br>
-                      <span>Zeitraum: %period%</span>
+                        <span>%eventItemRoomText% %room%</span><br>
+                        <span>%eventItemWhoText% %who%</span><br>
+                        <span>%eventItemPeriodText% %period%</span>
                     </div>
                 `,
 
@@ -332,7 +339,7 @@ ccm.files["ccm.timetable.js"] = {
 
         },
         onchange: event => console.log(event),
-        },
+    },
 
     Instance: function () {
         let self = this;
@@ -340,12 +347,19 @@ ccm.files["ccm.timetable.js"] = {
         let allCourses = [];
         let currentCourses = [];
         let isEditMode = false;
-        let toggleButton;
 
         this.init = async () => {
             $ = Object.assign({}, this.ccm.helper, this.helper);
             $.use(this.ccm);
             if (this.user) this.user.onchange = this.start;
+        }
+
+        this.events = {
+            onToggleButton: async () => {
+                isEditMode = !isEditMode;
+                await self.renderView();
+            },
+
         }
 
         this.start = async () => {
@@ -358,10 +372,7 @@ ccm.files["ccm.timetable.js"] = {
                 previewListText: self.text.previewListText,
                 plsLoggin: self.text.plsLoggin,
                 timeTableText: self.text.timeTableText,
-                onToggleButton: () => {
-                    isEditMode = !isEditMode;
-                    self.renderView();
-                },
+                onToggleButton: this.events.onToggleButton,
             }));
             $.setContent(self.element, mainTemplate);
 
@@ -372,12 +383,11 @@ ccm.files["ccm.timetable.js"] = {
 
             studentId = await this.user.getValue();
             if (!studentId) {
-                alert("Please log in to continue.");
+                alert(self.text.errorLoginRequired);
                 console.log("User is not logged in");
                 return;
             }
             studentId = studentId.key;
-            //studentId = "tmiede2s";
 
             let savedSchedule;
             try {
@@ -430,7 +440,7 @@ ccm.files["ccm.timetable.js"] = {
         this.renderView = async () => {
             const toggleButton = self.element.querySelector('#toggle-view-button');
             // hier auch texte
-            toggleButton.textContent = isEditMode ? 'Zur Stundenplanansicht' : 'Stundenplan Konfigurieren';
+            toggleButton.textContent = isEditMode ? this.text.toTimeText : this.text.timetableConfigureText;
 
             if (isEditMode) {
                 await self.renderEditView();
@@ -441,10 +451,11 @@ ccm.files["ccm.timetable.js"] = {
 
         this.renderEditView = async () => {
             const mainHtml = self.ccm.helper.html(self.html.editView.main, {
-                timtableEditText: self.text.timtableEditText,
+                timetableEditText: self.text.timetableEditText,
                 addOwnCourseText: self.text.addOwnCourseText,
                 addCourseText: self.text.addCourseText,
                 courseNameText: self.text.courseNameText,
+                coursePlaceholderText: self.text.coursePlaceholderText,
                 cancelText: self.text.cancelText,
                 addCourseDropdownText: self.text.addCourseDropdownText,
                 courseSearchPlaceholderText: self.text.courseSearchPlaceholderText,
@@ -462,32 +473,43 @@ ccm.files["ccm.timetable.js"] = {
                 roomText: self.text.roomText,
 
                 // hier könnte man in events auslagern muss man aber auach nicht
+                // Bitte diesen Block in renderEditView komplett kopieren und einfügen
                 onAddCourseButton: () => {
                     eventsContainer.innerHTML = '';
+                    // DIES IST DER KORRIGIERTE UND VOLLSTÄNDIGE AUFRUF
                     const eventFormHtml = self.ccm.helper.html(self.html.editView.eventItem, {
-                        startClockTimeText: self.text.startClockTimeText,
-                        endClockTimeText: self.text.endClockTimeText,
-                        dayText: self.text.dayText,
-                        mondayText: self.text.mondayText,
-                        tuesdayText: self.text.tuesdayText,
-                        chooseDayText: self.text.chooseDayText,
-                        roumText: self.text.roumText,
-                        startDateText: self.text.startDateText,
-                        startDatePlaceholderText: self.text.startDatePlaceholderText,
-                        endDateText: self.text.endDateText,
-                        endDatePlaceholderText: self.text.endDatePlaceholderText,
+                        index: 0,
                         typeText: self.text.typeText,
                         chooseTypeText: self.text.chooseTypeText,
                         lectureText: self.text.lectureText,
                         exerciseText: self.text.exerciseText,
-                        groupText: self.text.groupText,
                         seminarText: self.text.seminarText,
                         practicalText: self.text.practicalText,
                         sportCourseText: self.text.sportCourseText,
                         languageCourseText: self.text.languageCourseText,
                         tutorialText: self.text.tutorialText,
                         otherText: self.text.otherText,
-                        index: 0
+                        dayText: self.text.dayText,
+                        chooseDayText: self.text.chooseDayText,
+                        mondayText: self.text.mondayText,
+                        tuesdayText: self.text.tuesdayText,
+                        wednesdayText: self.text.wednesdayText,
+                        thursdayText: self.text.thursdayText,
+                        fridayText: self.text.fridayText,
+                        saturdayText: self.text.saturdayText,
+                        sundayText: self.text.sundayText,
+                        startTimeText: self.text.startTimeText,
+                        endTimeText: self.text.endTimeText,
+                        roomText: self.text.roomText,
+                        roomPlaceholderText: self.text.roomPlaceholderText,
+                        startDateText: self.text.startDateText,
+                        startDatePlaceholderText: self.text.startDatePlaceholderText,
+                        endDateText: self.text.endDateText,
+                        endDatePlaceholderText: self.text.endDatePlaceholderText,
+                        teacherText: self.text.teacherText,
+                        teacherPlaceholderText: self.text.teacherPlaceholderText,
+                        groupText: self.text.groupText,
+                        groupPlaceholderText: self.text.groupPlaceholderText
                     });
                     eventsContainer.appendChild(eventFormHtml);
                     courseFormContainer.style.display = 'block';
@@ -499,39 +521,6 @@ ccm.files["ccm.timetable.js"] = {
                     addCourseButton.style.display = 'block';
                     courseForm.querySelector('#course-title').value = '';
                 },
-                /*onEventContainer: (e) => {
-                    if (e.target.classList.contains('remove-event-button')) {
-                        const eventForm = e.target.closest('.event-form');
-                        eventsContainer.removeChild(eventForm);
-                        Array.from(eventsContainer.children).forEach((form, idx) => {
-                            form.dataset.index = idx;
-                            form.querySelector('h4').textContent = `Veranstaltung ${idx + 1}`;
-                            form.querySelectorAll('input, select, label').forEach(element => {
-                                if (element.tagName === 'LABEL') {
-                                    const forAttr = element.getAttribute('for');
-                                    if (forAttr) {
-                                        element.setAttribute('for', forAttr.replace(/\d+$/, idx));
-                                    }
-                                } else {
-                                    const name = element.name.replace(/\d+$/, idx);
-                                    const id = element.id.replace(/\d+$/, idx);
-                                    element.name = name;
-                                    element.id = id;
-                                    // todo checken ob man das if braucht
-                                    if (element.tagName === 'SELECT') {
-                                        element.querySelectorAll('option').forEach(option => {
-                                            if (option.value === '') {
-                                                option.textContent = 'Wähle einen Typ';
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                            form.querySelector('.remove-event-button').style.display = idx === 0 ? 'none' : 'block';
-                        });
-                        eventIndex = eventsContainer.children.length - 1;
-                    }
-                },*/
                 onCourseForm: async (event) => {
                     event.preventDefault();
                     try {
@@ -556,18 +545,6 @@ ccm.files["ccm.timetable.js"] = {
 
             let eventIndex = 0;
 
-            // hier kann wahrscheinlch weg
-            const addEventForm = (index) => {
-                const eventForm = eventsContainer.querySelector(`.event-form[data-index="${index}"]`);
-                if (!eventForm) {
-                    const eventFormHtml = self.ccm.helper.html(self.html.editView.eventItem, {
-
-                        index: index,
-                        removeEventButtonStyle: index === 0 ? 'display: none;' : ''
-                    });
-                    eventsContainer.appendChild(eventFormHtml);
-                }
-            };
             await initSelectCoursesDropdown(container);
 
             currentCourses.forEach(course => {
@@ -580,7 +557,7 @@ ccm.files["ccm.timetable.js"] = {
             try {
                 const courseName = form.querySelector('#course-title').value.trim();
                 if (!courseName) {
-                    throw new Error("Bitte gib einen Kursnamen ein.");
+                    throw new Error(self.text.errorCourseNameRequired);
                 }
 
                 const eventForms = form.querySelectorAll('.event-form');
@@ -602,9 +579,6 @@ ccm.files["ccm.timetable.js"] = {
                     return eventData;
                 });
 
-                if (events.length === 0) {
-                    throw new Error("Bitte füge mindestens eine Veranstaltung hinzu.");
-                }
 
                 const courseData = {
                     course: courseName,
@@ -629,7 +603,7 @@ ccm.files["ccm.timetable.js"] = {
                 return newCourse;
             } catch (e) {
                 console.error("Fehler beim Hinzufügen eines studentischen Kurses:", e);
-                throw new Error(e.message || "Fehler beim Hinzufügen des Kurses. Bitte versuche es erneut.");
+                throw new Error(e.message || self.text.errorAddCourseFailed);
             }
         };
 
@@ -637,14 +611,15 @@ ccm.files["ccm.timetable.js"] = {
             const courseCheckboxList = container.querySelector('#course-checkbox-list');
             const studyGroups = {};
             allCourses.forEach(course => {
+                // hier noch 4 texte
                 if (course && course.value && course.value.course) {
                     const studies = course.value.course_of_study && course.value.course_of_study.length > 0
                         ? course.value.course_of_study
-                        : [{courseOfStudy: "Ohne Studiengang", semester: "N/A"}];
+                        : [{courseOfStudy: self.text.noStudyText, semester: elf.text.nAText}];
 
                     studies.forEach(study => {
-                        const studyName = study.courseOfStudy || "Ohne Studiengang";
-                        const semester = study.semester || "N/A";
+                        const studyName = study.courseOfStudy || self.text.noStudyText;
+                        const semester = study.semester || self.text.nAText;
                         if (!studyGroups[studyName]) studyGroups[studyName] = {};
                         if (!studyGroups[studyName][semester]) studyGroups[studyName][semester] = {};
                         if (!studyGroups[studyName][semester][course.value.course]) {
@@ -761,10 +736,10 @@ ccm.files["ccm.timetable.js"] = {
                 };
                 await self.studentStore.set(scheduleData);
                 console.log("Kurse automatisch gespeichert:", scheduleData);
-                this.onchange && this.onchange({event:"saveCourse", instance: self});
+                this.onchange && this.onchange({event: "saveCourse", instance: self});
             } catch (e) {
                 console.error("Fehler beim Speichern der Kurse:", e);
-                alert("Fehler beim Speichern der Kurse. Bitte versuche es erneut.");
+                alert(self.text.errorSaveCoursesFailed);
             }
         };
 
@@ -785,7 +760,6 @@ ccm.files["ccm.timetable.js"] = {
                 let courseInCurrent = currentCourses.find(c => c.key === courseKey);
 
                 if (isChecked) {
-
                     if (!courseInCurrent) {
                         courseInCurrent = {
                             ...courseFromAll,
@@ -798,12 +772,10 @@ ccm.files["ccm.timetable.js"] = {
                     }
 
                     if (!courseInCurrent.value.events.some(e => e.key === eventKey)) {
-                        courseInCurrent.value.events.push({ ...eventFromAll });
+                        courseInCurrent.value.events.push({...eventFromAll});
                     }
                 } else {
-
                     if (courseInCurrent) {
-
                         courseInCurrent.value.events = courseInCurrent.value.events.filter(e => e.key !== eventKey);
 
                         if (courseInCurrent.value.events.length === 0) {
@@ -823,7 +795,6 @@ ccm.files["ccm.timetable.js"] = {
                 });
             };
 
-
             courseCheckboxList.addEventListener('change', async (e) => {
                 const target = e.target;
 
@@ -838,8 +809,7 @@ ccm.files["ccm.timetable.js"] = {
                     if (scope) {
                         affectedEventCheckboxes = Array.from(scope.querySelectorAll('.event-checkbox, .course-checkbox'));
                     }
-                }
-                else if (target.classList.contains('event-checkbox')) {
+                } else if (target.classList.contains('event-checkbox')) {
                     affectedEventCheckboxes.push(target);
                 }
 
@@ -896,7 +866,8 @@ ccm.files["ccm.timetable.js"] = {
                     removeButtonText: self.text.removeButtonText,
                     linksLabelText: self.text.linksLabelText,
                     linkTitleText: self.text.linkTitleText,
-                    addLinkInlineButton: self.text.addLinkInlineButton,
+                    linkUrlText: self.text.linkUrlText,
+                    addLinkInlineButtonText: self.text.addLinkInlineButtonText
                 }));
 
                 $.append(selectedScheduleContainer, courseHtml);
@@ -922,7 +893,7 @@ ccm.files["ccm.timetable.js"] = {
                     noteContainer.querySelector('.save-note-button').addEventListener('click', async () => {
                         event.note = noteContainer.querySelector('textarea').value.trim();
                         await saveSelectedCourses();
-                        alert('Notiz gespeichert!');
+                        alert(self.text.noteSaved);
                     });
                 } else {
                     initAddNoteButton(noteContainer, event);
@@ -941,7 +912,7 @@ ccm.files["ccm.timetable.js"] = {
                         saveButton.addEventListener('click', async () => {
                             currentEvent.note = newTextarea.value.trim();
                             await saveSelectedCourses();
-                            alert('Notiz gespeichert!');
+                            alert(self.text.noteSaved);
                         });
                         newTextarea.focus();
                     });
@@ -997,7 +968,7 @@ ccm.files["ccm.timetable.js"] = {
                         refreshLinksDisplay();
                         await saveSelectedCourses();
                     } else {
-                        alert("Bitte geben Sie eine URL für den Link ein.");
+                        alert(self.text.errorLinkUrlRequired);
                     }
                 });
 
@@ -1020,7 +991,7 @@ ccm.files["ccm.timetable.js"] = {
                             currentCourses = currentCourses.filter(c => c.key !== course.key);
                         }
                         const itemToRemove = selectedScheduleContainer.querySelector(`.event-info[data-event-key="${event.key}"]`);
-                        if(itemToRemove) itemToRemove.closest('.list-item').remove();
+                        if (itemToRemove) itemToRemove.closest('.list-item').remove();
 
                         const courseCheckboxList = self.element.querySelector('#course-checkbox-list');
                         const checkbox = courseCheckboxList.querySelector(`.event-checkbox[data-event-key="${event.key}"]`);
@@ -1046,7 +1017,7 @@ ccm.files["ccm.timetable.js"] = {
                 event.stopPropagation();
                 const isOpen = dropdownContent.style.display === 'block';
                 dropdownContent.style.display = isOpen ? 'none' : 'block';
-                dropdownButton.textContent = isOpen ? 'Kurs hinzufügen ▼' : 'Kurs hinzufügen ▲';
+                dropdownButton.textContent = isOpen ? this.text.addCourseDropdownText : 'Kurs hinzufügen ▲';
                 if (!isOpen) searchInput.focus();
             };
 
@@ -1096,14 +1067,6 @@ ccm.files["ccm.timetable.js"] = {
             searchInput.addEventListener('input', filterCourses);
             dayFilter.addEventListener('change', filterCourses);
         };
-        // was hier mit
-        const addNoteToCourse = async (courseKey, note) => {
-            const course = currentCourses.find(c => c.key === courseKey);
-            if (course) {
-                course.note = note;
-                await saveSelectedCourses();
-            }
-        };
 
         this.renderScheduleView = async () => {
             const scheduleViewElement = await renderSchedule();
@@ -1112,9 +1075,14 @@ ccm.files["ccm.timetable.js"] = {
 
                 const clickedEvent = e.target.closest('.event');
                 if (clickedEvent) {
-                const courseId = clickedEvent.getAttribute('data-course-id');
+                    const courseId = clickedEvent.getAttribute('data-course-id');
 
-                this.onchange && this.onchange({event: "schedule", instance: this, studentId: studentId, courseId: courseId,});
+                    this.onchange && this.onchange({
+                        event: "schedule",
+                        instance: this,
+                        studentId: studentId,
+                        courseId: courseId,
+                    });
 
                     const eventId = clickedEvent.getAttribute('data-event-id');
                     await self.openModal(courseId, eventId);
@@ -1137,21 +1105,21 @@ ccm.files["ccm.timetable.js"] = {
         const renderSchedule = async () => {
             const schedule = {};
             const mainContainer = $.html(self.html.scheduleView.main, {
-
-                timeTableForText: "Stundenplan für" + studentId,
+                //
+                timeTableForText: self.text.timeTableForText + studentId,
                 linkTitleText: self.text.linkTitleText,
                 noLinksText: self.text.noLinksText,
                 noNotesText: self.text.noNotesText,
                 noteText: self.text.noteText,
-
-
-                studentId });
+            });
             const scheduleContainer = mainContainer.querySelector('.week-schedule');
 
             if (currentCourses.length > 0) {
                 currentCourses.forEach(course => {
                     if (course && course.value && course.value.events) {
                         course.value.events.forEach(event => {
+                            console.log("---------------")
+                            console.log(event)
                             const normalizedDay = normalizeDay(event.day || "Unbekannt");
                             if (!schedule[normalizedDay]) schedule[normalizedDay] = [];
                             schedule[normalizedDay].push({
@@ -1181,13 +1149,13 @@ ccm.files["ccm.timetable.js"] = {
 
 
             daysToDisplay.forEach(day => {
-                const dayColumn = $.html(self.html.scheduleView.dayColumn, { day: day });
+                const dayColumn = $.html(self.html.scheduleView.dayColumn, {day: day});
                 const eventsContainer = dayColumn.querySelector('.events-container');
 
                 if (schedule[day] && schedule[day].length > 0) {
                     const eventItems = schedule[day].map(event => {
                         const noteIconHtml = event.note.trim() !== ""
-                            ? $.html(self.html.scheduleView.noteIcon, { note: event.note }).outerHTML
+                            ? $.html(self.html.scheduleView.noteIcon, {note: event.note}).outerHTML
                             : '';
 
                         return $.html(self.html.scheduleView.eventItem, {
@@ -1196,10 +1164,14 @@ ccm.files["ccm.timetable.js"] = {
                             color: event.color,
                             title: event.title,
                             noteIcon: noteIconHtml,
+                            period: event.period,
                             time: event.time,
                             room: event.room,
                             who: event.who,
-                            period: event.period
+
+                            eventItemRoomText: self.text.eventItemRoomText,
+                            eventItemWhoText: self.text.eventItemWhoText,
+                            eventItemPeriodText: self.text.eventItemPeriodText
                         });
                     });
 
@@ -1212,7 +1184,6 @@ ccm.files["ccm.timetable.js"] = {
 
                 scheduleContainer.appendChild(dayColumn);
             });
-
 
             return mainContainer;
         };
