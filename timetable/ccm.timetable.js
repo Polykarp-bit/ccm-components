@@ -114,6 +114,7 @@ ccm.files["ccm.timetable.js"] = {
                     <h1>%timetableEditText%</h1>
                     <div id="schedule-container">
                         <div class="add-course-header">
+                            <button id="course-dropdown-button" class="dropdown-button">%addCourseDropdownText%</button>
                             <button id="add-course-button" onclick="%onAddCourseButton%">%addOwnCourseText%</button>
                         </div>
                         <div id="course-form-container" style="display: none;">
@@ -129,7 +130,7 @@ ccm.files["ccm.timetable.js"] = {
                             </form>
                         </div>
                         <div class="dropdown-container">
-                            <button id="course-dropdown-button" class="dropdown-button">%addCourseDropdownText%</button>
+                        
                             <div id="course-dropdown-content" class="dropdown-content">
                                 <input type="text" id="course-search" placeholder="%courseSearchPlaceholderText%">
                                 <select id="day-filter">
