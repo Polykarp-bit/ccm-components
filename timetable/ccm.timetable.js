@@ -854,37 +854,34 @@ ccm.files["ccm.timetable.js"] = {
 
             courseCheckboxList.addEventListener('change', async (e) => {
                 const target = e.target;
-
-                if (target.type !== 'checkbox') return;
-
                 const isChecked = target.checked;
-                let affectedEventCheckboxes = [];
 
-                if (target.classList.contains('course-checkbox') || target.classList.contains('semester-checkbox')) {
-                    const scope = target.closest('.course-group, .semester-group');
-                    if (scope) {
-                        affectedEventCheckboxes = Array.from(scope.querySelectorAll('.event-checkbox, .course-checkbox'));
+                if (target.type === 'checkbox') {
+                    let affectedEvents = [];
+
+                    if (target.classList.contains('event-checkbox')) {
+                        affectedEvents.push(target);
                     }
-                } else if (target.classList.contains('event-checkbox')) {
-                    affectedEventCheckboxes.push(target);
-                }
-
-                if (affectedEventCheckboxes.length === 0) return;
-
-                for (const checkbox of affectedEventCheckboxes) {
-                    if (checkbox.checked !== isChecked) {
-                        checkbox.checked = isChecked;
-                        await handleCheckboxChange(checkbox);
+                    else if (target.classList.contains('course-checkbox') || target.classList.contains('semester-checkbox')) {
+                        const parentGroup = target.closest('.course-group') || target.closest('.semester-group');
+                        affectedEvents = parentGroup.querySelectorAll('.event-checkbox');
                     }
+
+                    for (const cb of affectedEvents) {
+                        if (cb.checked !== isChecked) {
+                            cb.checked = isChecked;
+                        }
+                        await handleCheckboxChange(cb);
+                    }
+
+                    redrawSelectedCourses();
+
+                    if (affectedEvents.length > 0) {
+                        self.updateParentCheckboxes(affectedEvents[0]);
+                    }
+
+                    await self.saveSelectedCourses();
                 }
-
-                redrawSelectedCourses();
-
-                if (affectedEventCheckboxes.length > 0) {
-                    self.updateParentCheckboxes(affectedEventCheckboxes[0]);
-                }
-
-                await self.saveSelectedCourses();
             });
         };
 
@@ -942,8 +939,9 @@ ccm.files["ccm.timetable.js"] = {
                 colorPicker.addEventListener('input', async (e) => {
                     const newColor = e.target.value;
                     event.color = newColor;
-                    const courseItemDiv = courseHtml.querySelector('.course-item');
-                    if (courseItemDiv) courseItemDiv.style.borderLeft = `5px solid ${newColor}`;
+                    if (courseHtml) {
+                        courseHtml.style.borderLeft = `5px solid ${newColor}`;
+                    }
                     await self.saveSelectedCourses();
                 });
 
