@@ -32,7 +32,7 @@ ccm.files["ccm.checklist.js"] = {
             writeNoteText: "Notiz eingeben...",
             editNoteText: "Notiz bearbeiten",
             addNoteText: "Notiz hinzufügen",
-            notePlaceholderText: "Noch keine Notiz vorhanden",
+            notePlaceholderText: "Keine Notiz",
         },
         helper: ["ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-7.2.0.mjs"],
         html: {
@@ -70,7 +70,7 @@ ccm.files["ccm.checklist.js"] = {
                <div class='%isEndpoint%' id=%itemKey%>
                     <div class='%isEndpointHeader%'>
                         <div class='title-edit-wrapper'>
-                            <button class='edit-item-name-btn' title='Namen bearbeiten' onclick=%editName%>&#9998;</button> 
+                            <button class='edit-item-name-btn' title='Namen bearbeiten' onclick=%editName%>&#9998;</button>
                             <p class='%isEndpointTitle%'>%itemName%</p>
                             <div class='item-name-edit-form' style="display: none;">
                                 <input type="text" class='item-name-input-field'/>
@@ -101,7 +101,7 @@ ccm.files["ccm.checklist.js"] = {
                             <button class="delete-list" onclick=%onDeleteButton%>%deleteText%</button>
                         </div>
                     </div>
-                    <button class="toggle-item" onclick=%onClickToggleButton%>▼</button>      
+                    <button class="toggle-item" onclick=%onClickToggleButton%>▼</button>
                     <div class="item-content">
                         <div class="progress-bar">
                             <div class="progress-fill"></div>
@@ -113,21 +113,25 @@ ccm.files["ccm.checklist.js"] = {
                     <div class="%isEndPoint%--header">
                         <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox" checked="%checkboxChecked%" onchange="%onCheckboxChange%">
                         <label for="%itemKey%" class="%isEndPoint%--title">%itemName%</label>
-                        <input type="date" class="deadline-picker" value=%itemDeadline% onchange="%onDeadlinePicker%">
-                        %subitemProgress%
-                    </div>
-    
-                    <div class="note-container">
+                        <div class="note-container">
                         <p class="%subItemNoteClass%">%noteShow%</p>
                         <button class="edit-note-btn" title="%noteTitle%" onclick=%onEditeNote%>✎</button>
-    
+
                         <div class="note-edit-form" style="display: none;">
                             <textarea class="note-input" rows="3" placeholder="%writeNoteText%">%itemNote%</textarea>
                             <button class="save-note-btn" onclick="%onSaveNoteButton%">%saveText%</button>
                             <button class="cancel-note-btn" onclick="%onCancelNoteBtn%">%cancelText%</button>
                         </div>
-                        %subItemList%   
-                </div>`,
+                        </div>
+                        <input type="date" class="deadline-picker" value=%itemDeadline% onchange="%onDeadlinePicker%">
+                        %subitemProgress%
+                        
+                    </div>
+
+                    
+                        %subItemList%
+                        
+                        </div>`,
         }
     },
     Instance: function () {
@@ -931,3 +935,10 @@ ccm.files["ccm.checklist.js"] = {
         }
     }
 };
+
+
+
+
+
+
+

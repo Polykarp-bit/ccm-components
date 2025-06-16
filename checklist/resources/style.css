@@ -1,12 +1,29 @@
+/* ==============================================
+   1. GRUNDLEGENDE VARIABLEN & RESET
+   ============================================== */
+:root {
+    --background-color: #f4f6f9;
+    --container-background: #ffffff;
+    --text-primary: #2d3748;
+    --text-secondary: #64748b;
+    --accent-color: #2563eb;
+    --danger-color: #ef4444;
+    --border-color: #e2e8f0;
+    --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #f4f6f9;
+    font-family: var(--font-family);
+    background-color: var(--background-color);
     margin: 0;
     padding: 20px;
-    color: #2d3748;
+    color: var(--text-primary);
     line-height: 1.6;
 }
 
+/* ==============================================
+   2. CONTAINER & BASISELEMENTE
+   ============================================== */
 .container {
     max-width: 960px;
     margin: 0 auto;
@@ -16,856 +33,279 @@ body {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
-h1 {
-    text-align: center;
-    color: #2563eb;
-    font-size: 2rem;
-    margin-bottom: 32px;
-    font-weight: 600;
-}
-
-.create-list, .list-form {
-    background-color: #f8fafc;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 24px;
-    border: 1px solid #e2e8f0;
-    transition: box-shadow 0.2s ease;
-}
-
-.create-list:hover, .list-form:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.create-list input, .list-form input {
-    padding: 12px;
-    margin: 10px 0;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    width: 100%;
-    font-size: 16px;
-    box-sizing: border-box;
-    transition: border-color 0.2s ease;
-}
-
-.create-list input:focus, .list-form input:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.create-list button, .list-form button, .add-subitem, .confirm-subitem, .remove-subitem, .edit-list, #start-create{
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    margin: 8px 4px;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-.add-subitem, .confirm-subitem, .edit-list, .list-form button#save-list, #start-create {
-    background-color: #2563eb;
-    color: #ffffff;
-}
-
-.remove-subitem {
-    background-color: #ef4444;
-    color: #ffffff;
-    padding: 8px 16px;
-    font-size: 14px;
-}
-
-.add-subitem:hover, .confirm-subitem:hover, .edit-list:hover, .list-form button#save-list:hover, #start-create:hover  {
-    background-color: #1e40af;
-    transform: translateY(-1px);
-}
-
-.remove-subitem:hover {
-    background-color: #b91c1c;
-    transform: translateY(-1px);
-}
-
-.item-section {
-    margin-top: 20px;
-    padding: 16px;
-    background-color: #ffffff;
-    border-radius: 12px;
-    border-left: 4px solid #2563eb;
-}
-
-.preview-section {
-    margin-top: 24px;
-    padding: 20px;
-    background-color: #f8fafc;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-}
-
-.preview-section h3 {
-    margin: 0 0 16px 0;
-    color: #2563eb;
-    font-size: 1.25rem;
-    font-weight: 500;
-}
-
-.list-item {
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-left: 4px solid #2563eb;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    padding: 20px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.list-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-}
-
-.list-item.completed {
-    background-color: #cdffca;
-    border-left-color: #5bfa20;
-}
-
+/* ==============================================
+   3. HEADER & TITEL
+   ============================================== */
 .item-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding-bottom: 12px;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .item-header h3 {
     margin: 0;
-    color: #2563eb;
     font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ==============================================
+   4. LISTENELEMENTE
+   ============================================== */
+.item-content {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.point--header,
+.subitem--header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    position: relative; /* Für absolute Positionierung der note-edit-form */
+}
+
+.point--checkbox,
+.subitem--checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+}
+
+.point--title,
+.subitem--title {
+    flex-grow: 1;
     font-weight: 500;
 }
 
-.toggle-item {
-    background: none;
-    border: none;
-    font-size: 1.25rem;
-    cursor: pointer;
-    color: #6b7280;
-    transition: color 0.2s ease;
-}
-
-.toggle-item:hover {
-    color: #2563eb;
-}
-
-.item-content {
-    margin-top: 16px;
-}
-
+/* ==============================================
+   5. FORTSCHRITTSANZEIGE
+   ============================================== */
 .progress-bar {
     width: 100%;
-    background-color: #e2e8f0;
+    background-color: var(--border-color);
     border-radius: 8px;
-    height: 10px;
-    margin-bottom: 16px;
+    height: 8px;
+    margin: 1rem 0;
     overflow: hidden;
 }
 
 .progress-fill {
-    background-color: #2563eb;
     height: 100%;
-    border-radius: 8px;
-    transition: width 0.4s ease-in-out;
+    background-color: var(--accent-color);
+    transition: width 0.3s ease;
 }
 
 .progress-prozent {
-    font-size: 1rem;
+    font-size: 0.875rem;
+    color: var(--accent-color);
     font-weight: 600;
-    color: #2563eb;
-    background-color: #eff6ff;
-    padding: 4px 8px;
-    border-radius: 6px;
 }
 
-.subitem {
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    margin-bottom: 12px;
-    padding: 16px;
-    margin-left: 20px;
-    background-color: #f9fafb;
-    transition: background-color 0.2s ease;
-    position: relative;
-}
-
-.subitem .subitem {
-    background-color: #f1f5f9;
-    margin-left: 30px;
-}
-
-
-/* Notiz-Styling */
-.note-container {
-    margin-top: 8px;
-    padding-left: 20px;
-    position: relative;
-    display: flex;
-    align-items: flex-start;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.subitem-note {
-    font-size: 0.875rem;
-    color: black;
-    background-color: #e8e8e8;
-    padding: 4px 8px;
-    border-radius: 6px;
-    margin: 0;
-    word-wrap: break-word;
-    line-height: 1.4;
-}
-
-.subitem-note-placeholder {
-    font-size: 0.875rem;
-    color: black;
-    font-style: italic;
-    margin: 0;
-    padding: 4px 8px;
-    border-radius: 6px;
-    background-color: #e8e8e8;
-    cursor: pointer;
-}
-
-
-.edit-note-btn {
-    background: none;
-    border: none;
-    padding: 4px;
-    font-size: 0.875rem;
-    color: #6b7280;
-    cursor: pointer;
-    line-height: 1;
-    transition: color 0.2s ease;
-    display: flex;
-    align-items: center;
-}
-
-.edit-note-btn:hover {
-    color: #2563eb;
-}
-
-.note-edit-form {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 8px;
-    padding: 12px;
-    background-color: #f8fafc;
-    border: 1px dashed #2563eb;
-    border-radius: 8px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.note-input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    font-size: 14px;
-    resize: vertical;
-    box-sizing: border-box;
-    transition: border-color 0.2s ease;
-    line-height: 1.4;
-}
-
-.note-input:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.save-note-btn,
-.cancel-note-btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-.save-note-btn {
-    background-color: #2563eb;
-    color: #ffffff;
-}
-
-.save-note-btn:hover {
-    background-color: #1e40af;
-    transform: translateY(-1px);
-}
-
-.cancel-note-btn {
-    background-color: #6b7280;
-    color: #ffffff;
-}
-
-.cancel-note-btn:hover {
-    background-color: #4b5563;
-    transform: translateY(-1px);
-}
-
-.subitem::before {
-    content: '';
-    position: absolute;
-    left: -10px;
-    top: 0;
-    height: 100%;
-    width: 1px;
-    background-color: #d1d5db;
-    opacity: 0.5;
-}
-
-.subitem::after {
-    content: '';
-    position: absolute;
-    left: -10px;
-    top: 24px;
-    width: 10px;
-    height: 1px;
-    background-color: #d1d5db;
-    opacity: 0.5;
-}
-
-.subitem:hover {
-    background-color: #f1f5f9;
-}
-
-.subitem-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.subitem-checkbox {
-    width: 18px;
-    height: 18px;
-    accent-color: #2563eb;
-    cursor: pointer;
-}
-
-.subitem-title {
-    font-weight: 500;
-    color: #2d3748;
-    font-size: 1rem;
-    flex-grow: 1;
-}
-
-.subitem-progress {
-    color: #2563eb;
-    font-size: 0.875rem;
-    font-weight: 600;
-    background-color: #eff6ff;
-    padding: 4px 8px;
-    border-radius: 6px;
-    order: 3;
-}
-
-.point-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-    margin-left: 30px;
-    flex-wrap: wrap;
-    position: relative;
-    background-color: #ffffff;
-    padding: 4px 8px;
-    border-radius: 6px;
-}
-
-.point-item::before {
-    content: '';
-    position: absolute;
-    left: -10px;
-    top: 0;
-    height: 100%;
-    width: 1px;
-    background-color: #d1d5db;
-    opacity: 0.5;
-}
-
-.point-item::after {
-    content: '';
-    position: absolute;
-    left: -10px;
-    top: 16px;
-    width: 10px;
-    height: 1px;
-    background-color: #d1d5db;
-    opacity: 0.5;
-}
-
-.point-checkbox {
-    width: 16px;
-    height: 16px;
-    accent-color: #2563eb;
-    cursor: pointer;
-}
-
-.point-title {
-    color: #2d3748;
-    font-size: 0.9375rem;
-}
-
-.subitem-list-container {
-    margin-top: 12px;
-    padding: 8px;
-    background-color: #f9fafb;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
-}
-
-.subitem-list {
-    margin-bottom: 8px;
-}
-
-.add-subitem-wrapper {
-    padding: 4px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.add-subitem {
-    background-color: #2563eb;
-    color: #ffffff;
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-.add-subitem:hover {
-    background-color: #1e40af;
-    transform: translateY(-1px);
-}
-
-.add-icon {
-    font-size: 1rem;
-    line-height: 1;
-}
-
-.subitem-input {
-    display: none;
-    margin-top: 8px;
-    padding: 12px;
-    background-color: #ffffff;
-    border: 1px dashed #2563eb;
-    border-radius: 8px;
-    gap: 8px;
-    flex-wrap: wrap;
-    width: 100%;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.subitem-input.active {
-    display: flex;
-    flex-direction: column;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.subitem-input input {
-    padding: 8px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    font-size: 14px;
-    width: 100%;
-    box-sizing: border-box;
-    transition: border-color 0.2s ease;
-}
-
-.subitem-input input:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.subitem-name {
-    flex: 1;
-}
-
-.subitem-deadline {
-    flex: 1;
-    width: 150px;
-}
-
-.confirm-subitem {
-    background-color: #2563eb;
-    color: #ffffff;
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-.confirm-subitem:hover {
-    background-color: #1e40af;
-    transform: translateY(-1px);
-}
-
-.cancel-subitem {
-    background-color: #6b7280;
-    color: #ffffff;
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-.cancel-subitem:hover {
-    background-color: #4b5563;
-    transform: translateY(-1px);
-}
-
-.list-input {
-    display: none;
-    margin-top: 12px;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.list-input.active {
-    display: flex;
-}
-
-.list-input input {
-    flex: 1;
-    min-width: 200px;
-}
-
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
-}
-
-.deadline-container {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin: 0 8px;
-    padding: 4px 8px;
-    border-radius: 6px;
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-}
-
-.deadline-icon {
-    font-size: 1rem;
-    color: #2563eb;
-    line-height: 1;
-}
-
-.deadline-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #2563eb;
-}
-
-.deadline-picker {
-    padding: 6px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-    background-color: #ffffff;
-    color: #2d3748;
-    width: 120px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.deadline-picker:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.deadline-display {
-    font-size: 0.875rem;
-    color: #2d3748;
-    font-weight: 500;
-    background-color: #eff6ff;
-    padding: 4px 8px;
-    border-radius: 6px;
-}
-
-.subitem-header .deadline-container {
-    flex-grow: 0;
-    order: 2;
-}
-
-.point-item .deadline-container {
-    margin-left: auto;
-    order: 3;
-}
-
-.action-button-group {
-    display: flex;
-    gap: 8px;
-    margin-left: auto;
-    order: 3;
-}
-
-.subitem-header, .point-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.deadline-container.overdue {
-    border-color: #ef4444;
-    background-color: #fef2f2;
-}
-
-.deadline-container.overdue .deadline-display {
-    color: #ef4444;
-    background-color: #fee2e2;
-}
-
-ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-ul li {
-    padding: 6px 0;
-    color: #2d3748;
-}
-
-.delete-list {
-    background-color: #ff4d4d;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    margin-left: 5px;
-}
-
-.delete-list:hover {
-    background-color: #cc0000;
-}
-
-.deadline-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.deadline-picker {
-    width: auto;
-    min-width: 120px;
-    max-width: 150px;
-    padding: 6px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    font-size: 14px;
-}
-
+/* ==============================================
+   6. BEARBEITUNGSMODUS
+   ============================================== */
 .title-edit-wrapper {
     display: flex;
-    align-items: baseline;
-    gap: 6px;
-    flex-grow: 1;
-}
-
-.title-edit-wrapper > p.point-title,
-.title-edit-wrapper > p.subitem-title {
-    margin: 0;
-    padding: 0;
-    line-height: 1.2;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .edit-item-name-btn {
     background: none;
     border: none;
-    padding: 0;
-    margin: 0;
+    padding: 0.25rem;
     cursor: pointer;
-    font-size: 0.9em;
-    line-height: inherit;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    color: var(--text-secondary);
 }
 
-/* Responsive Design */
+.item-name-edit-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.item-name-input-field {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+/* ==============================================
+   7. DEADLINE GRUPPE
+   ============================================== */
+.deadline-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.deadline-picker {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* ==============================================
+   8. AKTIONSBUTTONS
+   ============================================== */
+.action-button-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.add-subitem,
+.remove-subitem,
+.confirm-subitem {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.add-subitem,
+.confirm-subitem {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+}
+
+.remove-subitem {
+    background-color: var(--danger-color);
+    color: white;
+    border: none;
+}
+
+/* ==============================================
+   9. UNTERPUNKTE & VERSCHACHTELUNG
+   ============================================== */
+.subitem-list,
+.subitem-list-children {
+    margin-left: 0;  /* Reduziere den Einzug */
+    padding-left: 2.5rem;  /* Einheitlicher Einzug */
+    border-left: none;     /* Entferne die vertikale Linie */
+    display: block;        /* Verwende normalen Dokumentenfluss */
+}
+
+/* Container für Unterpunkte */
+.point,
+.subitem {
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 0.5rem;
+}
+
+/* Header für jeden Unterpunkt */
+.point--header,
+.subitem--header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    background-color: white;  /* Stelle sicher, dass der Hintergrund weiß ist */
+}
+
+/* Entferne die letzte Trennlinie */
+.point:last-child,
+.subitem:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+/* Action Button Group anpassen */
+.action-button-group {
+    margin: 0.5rem 0;
+    padding-left: 2.5rem;  /* Gleicher Einzug wie die Liste */
+}
+
+/* Notiz-Container anpassen */
+.note-container {
+    margin: 0.25rem 0;
+    padding-left: 2.5rem;  /* Gleicher Einzug wie die Liste */
+}
+
+/* ==============================================
+   10. NOTIZEN
+   ============================================== */
+.note-container {
+    display: flex;
+    align-items: center;
+    margin-left: 1rem;
+    padding: 0;
+    gap: 0.5rem;
+}
+
+.subitem-note,
+.subitem-note-placeholder {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.note-edit-form {
+    margin-top: 0.5rem;
+    background: white;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+.note-input {
+    width: 100%;
+    min-height: 60px;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    resize: vertical;
+}
+
+.edit-note-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.edit-note-btn:hover {
+    opacity: 1;
+}
+
+.note-action {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.task-content:hover .note-action {
+    opacity: 1;
+}
+
+.note-text + .note-action {
+    opacity: 1;
+}
+/* ==============================================
+   7. RESPONSIVE DESIGN
+   ============================================== */
 @media (max-width: 768px) {
-    body {
-        padding: 12px;
-    }
-
-    .container {
-        padding: 16px;
-        border-radius: 10px;
-    }
-
-    h1 {
-        font-size: 1.75rem;
-        margin-bottom: 24px;
-    }
-
-    .create-list, .list-form {
-        padding: 16px;
-    }
-
-    .create-list input, .list-form input {
-        font-size: 14px;
-        padding: 10px;
-    }
-
-    .create-list button, .list-form button, .add-subitem, .confirm-subitem, .remove-subitem, .edit-list{
-        padding: 8px 16px;
-        font-size: 13px;
-    }
-
-    .item-header h3 {
-        font-size: 1.25rem;
-    }
-
-    .subitem {
-        margin-left: 15px;
-        padding: 12px;
-    }
-
-    .point-item {
-        margin-left: 25px;
-    }
-
-    .subitem::before,
-    .point-item::before {
-        left: -8px;
-    }
-
-    .subitem::after,
-    .point-item::after {
-        left: -8px;
-        width: 8px;
-    }
-
-    .list-input input {
-        min-width: 100%;
-    }
-
-    .subitem-list-container {
-        padding: 6px;
-    }
-
-    .add-subitem-wrapper {
-        padding: 4px 0;
-    }
-
-    .add-subitem {
-        padding: 6px 12px;
-        font-size: 13px;
-    }
-
-    .subitem-input {
-        padding: 10px;
-        margin-top: 6px;
-    }
-
-    .subitem-deadline {
-        width: 130px;
-    }
-
-    .confirm-subitem, .cancel-subitem {
-        padding: 6px 12px;
-        font-size: 13px;
-    }
-
-    .deadline-container {
-        padding: 4px 6px;
-        margin: 0 4px;
-    }
-
-    .deadline-picker {
-        width: 110px;
-    }
-
-    .subitem-header .deadline-container {
-        order: 3;
-        width: 100%;
-    }
-
-    .point-item .deadline-container {
-        margin-left: 0;
-        width: 100%;
-    }
+    /* ... existing code ... */
 }
 
 @media (max-width: 480px) {
-    .subitem-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-    .subitem-header .subitem-progress {
-        order: 4;
-    }
-
-    .subitem-header .add-subitem,
-    .subitem-header .remove-subitem {
-        order: 5;
-    }
-
-    .subitem-input {
-        gap: 6px;
-    }
-
-    .subitem-deadline {
-        width: 100%;
-    }
-
-    .deadline-container {
-        flex-direction: row;
-        gap: 4px;
-    }
-
-    .deadline-picker {
-        width: 100px;
-    }
-
-    .deadline-display {
-        font-size: 0.8125rem;
-        padding: 3px 6px;
-    }
+    /* ... existing code ... */
 }
