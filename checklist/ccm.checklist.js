@@ -67,15 +67,15 @@ ccm.files["ccm.checklist.js"] = {
                     </div>
                 </div>`,
             renderpreviewList: `
-               <div class='%isEndpoint%' id=%itemKey%>
-                    <div class='%isEndpointHeader%'>
+               <div class="%isEndpoint%" id="%itemKey%">
+                    <div class="%isEndpointHeader%">
                         <div class='title-edit-wrapper'>
-                            <button class='edit-item-name-btn' title='Namen bearbeiten' onclick=%editName%>&#9998;</button>
+                            <button class='edit-item-name-btn' title='Namen bearbeiten' onclick="%editName%">&#9998;</button>
                             <p class='%isEndpointTitle%'>%itemName%</p>
                             <div class='item-name-edit-form' style="display: none;">
                                 <input type="text" class='item-name-input-field'/>
-                                <button class='save-item-name-btn' onclick=%saveItemName%>OK</button>
-                                <button class='cancel-item-name-btn' onclick=%cancelNameButton%>X</button>
+                                <button class='save-item-name-btn' onclick="%saveItemName%">OK</button>
+                                <button class='cancel-item-name-btn' onclick="%cancelNameButton%">X</button>
                             </div>
                         </div>
                     </div>
@@ -83,12 +83,12 @@ ccm.files["ccm.checklist.js"] = {
                         <input type="date" id="%deadlineGroupId%" class="deadline-picker" value="%deadlinePickerValue%" onchange="%onDeadlineChange%" /> %progressSpanHTML%
                     </div>
                     <div class='action-button-group'>
-                        <button class='add-subitem' onclick='%onAddSubitem%'>
+                        <button class='add-subitem' onclick="%onAddSubitem%">
                             %addSubpointText% </button>
-                        <button class='remove-subitem' onclick='%onRemoveSubitem%'>%removeText%</button>
+                        <button class='remove-subitem' onclick="%onRemoveSubitem%">%removeText%</button>
                     </div>
                     <div class='subitem-input'>
-                        <input type='text' class='subitem-name' placeholder= "%subPointName%"/> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
+                        <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
                     </div>
                     <div class="subitem-list-children"></div>
                 </div>`,
@@ -97,8 +97,8 @@ ccm.files["ccm.checklist.js"] = {
                     <h3>%listTitle%</h3>
                     <div class="progress-prozent"></div>
                         <div>
-                            <button class="edit-list" onclick=%onEditButton%>%editText%</button>
-                            <button class="delete-list" onclick=%onDeleteButton%>%deleteText%</button>
+                            <button class="edit-list" title="%editText%" onclick="%onEditButton%">✎</button>
+                            <button class="delete-list" title="%deleteText%" onclick="%onDeleteButton%">🗑</button>
                         </div>
                     </div>
                     <button class="toggle-item" onclick=%onClickToggleButton%>▼</button>
@@ -109,16 +109,15 @@ ccm.files["ccm.checklist.js"] = {
                     <div class="subitem-list"></div>
                 </div>`,
             renderItem: `
-                <div class="%isEndPoint%" id=%itemKey%>
+                <div class="%isEndPoint%" id="%itemKey%">
                     <div class="%isEndPoint%--header">
                         <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox" checked="%checkboxChecked%" onchange="%onCheckboxChange%">
                         <label for="%itemKey%" class="%isEndPoint%--title">%itemName%</label>
                         <div class="note-container">
+                        <button class="edit-note-btn" title="%noteTitle%" onclick="%onEditeNote%">✎</button>
                         <p class="%subItemNoteClass%">%noteShow%</p>
-                        <button class="edit-note-btn" title="%noteTitle%" onclick=%onEditeNote%>✎</button>
-
                         <div class="note-edit-form" style="display: none;">
-                            <textarea class="note-input" rows="3" placeholder="%writeNoteText%">%itemNote%</textarea>
+                            <textarea class="note-input" rows="3" placeholder="">%itemNote%</textarea>
                             <button class="save-note-btn" onclick="%onSaveNoteButton%">%saveText%</button>
                             <button class="cancel-note-btn" onclick="%onCancelNoteBtn%">%cancelText%</button>
                         </div>
@@ -643,9 +642,9 @@ ccm.files["ccm.checklist.js"] = {
 
             $.setContent(itemHtml, $.html(self.html.renderpreviewList, {
                 itemKey: itemKey,
-                isEndPointHeader: `${isEndPoint ? 'point' : 'subitem'}-header`,
+                isEndpointHeader: `${isEndPoint ? 'point' : 'subitem'}--header`,
                 addSubpointText: self.text.addSubpointText,
-                isEndPoint: isEndPoint ? 'point-item' : 'subitem',
+                isEndpoint: isEndPoint ? 'point-item' : 'subitem-preview',
                 isEndpointTitle: isEndPoint ? 'point-title' : 'subitem-title',
                 deadlineGroupId: deadlineGroupId,
                 deadlineText: self.text.deadlineText,
@@ -838,7 +837,7 @@ ccm.files["ccm.checklist.js"] = {
                 itemDeadline: item.deadline || '',
                 subitemProgress: !isEndPoint ? ('<span class="subitem-progress">' + Math.round(subitemProgress) + '</span>') : '',
                 subItemNoteClass: item.note ? 'subitem-note' : 'subitem-note-placeholder',
-                noteShow: item.note ? item.note : self.text.notePlaceholderText,
+                noteShow: item.note ? item.note : "",
                 noteTitle: item.note ? self.text.editNoteText : self.text.addNoteText,
                 itemNote: item.note || '',
                 subItemList: !isEndPoint ? '<div class="subitem-list"></div>' : '',

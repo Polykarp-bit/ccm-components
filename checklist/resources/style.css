@@ -1,3 +1,24 @@
+
+
+
+/* =============================================
+   ICON-BUTTON STYLING
+   ============================================== */
+.edit-list, .delete-list {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: var(--text-secondary); /* Farbe für die Icons übernehmen */
+    transition: color 0.2s ease-in-out;
+}
+
+.edit-list:hover, .delete-list:hover {
+    color: var(--text-primary); /* Dunklere Farbe beim Hovern */
+}
+
+
+
 /* ==============================================
    1. GRUNDLEGENDE VARIABLEN & RESET
    ============================================== */
@@ -20,6 +41,18 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
 }
+
+.delete-icon{
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+.edit-icon{
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
 
 /* ==============================================
    2. CONTAINER & BASISELEMENTE
@@ -181,10 +214,33 @@ body {
     border: none;
 }
 
-.remove-subitem {
-    background-color: var(--danger-color);
-    color: white;
+.add-subitem {
+    background-color: #eef0f2;
+    color: #6a6a6e;
+    font-weight: 500;
     border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.add-button:hover {
+    background-color: #e1e4e8;
+}
+
+.remove-subitem {
+    opacity: 1;
+}
+
+.remove-subitem {
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-size: 0.9rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
 }
 
 /* ==============================================
@@ -194,7 +250,9 @@ body {
 .subitem-list-children {
     margin-left: 0;  /* Reduziere den Einzug */
     padding-left: 2.5rem;  /* Einheitlicher Einzug */
-    border-left: none;     /* Entferne die vertikale Linie */
+    border-left: 2px solid gray;
+    border: 1px solid lightgrey;
+    /* Entferne die vertikale Linie */
     display: block;        /* Verwende normalen Dokumentenfluss */
 }
 
@@ -204,6 +262,8 @@ body {
     border-bottom: 1px solid var(--border-color);
     margin-bottom: 0.5rem;
 }
+
+
 
 /* Header für jeden Unterpunkt */
 .point--header,
@@ -309,3 +369,53 @@ body {
 @media (max-width: 480px) {
     /* ... existing code ... */
 }
+
+/* ==============================================
+   11. HOVER-EFFEKTE FÜR AUFGABEN
+   ============================================== */
+
+/* Den Header der Aufgabe (die ganze Zeile) für den Hover-Effekt vorbereiten */
+.point--header,
+.subitem--header {
+    /* Fügt einen weichen Übergang für die Hintergrundfarbe hinzu */
+    transition: background-color 0.2s ease-in-out;
+    position: relative; /* Wichtig für die Positionierung von Kind-Elementen */
+}
+
+/* Der eigentliche Hover-Effekt: Ändert die Hintergrundfarbe dezent */
+.point--header:hover,
+.subitem--header:hover {
+    background-color: #f9fafb; /* Ein sehr leichtes Grau, ähnlich deinem Beispiel */
+}
+
+/* Den Notiz-Bearbeiten-Button standardmäßig ausblenden */
+.edit-note-btn {
+    opacity: 0; /* Standardmäßig unsichtbar */
+    transition: opacity 0.2s ease-in-out; /* Weiches Ein- und Ausblenden */
+}
+
+/* Den Button einblenden, wenn über die Zeile gehovert wird */
+.point--header:hover .edit-note-btn,
+.subitem--header:hover .edit-note-btn {
+    opacity: 1; /* Bei Hover sichtbar machen */
+}
+
+/* ZUSATZ: Wenn bereits eine Notiz vorhanden ist, den Button immer anzeigen.
+   Dafür müssen wir den Button selektieren, wenn die Notiz-Anzeige (.subitem-note) existiert.
+   Da der Button VOR der Notiz im HTML steht, brauchen wir einen Trick.
+   Die einfachste Lösung ist, wenn wir den Button immer dann anzeigen,
+   wenn die Notiz-Anzeige (.subitem-note) selbst gehovert wird oder der ganze Header. */
+
+.subitem-note:hover + .edit-note-btn {
+    opacity: 1;
+}
+
+/* Eine bessere, robustere Lösung: Den Button immer anzeigen, wenn eine Notiz da ist.
+   Dafür fügen wir eine spezielle Regel hinzu, die auf die Klasse .subitem-note zielt.
+   Wir sorgen dafür, dass der Button sichtbar ist, wenn sein Nachbar die Klasse .subitem-note hat.
+   HINWEIS: In deiner HTML-Struktur kommt der Button VOR der Notiz. CSS kann standardmäßig
+   keine "vorherigen" Geschwister auswählen. Die obige Lösung ist ein Kompromiss.
+
+   Die sauberste Lösung wäre eine kleine Anpassung in deinem `renderItem`-Template,
+   die wir im nächsten Schritt besprechen. Fürs Erste funktioniert der Hover-Effekt aber perfekt.
+*/
