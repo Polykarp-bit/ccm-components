@@ -11,7 +11,7 @@ ccm.files["ccm.timetable.js"] = {
         courseStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_teacher_courses"}],
         studentCourseStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_student_courses"}],
         studentStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_student_schedules"}],
-        css: ["ccm.load", "./resources/style.css"],
+        css: ["ccm.load", "./css/style.css"],
         text: {
             configureTimetableText: "Stundenplan Konfigurieren",
             timeTableText: "Stundenplan",
@@ -67,11 +67,12 @@ ccm.files["ccm.timetable.js"] = {
             noNotesText: "Keine Notizen vorhanden",
             noLinksText: "Keine Links vorhanden",
             semesterLabelText: "Semester ",
-            linksLabelText: "Links:",
-            linkTitleText: "Link Titel",
-            linkUrlText: "Link URL",
+            linksLabelText: "Nützliche Links:",
+            linkTitleText: "Titel des Links",
+            linkUrlText: "https://beispiel.de",
             addLinkInlineButtonText: "Link hinzufügen",
-            noteText: "Notizen",
+            noteLabelText: "Notizen:",
+            noteText: "Hier deine Notizen zur Veranstaltung eintragen",
             eventItemRoomText: "Raum: ",
             eventItemWhoText: "Dozent: ",
             eventItemPeriodText: "Zeitraum: ",
@@ -242,52 +243,45 @@ ccm.files["ccm.timetable.js"] = {
                     </div>
                 `,
                 courseItem: `
-                    <div class="course-item" data-key="%key%" style="border-left: 5px solid %borderColor%">
-                        <div class="course-item-row course-item-main-info">
-                            <div class="course-item-details">
+                    <div class="course-item" data-key="%key%" style="border-color: %borderColor%">
+                        <div class="card-header">
+                            <div class="course-details">
                                 <h3>%courseTitle%</h3>
-                                <div class="event-info" data-event-key="%eventKey%">
-                                    %eventTimeData%
-                                </div>
+                                <div class="event-info" data-event-key="%eventKey%">%eventTimeData%</div>
                             </div>
-                            <div class="course-item-primary-actions">
-                                <div class="event-note" id="event-note-container-%eventKey%"></div>
-                                <div class="event-color" id="event-color-container-%eventKey%">
+                            <div class="course-actions">
+                                <div class="event-color-picker">
                                     <label for="event-color-%eventKey%">%eventColorText%</label>
                                     <input type="color" class="color-picker" id="event-color-%eventKey%" value="%colorValue%">
                                 </div>
-                                <div class="course-actions">
-                                    <button class="remove-event-button">%removeButtonText%</button>
-                                </div>
+                                <button class="button button-danger remove-event-button">%removeButtonText%</button>
                             </div>
                         </div>
-                        <div class="course-item-row event-links-section" id="event-links-section-%eventKey%">
-                            <label class="links-label">%linksLabelText%</label>
-                            <div class="current-event-links" id="current-event-links-%eventKey%"></div>
-                            <div class="add-new-link-form-inline">
-                                <input type="text" class="new-link-title-inline" placeholder="%linkTitleText%">
-                                <input type="url" class="new-link-url-inline" placeholder="%linkUrlText%">
-                                <button type="button" class="add-link-inline-button" data-event-key="%eventKey%">%addLinkInlineButtonText%</button>
+                        <div class="card-body">
+                            <div class="event-section" id="event-links-section-%eventKey%">
+                                <label class="section-label">%linksLabelText%</label>
+                                <form class="form-inline">
+                                    <input type="text" class="new-link-title-inline" placeholder="%linkTitleText%">
+                                    <input type="url" class="new-link-url-inline" placeholder="%linkUrlText%">
+                                    <button type="button" class="button button-primary add-link-inline-button" data-event-key="%eventKey%" onclick="%onAddLink%">%addLinkInlineButtonText%</button>
+                                </form>
+                                <div class="current-event-links" id="current-event-links-%eventKey%"></div>
+                            </div>
+                            <div class="event-section" id="event-note-container-%eventKey%">
+                                <label class="section-label" for="event-note-input-%eventKey%">%noteLabelText%</label>
+                                <textarea class="event-note-input" id="event-note-input-%eventKey%" placeholder="%noteText%" onchange="%onChangeNote%"></textarea>
                             </div>
                         </div>
                     </div>
                 `,
-                noteContainerWithTextarea: `
-                    <div class="event-note-container">
-                        <textarea class="event-note-textarea" id="event-note-%eventKey%" placeholder="%notePlaceholderText%">%noteText%</textarea>
-                        <button type="button" class="save-note-button small-button" onclick="%onSaveNoteButton%">%saveNoteButtonText%</button>
-                    </div>
-                `,
-                noteContainerWithAddButton: `
-                    <div class="event-note-container">
-                        <button class="add-note-button" onclick="%onAddNoteButton%">%addNoteButtonText%</button>
-                    </div>
-                `,
+
                 linkDisplayItem: `
-                    <div class="event-link-display-item">
-                        <a href="%linkUrl%" target="_blank" rel="noopener noreferrer">%linkTitle%</a>
-                        <button type="button" class="remove-single-link-button small-button" data-link-key="%linkKey%" onclick="%onRemoveLinkButton%">%removeLinkButtonText%</button>
-                    </div>
+                    <ul class="current-event-links">
+                        <li class="event-link-display-item">
+                            <a href="%linkUrl%" target="_blank" rel="noopener noreferrer">%linkTitle%</a>
+                            <button type="button" class="remove-single-link-button small-button" data-link-key="%linkKey%" onclick="%onRemoveLinkButton%">%removeLinkButtonText%</button>
+                        </li>
+                    </ul>
                 `,
                 noLinksMessage: `
                     <p class="no-links-text">%noLinksText%</p>
@@ -913,7 +907,7 @@ ccm.files["ccm.timetable.js"] = {
                 console.warn(`Kurs ${course.value.course} hat keine gültigen Events.`, course);
                 course.value.events = [];
             }
-
+            // hier sind noch sahen bei denen du das ins onclick im tepmalet schreiben kannst und dann noch in events auslagern
             course.value.events.forEach(event => {
                 if (!event.links) event.links = [];
                 if (!event.color) event.color = '#cccccc';
@@ -930,7 +924,35 @@ ccm.files["ccm.timetable.js"] = {
                     linksLabelText: self.text.linksLabelText,
                     linkTitleText: self.text.linkTitleText,
                     linkUrlText: self.text.linkUrlText,
-                    addLinkInlineButtonText: self.text.addLinkInlineButtonText
+                    addLinkInlineButtonText: self.text.addLinkInlineButtonText,
+                    noteLabelText: self.text.noteLabelText,
+                    noteText: self.text.noteText,
+                    onAddLink: async () => {
+                        const title = newLinkTitleInput.value.trim();
+                        let url = newLinkUrlInput.value.trim();
+                        if (url) {
+                            if (!url.match(/^https?:\/\//i)) {
+                                url = 'https://' + url;
+                            }
+                            if (!event.links) event.links = [];
+                            event.links.push({
+                                key: self.ccm.helper.generateKey(),
+                                title: title || url,
+                                url: url
+                            });
+                            newLinkTitleInput.value = '';
+                            newLinkUrlInput.value = '';
+                            self.refreshLinksDisplay(event, currentLinksDiv);
+                            await self.saveSelectedCourses();
+                        } else {
+                            alert(self.text.errorLinkUrlRequired);
+                        }
+                    },
+                    onChangeNote: async () => {
+                        const noteInput = courseHtml.querySelector(`#event-note-input-${event.key}`);
+                        event.note = noteInput.value.trim();
+                        await self.saveSelectedCourses()
+                    }
                 });
 
                 $.append(selectedScheduleContainer, courseHtml);
@@ -944,55 +966,15 @@ ccm.files["ccm.timetable.js"] = {
                     }
                     await self.saveSelectedCourses();
                 });
-
-                const noteContainer = courseHtml.querySelector(`#event-note-container-${event.key}`);
-                if (event.note && event.note.trim() !== "") {
-                    const noteHtml = self.ccm.helper.html(self.html.editView.noteContainerWithTextarea, {
-                        eventKey: event.key,
-                        notePlaceholderText: self.text.notePlaceholderText,
-                        noteText: event.note,
-                        saveNoteButtonText: self.text.saveNoteButtonText,
-                        onSaveNoteButton: self.events.onSaveNoteButton(event.key, noteContainer)
-                    });
-                    $.setContent(noteContainer, noteHtml);
-                } else {
-                    const noteHtml = self.ccm.helper.html(self.html.editView.noteContainerWithAddButton, {
-                        eventKey: event.key,
-                        addNoteButtonText: self.text.addNoteButtonText,
-                        onAddNoteButton: self.events.onAddNoteButton(event.key, noteContainer)
-                    });
-                    $.setContent(noteContainer, noteHtml);
-                }
+                const noteInput = courseHtml.querySelector(`#event-note-input-${event.key}`);
+                noteInput.value = event.note || '';
 
                 const eventLinksSection = courseHtml.querySelector(`#event-links-section-${event.key}`);
                 const currentLinksDiv = eventLinksSection.querySelector(`.current-event-links`);
-                const addLinkInlineButton = eventLinksSection.querySelector('.add-link-inline-button');
                 const newLinkTitleInput = eventLinksSection.querySelector('.new-link-title-inline');
                 const newLinkUrlInput = eventLinksSection.querySelector('.new-link-url-inline');
 
                 self.refreshLinksDisplay(event, currentLinksDiv);
-
-                addLinkInlineButton.addEventListener('click', async () => {
-                    const title = newLinkTitleInput.value.trim();
-                    let url = newLinkUrlInput.value.trim();
-                    if (url) {
-                        if (!url.match(/^https?:\/\//i)) {
-                            url = 'https://' + url;
-                        }
-                        if (!event.links) event.links = [];
-                        event.links.push({
-                            key: self.ccm.helper.generateKey(),
-                            title: title || url,
-                            url: url
-                        });
-                        newLinkTitleInput.value = '';
-                        newLinkUrlInput.value = '';
-                        self.refreshLinksDisplay(event, currentLinksDiv);
-                        await self.saveSelectedCourses();
-                    } else {
-                        alert(self.text.errorLinkUrlRequired);
-                    }
-                });
 
                 courseHtml.querySelector('.remove-event-button').addEventListener('click', async () => {
                     const courseInCurrent = currentCourses.find(c => c.key === course.key);
@@ -1001,9 +983,8 @@ ccm.files["ccm.timetable.js"] = {
                         if (courseInCurrent.value.events.length === 0) {
                             currentCourses = currentCourses.filter(c => c.key !== course.key);
                         }
-                        const itemToRemove = selectedScheduleContainer.querySelector(`.event-info[data-event-key="${event.key}"]`);
-                        if (itemToRemove) itemToRemove.closest('.list-item').remove();
-
+                        const itemToRemove = selectedScheduleContainer.querySelector(`.course-item[data-key="${course.key}"]`);
+                        if (itemToRemove) itemToRemove.remove();
                         const courseCheckboxList = self.element.querySelector('#course-checkbox-list');
                         const checkbox = courseCheckboxList.querySelector(`.event-checkbox[data-event-key="${event.key}"]`);
                         if (checkbox) {
