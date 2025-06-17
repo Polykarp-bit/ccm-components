@@ -191,6 +191,11 @@ ccm.files["ccm.checklist.js"] = {
             onStartCreateButton: (createListForm, listForm, previewList) => {
                 const listName = createListForm.querySelector('#list-name').value.trim();
                 const firstItemName = createListForm.querySelector('#first-item-name').value.trim();
+
+                if (!istEingabeGueltig(listName) || !istEingabeGueltig(firstItemName)) {
+                    return;
+                }
+
                 if (!listName || !firstItemName) {
                     alert('Bitte geben Sie einen Listennamen und ein erstes Listenobjekt ein.');
                     return;
@@ -202,7 +207,7 @@ ccm.files["ccm.checklist.js"] = {
                 my.currentItems = [];
                 previewList.innerHTML = '';
 
-                const firstItemKey = `item_${firstItemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
+                const firstItemKey = `item§§§${firstItemName.replace(/[^a-zA-Z0-9äöüß]/g, '§§§').toLowerCase()}§§§${Date.now()}`;
                 const firstItem = {key: firstItemKey, name: firstItemName, items: [], deadline: null};
                 my.tempList.items.push(firstItem);
                 my.currentItems.push(firstItem);
@@ -254,6 +259,7 @@ ccm.files["ccm.checklist.js"] = {
             onConfirmSubitem: (listInput) => {
                 const subitemNameInput = self.element.querySelector('.list-item-name');
                 const subitemName = subitemNameInput.value.trim();
+                if (!istEingabeGueltig(subitemName)) return;
                 if (!subitemName) {
                     alert('Bitte geben Sie einen Namen für das Listenobjekt ein.');
                     return;
@@ -299,6 +305,7 @@ ccm.files["ccm.checklist.js"] = {
                 }*/
 
                 const subitemName = subitemNameInputForNew.value.trim();
+                if (!istEingabeGueltig(subitemName)) return;
                 if (!subitemName) {
                     alert('Bitte geben Sie einen Namen für den Unterpunkt ein.');
                     subitemNameInputForNew.focus();
@@ -328,6 +335,8 @@ ccm.files["ccm.checklist.js"] = {
             saveItemName: (event, item, nameEditForm, titleDisplay, editNameBtn, nameInput) => {
                 event.stopPropagation();
                 const newName = nameInput.value.trim();
+
+                if (!istEingabeGueltig(newName)) return;
                 if (newName && newName !== item.name) {
                     if (updateItemNameInTempList(my.tempList.items, item.key, newName)) {
                         renderPreview(my.tempList.key, my.tempList.items);
@@ -560,6 +569,7 @@ ccm.files["ccm.checklist.js"] = {
             saveListName: (event, nameEditForm, titleDisplay, editBtn, nameInput) => {
                 event.stopPropagation();
                 const newName = nameInput.value.trim();
+                if (!istEingabeGueltig(newName)) return;
                 if (newName && newName !== my.tempList.key) {
                     my.tempList.key = newName.replace(/\s+/g, '');
                     renderPreview(my.tempList.key, my.tempList.items); // Wichtig: Vorschau neu rendern
@@ -620,7 +630,6 @@ ccm.files["ccm.checklist.js"] = {
             });
         }
 
-        // Komplette, aber schlanke renderPreview-Funktion
         function renderPreview(listKey, items) {
             const previewList = self.element.querySelector('#preview-list');
             previewList.innerHTML = '';
@@ -680,7 +689,7 @@ ccm.files["ccm.checklist.js"] = {
         }
 
         function renderPreviewItem(item, parentElement, parentKey) {
-            const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
+            const itemKey = parentKey ? `${parentKey}§§§${item.key}` : item.key;
             const isEndPoint = item.items.length === 0;
             const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(my.tempList.key, itemKey, item.items, itemKey);
             const deadlineGroupId = `deadline_preview_${itemKey.replace(/\W/g, '_')}`;
@@ -739,7 +748,7 @@ ccm.files["ccm.checklist.js"] = {
                 my.listState[listKey] = state;
             }
             items.forEach(item => {
-                const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
+                const itemKey = parentKey ? `${parentKey}§§§${item.key}` : item.key;
                 state.items[itemKey] = state.items[itemKey] || {checked: false, collapsed: false};
                 initializeState(listKey, item.items, state, itemKey);
             });
@@ -751,7 +760,7 @@ ccm.files["ccm.checklist.js"] = {
             let checkedPoints = 0;
 
             items.forEach(item => {
-                const itemKey = currentParentKey ? `${currentParentKey}_${item.key}` : item.key;
+                const itemKey = currentParentKey ? `${currentParentKey}§§§${item.key}` : item.key;
                 if (item.items.length === 0) {
                     totalPoints++;
                     if (my.listState[listKey]?.items[itemKey]?.checked) {
@@ -859,7 +868,7 @@ ccm.files["ccm.checklist.js"] = {
         }
 
         function renderItem(listKey, item, parentElement, listContent, parentKey) {
-            const itemKey = parentKey ? `${parentKey}_${item.key}` : item.key;
+            const itemKey = parentKey ? `${parentKey}§§§${item.key}` : item.key;
             const isEndPoint = item.items.length === 0;
             const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(listKey, itemKey, item.items, itemKey);
 
@@ -925,8 +934,8 @@ ccm.files["ccm.checklist.js"] = {
 
         function findChildItemsInData(items, targetKeyPart, currentParentKey) {
             for (const item of items) {
-                const fullKey = currentParentKey ? `${currentParentKey}_${item.key}` : item.key;
-                const keyPart = fullKey.split('_').pop();
+                const fullKey = currentParentKey ? `${currentParentKey}§§§${item.key}` : item.key;
+                const keyPart = fullKey.split('§§§').pop();
                 if (keyPart === targetKeyPart) {
                     return item.items;
                 }
@@ -937,22 +946,22 @@ ccm.files["ccm.checklist.js"] = {
         }
 
         const updateParentState = (itemId, currentListKey, currentListContent) => {
-            const parts = itemId.split('_');
+            const parts = itemId.split('§§§');
             if (parts.length <= 3) return;
             console.log('Update parent state for', {itemId, currentListKey, currentListContent});
             parts.pop();
             parts.pop();
             parts.pop();
 
-            const parentId = parts.join('_');
+            const parentId = parts.join('§§§');
             const parentItemInState = my.listState[currentListKey].items[parentId];
             const parentElementInDOM = parentElementForId(currentListContent, parentId);
 
             if (parentItemInState && parentElementInDOM) {
-                const childItems = findChildItemsInData(my.listsData[currentListKey], parentId.split('_').pop(), parts.slice(0, -1).join('_'));
+                const childItems = findChildItemsInData(my.listsData[currentListKey], parentId.split('§§§').pop(), parts.slice(0, -1).join('§§§'));
 
                 const allChildrenChecked = childItems.every(child => {
-                    const childKeyInState = `${parentId}_${child.key}`;
+                    const childKeyInState = `${parentId}§§§${child.key}`;
                     return my.listState[currentListKey].items[childKeyInState]?.checked;
                 });
                 console.log('allChildrenChecked:' + (allChildrenChecked));
@@ -976,12 +985,21 @@ ccm.files["ccm.checklist.js"] = {
 
         function updateSubitemPoints(listKey, items, parentKey, checked) {
             items.forEach(item => {
-                const itemKey = `${parentKey}_${item.key}`;
+                const itemKey = `${parentKey}§§§${item.key}`;
                 if (my.listState[listKey].items[itemKey]) {
                     my.listState[listKey].items[itemKey].checked = checked;
                 }
                 updateSubitemPoints(listKey, item.items, itemKey, checked);
             });
+        }
+
+        function istEingabeGueltig(inputText) {
+            const forbiddenSequence = '§§§';
+            if (inputText.includes(forbiddenSequence)) {
+                alert(`Die Zeichenfolge "${forbiddenSequence}" ist im Namen nicht erlaubt.`);
+                return false; // Eingabe ist ungültig
+            }
+            return true; // Eingabe ist gültig
         }
     }
 };

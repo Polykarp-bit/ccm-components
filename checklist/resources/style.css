@@ -282,7 +282,6 @@ button {
 
 .add-subitem,
 .confirm-subitem {
-    background-color: var(--accent-color);
     color: green;
     border: none;
 }
