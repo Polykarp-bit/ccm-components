@@ -60,9 +60,9 @@ ccm.files["ccm.timetable.js"] = {
             groupText: "Gruppe (optional)",
             groupPlaceholderText: "z.B. A",
             removeButtonText: "Veranstaltung entfernen",
-            courseItemTitleText: "Kursname",
-            eventTimeDataText: "Veranstaltungszeit",
-            eventNoteText: "Notizen",
+        /*    courseItemTitleText: "Kursname", */
+        /*    eventTimeDataText: "Veranstaltungszeit", */
+        /*    eventNoteText: "Notizen", */
             eventColorText: "Farbe:",
             noNotesText: "Keine Notizen vorhanden",
             noLinksText: "Keine Links vorhanden",
@@ -81,16 +81,16 @@ ccm.files["ccm.timetable.js"] = {
             ownCourseText: "[eigene Veranstaltung]",
             noStudyText: "Ohne Studiengang",
             nAText: "N/A",
-            previewListText: "Vorschau Liste",
+          /*  previewListText: "Vorschau Liste",*/
             errorCourseNameRequired: "Bitte gib einen Kursnamen ein.",
-            errorAtLeastOneEvent: "Bitte füge mindestens eine Veranstaltung hinzu.",
+          /*  errorAtLeastOneEvent: "Bitte füge mindestens eine Veranstaltung hinzu.", */
             errorAddCourseFailed: "Fehler beim Hinzufügen des Kurses. Bitte versuche es erneut.",
             errorSaveCoursesFailed: "Fehler beim Speichern der Kurse. Bitte versuche es erneut.",
             errorLoginRequired: "Bitte melde dich an, um fortzufahren.",
             noteSaved: "Notiz gespeichert!",
             errorLinkUrlRequired: "Bitte geben Sie eine URL für den Link ein.",
-            addNoteButtonText: "Notiz hinzufügen",
-            noLinksForEvent: "Keine Links für diese Veranstaltung vorhanden.",
+           /* addNoteButtonText: "Notiz hinzufügen",*/
+           /* noLinksForEvent: "Keine Links für diese Veranstaltung vorhanden.",*/
             removeLinkButtonText: "Link entfernen",
             notePlaceholderText: "Deine Notiz...",
             saveNoteButtonText: "Notiz speichern"
@@ -448,6 +448,7 @@ ccm.files["ccm.timetable.js"] = {
                     }
                 };
             },
+            /*
             onAddNoteButton: (eventKey, noteContainer) => {
                 return () => {
                     const noteHtml = self.ccm.helper.html(self.html.editView.noteContainerWithTextarea, {
@@ -461,6 +462,8 @@ ccm.files["ccm.timetable.js"] = {
                     noteContainer.querySelector(`#event-note-${eventKey}`).focus();
                 };
             },
+            */
+
             onRemoveLinkButton: (eventKey, linkKey, currentLinksDiv) => {
                 return async () => {
                     const course = currentCourses.find(c => c.value.events.some(e => e.key === eventKey));
@@ -1170,13 +1173,7 @@ ccm.files["ccm.timetable.js"] = {
 
         this.openModal = async (courseId, eventId) => {
             try {
-                console.log('--- openModal GESTARTET ---');
-                console.log('courseId:', courseId, 'eventId:', eventId);
                 const course = currentCourses.find(c => c.key === courseId);
-                if (!course) {
-                    console.error('ABBRUCH: Kurs konnte nicht gefunden werden.');
-                    return;
-                }
                 const event = course.value.events.find(e => e.key === eventId);
                 if (!event) {
                     console.error('ABBRUCH: Event konnte nicht im Kurs gefunden werden.');

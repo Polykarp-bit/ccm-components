@@ -32,7 +32,7 @@ ccm.files["ccm.checklist.js"] = {
             writeNoteText: "Notiz eingeben...",
             editNoteText: "Notiz bearbeiten",
             addNoteText: "Notiz hinzufügen",
-            notePlaceholderText: "Keine Notiz",
+         /*   notePlaceholderText: "Keine Notiz",*/
         },
         helper: ["ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-7.2.0.mjs"],
         html: {
@@ -265,23 +265,28 @@ ccm.files["ccm.checklist.js"] = {
                 if (event) event.stopPropagation();
                 const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
 
+                /*
                 if (!currentItemRenderedRoot) {
                     console.error(`confirmSubitem: Element mit ID '${itemKey}' nicht gefunden!`);
                     return;
                 }
-
+                */
                 const subitemInputContainer = currentItemRenderedRoot.querySelector('.subitem-input');
+
+                /*
                 if (!subitemInputContainer) {
                     console.error(`confirmSubitem: '.subitem-input' nicht in Element mit ID '${itemKey}' gefunden.`);
                     console.log("Inhalt von currentItemRenderedRoot (ID: " + itemKey + "):", currentItemRenderedRoot.innerHTML);
                     return;
-                }
+                } */
 
                 const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
+
+                /*
                 if (!subitemNameInputForNew) {
                     console.error(`confirmSubitem: '.subitem-name' Input nicht im subitemInputContainer für itemKey '${itemKey}' gefunden.`);
                     return;
-                }
+                }*/
 
                 const subitemName = subitemNameInputForNew.value.trim();
                 if (!subitemName) {
