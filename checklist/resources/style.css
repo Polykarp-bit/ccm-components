@@ -1,5 +1,94 @@
+#element{
+    --background-color: #f4f6f9;
+    --container-background: #ffffff;
+    --text-primary: #2d3748;
+    --text-secondary: #64748b;
+    --accent-color: #2563eb;
+    --danger-color: #ef4444;
+    --border-color: #e2e8f0;
+
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 20px;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+input{
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #595959;
+}
+
+input[type="text"] {
+    width: 15rem;
+}
+
+button {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #595959;
+}
 
 
+
+.create-list {
+    display: flex;
+    gap: 5px;
+}
+
+.list-item {
+
+   & > div {
+        margin-bottom: 1rem;
+    }
+    .edit-list {
+        font-size: 1.5rem;
+    }
+
+    .delete-list {
+        font-size: 1.5rem;
+    }
+
+    .title-edit-wrapper{
+        display: flex;
+        align-items: center;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .title-edit-wrapper-left {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .subitem-input {
+        display: none;
+        margin-bottom: 0.5rem;
+    }
+
+    .list-input {
+        margin-bottom: 0.5rem;
+    }
+}
+
+#items {
+    .subitem--header {
+        padding: 0.75rem 1rem 0.75rem 0;
+    }
+
+    .item-header {
+        padding: 1rem 0;
+    }
+
+    .list-item{
+        border-bottom: 1px solid var(--border-color);
+    }
+
+}
 
 /* =============================================
    ICON-BUTTON STYLING
@@ -18,29 +107,9 @@
 }
 
 
-
 /* ==============================================
    1. GRUNDLEGENDE VARIABLEN & RESET
    ============================================== */
-:root {
-    --background-color: #f4f6f9;
-    --container-background: #ffffff;
-    --text-primary: #2d3748;
-    --text-secondary: #64748b;
-    --accent-color: #2563eb;
-    --danger-color: #ef4444;
-    --border-color: #e2e8f0;
-    --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-body {
-    font-family: var(--font-family);
-    background-color: var(--background-color);
-    margin: 0;
-    padding: 20px;
-    color: var(--text-primary);
-    line-height: 1.6;
-}
 
 .delete-icon{
     width: 20px;
@@ -74,7 +143,6 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
 }
 
 .item-header h3 {
@@ -82,6 +150,8 @@ body {
     font-size: 1.5rem;
     font-weight: 600;
     color: var(--text-primary);
+    width: 50%;
+    overflow-wrap: break-word;
 }
 
 /* ==============================================
@@ -89,7 +159,6 @@ body {
    ============================================== */
 .item-content {
     padding: 1rem;
-    border-bottom: 1px solid var(--border-color);
 }
 
 .point--header,
@@ -139,6 +208,11 @@ body {
     font-size: 0.875rem;
     color: var(--accent-color);
     font-weight: 600;
+    width: 40%;
+}
+
+.item-header-right {
+    width: 10%;
 }
 
 /* ==============================================
@@ -178,7 +252,6 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin: 1rem 0;
 }
 
 .deadline-picker {
@@ -210,7 +283,7 @@ body {
 .add-subitem,
 .confirm-subitem {
     background-color: var(--accent-color);
-    color: white;
+    color: green;
     border: none;
 }
 
@@ -223,6 +296,7 @@ body {
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    margin: 0.5rem 0;
 }
 
 .add-button:hover {
@@ -248,47 +322,34 @@ body {
    ============================================== */
 .subitem-list,
 .subitem-list-children {
-    margin-left: 0;  /* Reduziere den Einzug */
-    padding-left: 2.5rem;  /* Einheitlicher Einzug */
+    margin-left: 0;
+    padding-left: 2.5rem;
     border-left: 2px solid gray;
-    border: 1px solid lightgrey;
-    /* Entferne die vertikale Linie */
-    display: block;        /* Verwende normalen Dokumentenfluss */
+    display: block;
 }
 
-/* Container für Unterpunkte */
 .point,
 .subitem {
-    border-bottom: 1px solid var(--border-color);
     margin-bottom: 0.5rem;
 }
 
-
-
-/* Header für jeden Unterpunkt */
 .point--header,
 .subitem--header {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0.75rem 0;
     background-color: white;  /* Stelle sicher, dass der Hintergrund weiß ist */
 }
 
-/* Entferne die letzte Trennlinie */
 .point:last-child,
 .subitem:last-child {
     border-bottom: none;
     margin-bottom: 0;
 }
 
-/* Action Button Group anpassen */
 .action-button-group {
     margin: 0.5rem 0;
-    padding-left: 2.5rem;  /* Gleicher Einzug wie die Liste */
 }
 
-/* Notiz-Container anpassen */
 .note-container {
     margin: 0.25rem 0;
     padding-left: 2.5rem;  /* Gleicher Einzug wie die Liste */
@@ -359,16 +420,6 @@ body {
 .note-text + .note-action {
     opacity: 1;
 }
-/* ==============================================
-   7. RESPONSIVE DESIGN
-   ============================================== */
-@media (max-width: 768px) {
-    /* ... existing code ... */
-}
-
-@media (max-width: 480px) {
-    /* ... existing code ... */
-}
 
 /* ==============================================
    11. HOVER-EFFEKTE FÜR AUFGABEN
@@ -388,34 +439,17 @@ body {
     background-color: #f9fafb; /* Ein sehr leichtes Grau, ähnlich deinem Beispiel */
 }
 
-/* Den Notiz-Bearbeiten-Button standardmäßig ausblenden */
 .edit-note-btn {
     opacity: 0; /* Standardmäßig unsichtbar */
     transition: opacity 0.2s ease-in-out; /* Weiches Ein- und Ausblenden */
 }
 
-/* Den Button einblenden, wenn über die Zeile gehovert wird */
 .point--header:hover .edit-note-btn,
 .subitem--header:hover .edit-note-btn {
     opacity: 1; /* Bei Hover sichtbar machen */
 }
 
-/* ZUSATZ: Wenn bereits eine Notiz vorhanden ist, den Button immer anzeigen.
-   Dafür müssen wir den Button selektieren, wenn die Notiz-Anzeige (.subitem-note) existiert.
-   Da der Button VOR der Notiz im HTML steht, brauchen wir einen Trick.
-   Die einfachste Lösung ist, wenn wir den Button immer dann anzeigen,
-   wenn die Notiz-Anzeige (.subitem-note) selbst gehovert wird oder der ganze Header. */
-
 .subitem-note:hover + .edit-note-btn {
     opacity: 1;
 }
 
-/* Eine bessere, robustere Lösung: Den Button immer anzeigen, wenn eine Notiz da ist.
-   Dafür fügen wir eine spezielle Regel hinzu, die auf die Klasse .subitem-note zielt.
-   Wir sorgen dafür, dass der Button sichtbar ist, wenn sein Nachbar die Klasse .subitem-note hat.
-   HINWEIS: In deiner HTML-Struktur kommt der Button VOR der Notiz. CSS kann standardmäßig
-   keine "vorherigen" Geschwister auswählen. Die obige Lösung ist ein Kompromiss.
-
-   Die sauberste Lösung wäre eine kleine Anpassung in deinem `renderItem`-Template,
-   die wir im nächsten Schritt besprechen. Fürs Erste funktioniert der Hover-Effekt aber perfekt.
-*/
