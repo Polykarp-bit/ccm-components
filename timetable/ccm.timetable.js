@@ -87,13 +87,13 @@ ccm.files["ccm.timetable.js"] = {
             errorAddCourseFailed: "Fehler beim Hinzufügen des Kurses. Bitte versuche es erneut.",
             errorSaveCoursesFailed: "Fehler beim Speichern der Kurse. Bitte versuche es erneut.",
             errorLoginRequired: "Bitte melde dich an, um fortzufahren.",
-            noteSaved: "Notiz gespeichert!",
+            /*noteSaved: "Notiz gespeichert!",*/
             errorLinkUrlRequired: "Bitte geben Sie eine URL für den Link ein.",
            /* addNoteButtonText: "Notiz hinzufügen",*/
            /* noLinksForEvent: "Keine Links für diese Veranstaltung vorhanden.",*/
             removeLinkButtonText: "Link entfernen",
-            notePlaceholderText: "Deine Notiz...",
-            saveNoteButtonText: "Notiz speichern"
+           /* notePlaceholderText: "Deine Notiz...",*/
+           /* saveNoteButtonText: "Notiz speichern"*/
         },
         user: ["ccm.instance", "https://ccmjs.github.io/akless-components/user/ccm.user.js"],
         helper: ["ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-8.4.2.min.mjs"],
@@ -125,7 +125,7 @@ ccm.files["ccm.timetable.js"] = {
                                     <label for="course-title">%courseNameText%</label>
                                     <input type="text" id="course-title" name="course-title" placeholder="%coursePlaceholderText%" required>
                                 </div>
-                                <div id="events-container" onclick="%onEventContainer%"></div>
+                                <div id="events-container" ></div>
                                 <button type="submit" id="submit-course-button">%addCourseText%</button>
                                 <button type="button" id="cancel-button" onclick="%onCancelButton%">%cancelText%</button>
                             </form>
@@ -433,9 +433,7 @@ ccm.files["ccm.timetable.js"] = {
                     alert(e.message);
                 }
             },
-            onEventContainer: () => {
-                console.log("Events container clicked");
-            },
+            /*
             onSaveNoteButton: (eventKey, noteContainer) => {
                 return async () => {
                     const textarea = noteContainer.querySelector(`#event-note-${eventKey}`);
@@ -448,7 +446,7 @@ ccm.files["ccm.timetable.js"] = {
                     }
                 };
             },
-            /*
+
             onAddNoteButton: (eventKey, noteContainer) => {
                 return () => {
                     const noteHtml = self.ccm.helper.html(self.html.editView.noteContainerWithTextarea, {
@@ -874,7 +872,10 @@ ccm.files["ccm.timetable.js"] = {
                     redrawSelectedCourses();
 
                     if (affectedEvents.length > 0) {
-                        self.updateParentCheckboxes(affectedEvents[0]);
+                        affectedEvents.forEach((event) => {
+                            self.updateParentCheckboxes(event)
+                        })
+                        ;
                     }
 
                     await self.saveSelectedCourses();
@@ -986,8 +987,7 @@ ccm.files["ccm.timetable.js"] = {
                         if (courseInCurrent.value.events.length === 0) {
                             currentCourses = currentCourses.filter(c => c.key !== course.key);
                         }
-                        const itemToRemove = selectedScheduleContainer.querySelector(`.course-item[data-key="${course.key}"]`);
-                        if (itemToRemove) itemToRemove.remove();
+                        courseHtml.remove();
                         const courseCheckboxList = self.element.querySelector('#course-checkbox-list');
                         const checkbox = courseCheckboxList.querySelector(`.event-checkbox[data-event-key="${event.key}"]`);
                         if (checkbox) {
