@@ -54,19 +54,29 @@ ccm.files["ccm.checklist.js"] = {
                     </div>
                     <div id="items"></div>
                 </div>`,
+            // In config.html
             previewList: `
-                <div class="item-header">
-                    <h3>%listTitle%</h3>
+    <div class="item-header">
+        <div class='title-edit-wrapper'>
+            <div class="title-edit-wrapper-left">
+                <button class='edit-item-name-btn' title='Listennamen bearbeiten' onclick="%editListName%">✎</button>
+                <h3 class='list-title'>%listTitle%</h3>
+                <div class='list-name-edit-form' style="display: none;">
+                    <input type="text" class='list-name-input-field'/>
+                    <button class='save-list-name-btn' onclick="%saveListName%">OK</button>
+                    <button class='cancel-list-name-btn' onclick="%cancelListName%">X</button>
                 </div>
-                <div class="item-content">
-                <button class="add-subitem" onclick="%onAddSubmitItem%">%addListObject%</button>
-                    <div class="list-input" style="display: none;">
-                        <input type="text" class="list-item-name" placeholder="%secondItemName%">
-                        <button class="confirm-subitem" onclick="%onConfirmSubitem%">%addText%</button>
-                    </div>
-                    <div class="subitem-list"></div>
-                    
-                </div>`,
+            </div>
+        </div>
+    </div>
+    <div class="item-content">
+        <button class="add-subitem" onclick="%onAddSubmitItem%">%addListObject%</button>
+        <div class="list-input" style="display: none;">
+            <input type="text" class="list-item-name" placeholder="%secondItemName%">
+            <button class="confirm-subitem" onclick="%onConfirmSubitem%">%addText%</button>
+        </div>
+        <div class="subitem-list"></div>
+    </div>`,
             renderpreviewList: `
                <div class="%isEndpoint%" id="%itemKey%">
                     <div class="%isEndpointHeader%">
@@ -537,7 +547,36 @@ ccm.files["ccm.checklist.js"] = {
                 }
 
                 await self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
-            }
+            },
+            editListName: (event, nameEditForm, titleDisplay, editBtn, nameInput) => {
+                event.stopPropagation();
+                titleDisplay.style.display = 'none';
+                editBtn.style.display = 'none';
+                nameEditForm.style.display = 'flex';
+                nameInput.value = titleDisplay.textContent.trim();
+                nameInput.focus();
+            },
+
+            saveListName: (event, nameEditForm, titleDisplay, editBtn, nameInput) => {
+                event.stopPropagation();
+                const newName = nameInput.value.trim();
+                if (newName && newName !== my.tempList.key) {
+                    my.tempList.key = newName.replace(/\s+/g, '');
+                    renderPreview(my.tempList.key, my.tempList.items); // Wichtig: Vorschau neu rendern
+                } else if (!newName) {
+                    alert('Der Listenname darf nicht leer sein.');
+                    nameInput.focus();
+                } else {
+                    self.events.cancelListName(event, nameEditForm, titleDisplay, editBtn);
+                }
+            },
+
+            cancelListName: (event, nameEditForm, titleDisplay, editBtn) => {
+                event.stopPropagation();
+                nameEditForm.style.display = 'none';
+                titleDisplay.style.display = '';
+                editBtn.style.display = '';
+            },
         }
 
         this.start = async () => {
@@ -581,6 +620,7 @@ ccm.files["ccm.checklist.js"] = {
             });
         }
 
+        // Komplette, aber schlanke renderPreview-Funktion
         function renderPreview(listKey, items) {
             const previewList = self.element.querySelector('#preview-list');
             previewList.innerHTML = '';
@@ -588,21 +628,38 @@ ccm.files["ccm.checklist.js"] = {
             const listHtml = document.createElement('div');
             listHtml.className = 'list-item';
 
+            // Handler definieren, die die DOM-Elemente an die Logik übergeben
+            const editListName = (event) => {
+                const wrapper = listHtml.querySelector('.title-edit-wrapper-left');
+                self.events.editListName(event, wrapper.querySelector('.list-name-edit-form'), wrapper.querySelector('.list-title'), wrapper.querySelector('.edit-item-name-btn'), wrapper.querySelector('.list-name-input-field'));
+            };
+            const saveListName = (event) => {
+                const wrapper = listHtml.querySelector('.title-edit-wrapper-left');
+                self.events.saveListName(event, wrapper.querySelector('.list-name-edit-form'), wrapper.querySelector('.list-title'), wrapper.querySelector('.edit-item-name-btn'), wrapper.querySelector('.list-name-input-field'));
+            };
+            const cancelListName = (event) => {
+                const wrapper = listHtml.querySelector('.title-edit-wrapper-left');
+                self.events.cancelListName(event, wrapper.querySelector('.list-name-edit-form'), wrapper.querySelector('.list-title'), wrapper.querySelector('.edit-item-name-btn'));
+            };
+
             $.setContent(listHtml, $.html(self.html.previewList, {
                 listTitle: listTitle,
-                dataItemId: "1",
+                // Deine anderen Platzhalter...
                 addListObject: self.text.addListObjectText,
                 addText: self.text.addText,
                 secondItemName: self.text.secondItemNameText,
                 onAddSubmitItem: () => self.events.onAddSubmitItem(),
-                onConfirmSubitem: () => self.events.onConfirmSubitem(listInput),
+                onConfirmSubitem: () => self.events.onConfirmSubitem(listHtml.querySelector('.list-input')),
+
+                // Die neuen Handler verknüpfen
+                editListName: editListName,
+                saveListName: saveListName,
+                cancelListName: cancelListName
             }));
+
             $.append(previewList, listHtml);
 
-            const listInput = listHtml.querySelector('.list-input');
-
             items.forEach(item => {
-                console.log('Rendering item in preview:', item);
                 renderPreviewItem(item, listHtml.querySelector('.subitem-list'), '');
             });
         }
