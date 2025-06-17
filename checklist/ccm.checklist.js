@@ -149,8 +149,10 @@ ccm.files["ccm.checklist.js"] = {
     Instance: function () {
         let self = this;
         let my;
+        let stuentId;
 
         this.init = async () => {
+
             try {
                 my = await self.store.get("checklist_data") || {listsData: {}, listState: {}};
                 my.listsData = my.listsData || {};
@@ -169,6 +171,7 @@ ccm.files["ccm.checklist.js"] = {
                 });
                 $ = Object.assign({}, this.ccm.helper, this.helper);
                 $.use(this.ccm);
+                if (this.user) this.user.onchange = this.start;
 
                 console.log("Initialized store:", JSON.stringify(my, null, 2));
             } catch (e) {
@@ -191,6 +194,10 @@ ccm.files["ccm.checklist.js"] = {
             onStartCreateButton: (createListForm, listForm, previewList) => {
                 const listName = createListForm.querySelector('#list-name').value.trim();
                 const firstItemName = createListForm.querySelector('#first-item-name').value.trim();
+
+                if(checkListNameExists(listName.replace(/\s+/g, ''))){
+                    return;
+                }
 
                 if (!istEingabeGueltig(listName) || !istEingabeGueltig(firstItemName)) {
                     return;
@@ -568,6 +575,9 @@ ccm.files["ccm.checklist.js"] = {
 
             saveListName: (event, nameEditForm, titleDisplay, editBtn, nameInput) => {
                 event.stopPropagation();
+                if(checkListNameExists(nameInput.value.trim())){
+                    return
+                }
                 const newName = nameInput.value.trim();
                 if (!istEingabeGueltig(newName)) return;
                 if (newName && newName !== my.tempList.key) {
@@ -1001,6 +1011,16 @@ ccm.files["ccm.checklist.js"] = {
             }
             return true; // Eingabe ist gültig
         }
+
+        function checkListNameExists(listName) {
+            const exist = Object.keys(my.listsData).includes(listName)
+            console.log(exist)
+            if(exist) {
+                alert(`Die Liste "${listName}" existiert bereits. Bitte wählen Sie einen anderen Namen.`);
+            }
+            return Object.keys(my.listsData).includes(listName);
+        }
+
     }
 };
 
