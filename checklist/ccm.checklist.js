@@ -133,6 +133,7 @@ ccm.files["ccm.checklist.js"] = {
                         <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox" checked="%checkboxChecked%" onchange="%onCheckboxChange%">
                         <label for="%itemKey%" class="%isEndPoint%--title">%itemName%</label>
                         <div class='action-button-group'>
+                        <button class='remove-subitem' onclick="%onRemoveSubitem%">%removeText%</button>
                         <button class='add-subitem' onclick="%onAddSubitem%">
                             %addSubpointText% </button> 
                         </div>
@@ -375,7 +376,56 @@ ccm.files["ccm.checklist.js"] = {
                 titleDisplay.style.display = '';
                 editNameBtn.style.display = '';
             },
-            onRemoveSubitem: (item, parentKey) => {
+            onRemoveSubitem: async (item, listKey) => {
+                // Entscheiden, welche Datenquelle (gespeicherte Liste oder temporäre Vorschau) verwendet wird
+                const isPreview = !listKey;
+
+                // Wenn wir in einer gespeicherten Liste sind und auf my.tempList zugreifen, würde es crashen.
+                // Daher prüfen wir zuerst, ob wir im Vorschaumodus sind.
+                if (isPreview) {
+                    // Logik für die Vorschau (my.tempList)
+                    if (!my.tempList || my.tempList.items.length === 1) {
+                        alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
+                        return;
+                    }
+                } else {
+                    // Logik für gespeicherte Listen (my.listsData)
+                    if (!my.listsData[listKey]) {
+                        console.error(`Liste mit key ${listKey} nicht gefunden.`);
+                        return;
+                    }
+                    if (my.listsData[listKey].length === 1 && my.listsData[listKey][0].key === item.key) {
+                        alert('Die Liste muss mindestens ein Listenobjekt enthalten. Löschen Sie stattdessen die ganze Liste.');
+                        return;
+                    }
+                }
+
+                // Wähle die korrekte Datenquelle aus
+                const dataSource = isPreview ? my.tempList.items : my.listsData[listKey];
+
+                function removeItemRecursive(items, targetKey) {
+                    for (let i = 0; i < items.length; i++) {
+                        if (items[i].key === targetKey) {
+                            items.splice(i, 1);
+                            return true;
+                        }
+                        if (items[i].items && removeItemRecursive(items[i].items, targetKey)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                if (removeItemRecursive(dataSource, item.key)) {
+                    if (!isPreview) {
+                        // Nur bei gespeicherten Listen den Store aktualisieren
+                        await self.store.set({ key: studentId, listsData: my.listsData, listState: my.listState });
+                    }
+                    // Die gesamte Ansicht neu rendern, um die Änderungen zu übernehmen
+                    await renderLists();
+                }
+            },
+           /* onRemoveSubitem: (item, parentKey) => {
                 if (my.tempList.items.length === 1 && item.items.length === 0 && !parentKey) {
                     alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
                     return;
@@ -406,8 +456,8 @@ ccm.files["ccm.checklist.js"] = {
                     const keysInTempList = collectAllItemKeys(my.tempList.items);
                     my.currentItems = my.currentItems.filter(ci => keysInTempList.has(ci.key));
                 }
-                renderPreview(my.tempList.key, my.tempList.items);
-            },
+                renderLists();
+            }, */
             onDeadlineChange: (event, item) => {
                 if (event) event.stopPropagation();
                 const newDeadline = event.target.value || null;
@@ -943,6 +993,7 @@ ccm.files["ccm.checklist.js"] = {
                 onCheckboxChange: (event) => self.events.onCheckboxChange(event, item, listKey, itemKey, isEndPoint, itemHtml, listContent),
                 confirmSubitem: () => self.events.confirmSubitem(itemKey, item),
                 onAddSubitem: () => self.events.onAddSubitem(itemKey),
+                onRemoveSubitem: () => self.events.onRemoveSubitem(item, listKey),
             }));
 
             parentElement.appendChild(itemHtml);
