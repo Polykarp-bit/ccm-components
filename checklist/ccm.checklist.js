@@ -141,8 +141,16 @@ ccm.files["ccm.checklist.js"] = {
                 <div class="%isEndPoint%" id="%itemKey%">
                     <div class="%isEndPoint%--header">
                         <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox" checked="%checkboxChecked%" onchange="%onCheckboxChange%">
-                        <label for="%itemKey%" class="%isEndPoint%--title">%itemName%</label>
-                      
+                        
+                        <div class="title-edit-wrapper">
+                             <button class="edit-item-name-btn" title="%editItemNameText%" onclick="%editName%">&#9998;</button>
+                             <label for="checkbox-%itemKey%" class="%isEndPoint%-title">%itemName%</label>
+                             <div class="item-name-edit-form" style="display: none;">
+                                 <input type="text" class="item-name-input-field" value="%itemName%">
+                                 <button class="save-item-name-btn" onclick="%saveItemName%">%saveText%</button>
+                                 <button class="cancel-item-name-btn" onclick="%cancelNameButton%">%cancelText%</button>
+                             </div>
+                        </div>
                         
                         <div class='action-button-group'>
                         <button class='remove-subitem' onclick="%onRemoveSubitem%">%removeText%</button>
@@ -416,42 +424,69 @@ ccm.files["ccm.checklist.js"] = {
                 subitemNameInputForNew.value = '';
                 subitemInputContainer.classList.remove('active');
             },
-            editName: (event, item, nameEditForm, titleDisplay, editNameBtn, nameInput) => {
+            editName: (event) => {
                 event.stopPropagation();
-                titleDisplay.style.display = 'none';
-                editNameBtn.style.display = 'none';
-                nameEditForm.style.display = 'flex';
-                nameInput.value = titleDisplay.textContent.trim();
-                nameInput.focus();
+                const editButton = event.target;
+                const wrapper = editButton.closest('.title-edit-wrapper');
+                const label = wrapper.querySelector('label');
+                const editForm = wrapper.querySelector('.item-name-edit-form');
+                const input = editForm.querySelector('input');
+
+                label.style.display = 'none';
+                editButton.style.display = 'none';
+                editForm.style.display = 'flex';
+                input.focus();
+                input.select();
             },
-            saveItemName: (event, item, nameEditForm, titleDisplay, editNameBtn, nameInput) => {
+
+            saveItemName: async (event, listKey, item) => {
                 event.stopPropagation();
-                const newName = nameInput.value.trim();
+                const saveButton = event.target;
+                const editForm = saveButton.closest('.item-name-edit-form');
+                const input = editForm.querySelector('input');
+                const newName = input.value.trim();
 
                 if (!istEingabeGueltig(newName)) return;
+
                 if (newName && newName !== item.name) {
-                    if (updateItemNameInTempList(my.tempList.items, item.key, newName)) {
-                        renderPreview(my.tempList.key, my.tempList.items);
-                    } else {
-                        console.error(`Could not find item with key ${item.key} in tempList for renaming.`);
-                        nameEditForm.style.display = 'none';
-                        titleDisplay.style.display = '';
-                        editNameBtn.style.display = '';
+                    const updateNameRecursive = (items, targetKey, name) => {
+                        // Sicherheitscheck: Wenn `items` undefiniert ist, abbrechen.
+                        if (!items) return false;
+                        for (let i = 0; i < items.length; i++) {
+                            if (items[i].key === targetKey) {
+                                items[i].name = name;
+                                return true;
+                            }
+                            // Stelle sicher, dass item[i].items existiert, bevor du es weitergibst
+                            if (items[i].items && updateNameRecursive(items[i].items, targetKey, name)) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    };
+
+                    if (updateNameRecursive(my.listsData[listKey], item.key, newName)) {
+                        await self.store.set({ key: studentId, listsData: my.listsData, listState: my.listState });
+                        await renderLists();
                     }
                 } else if (!newName) {
-                    alert('Der Item-Name darf nicht leer sein.');
-                    nameInput.focus();
+                    alert('Der Name darf nicht leer sein.');
+                    input.focus();
                 } else {
-                    nameEditForm.style.display = 'none';
-                    titleDisplay.style.display = '';
-                    editNameBtn.style.display = '';
+                    self.events.cancelNameButton(event);
                 }
             },
-            cancelNameButton: (event, nameEditForm, titleDisplay, editNameBtn) => {
+            cancelNameButton: (event) => {
                 event.stopPropagation();
-                nameEditForm.style.display = 'none';
-                titleDisplay.style.display = '';
-                editNameBtn.style.display = '';
+                const cancelButton = event.target;
+                const editForm = cancelButton.closest('.item-name-edit-form');
+                const wrapper = editForm.closest('.title-edit-wrapper');
+                const label = wrapper.querySelector('label');
+                const editButton = wrapper.querySelector('.edit-item-name-btn');
+
+                editForm.style.display = 'none';
+                label.style.display = '';
+                editButton.style.display = '';
             },
             onRemoveSubitem: async (item, listKey) => {
                 // Entscheiden, welche Datenquelle (gespeicherte Liste oder temporäre Vorschau) verwendet wird
@@ -902,12 +937,15 @@ ccm.files["ccm.checklist.js"] = {
                 onDeadlineChange: (event) => self.events.onDeadlineChange(event, item),
             }))
 
+            console.log(itemHtml, itemHtml);
             $.append(parentElement, itemHtml);
 
             const nameEditForm = itemHtml.querySelector('.item-name-edit-form');
             const titleDisplay = itemHtml.querySelector('.point-title, .subitem-title');
             const editNameBtn = itemHtml.querySelector('.edit-item-name-btn');
             const nameInput = nameEditForm.querySelector('.item-name-input-field');
+
+            console.log(itemHtml, itemHtml);
 
             // Recursive Call for Sub-items
             if (!isEndPoint) {
@@ -1035,6 +1073,7 @@ ccm.files["ccm.checklist.js"] = {
             const isEndPoint = item.items.length === 0;
             const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(listKey, itemKey, item.items, itemKey);
 
+
             if (!my.listState[listKey]) {
                 console.log(`Initialisiere listState für ${listKey} in renderItem`);
                 my.listState[listKey] = {items: {}, collapsed: false};
@@ -1073,9 +1112,19 @@ ccm.files["ccm.checklist.js"] = {
                 confirmSubitem: () => self.events.confirmSubitem(itemKey, item),
                 onAddSubitem: () => self.events.onAddSubitem(itemKey),
                 onRemoveSubitem: () => self.events.onRemoveSubitem(item, listKey),
+                editName:         (event) => self.events.editName(event),
+                saveItemName:     (event) => self.events.saveItemName(event, listKey, item),
+                cancelNameButton: (event) => self.events.cancelNameButton(event),
             }));
 
             parentElement.appendChild(itemHtml);
+
+
+            const nameEditForm = itemHtml.querySelector('.item-name-edit-form');
+            const titleDisplay = itemHtml.querySelector(`.point-title, .subitem-title`);
+            const editNameBtn = itemHtml.querySelector('.edit-item-name-btn');
+            const nameInput = nameEditForm.querySelector('.item-name-input-field');
+            console.log(titleDisplay);
 
             const checkbox = itemHtml.querySelector(`.${isEndPoint ? 'point' : 'subitem'}--checkbox`);
             const subitemList = itemHtml.querySelector('.subitem-list');
