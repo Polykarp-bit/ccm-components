@@ -50,14 +50,14 @@ ccm.files["ccm.checklist.js"] = {
                         <input type="text" id="first-item-name" placeholder="%firstItemNameText%">
                         <button id="start-create" onclick="%onStartCreateButton%">%listCreateButtonText%</button>
                     </div>
-                    <div class="list-form" style="display: none;">
+                     <!-- <div class="list-form" style="display: none;">
                         <div class="preview-section">
                             <h3>%previewListText%</h3>
                             <div id="preview-list"></div>
                         </div>
                         <button id="save-list" onclick="%onSaveListButton%">%saveListText%</button>
                         <button class="cancel-button" onclick="%onCancelListButton%">%cancelText%</button>
-                    </div>
+                    </div>-->
                     <div id="items"></div>
                 </div>`,
             // In config.html
@@ -132,6 +132,14 @@ ccm.files["ccm.checklist.js"] = {
                     <div class="%isEndPoint%--header">
                         <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox" checked="%checkboxChecked%" onchange="%onCheckboxChange%">
                         <label for="%itemKey%" class="%isEndPoint%--title">%itemName%</label>
+                        <div class='action-button-group'>
+                        <button class='add-subitem' onclick="%onAddSubitem%">
+                            %addSubpointText% </button> 
+                        </div>
+                        <div class='subitem-input' style="display: none">
+                            <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
+                        </div>
+                    
                         <div class="note-container">
                             <button class="edit-note-btn" title="%noteTitle%" onclick="%onEditeNote%">🗒️</button>
                             <p class="%subItemNoteClass%">%noteShow%</p>
@@ -170,7 +178,7 @@ ccm.files["ccm.checklist.js"] = {
                     subitemNameInputForNew.focus();
                 }
             },
-            onStartCreateButton: (createListForm, listForm, previewList) => {
+            onStartCreateButton: async (createListForm, listForm, previewList, itemElement) => {
                 const listName = createListForm.querySelector('#list-name').value.trim();
                 const firstItemName = createListForm.querySelector('#first-item-name').value.trim();
 
@@ -191,15 +199,33 @@ ccm.files["ccm.checklist.js"] = {
                     items: []
                 };
                 my.currentItems = [];
-                previewList.innerHTML = '';
 
                 const firstItemKey = `item§§§${firstItemName.replace(/[^a-zA-Z0-9äöüß]/g, '§§§').toLowerCase()}§§§${Date.now()}`;
                 const firstItem = {key: firstItemKey, name: firstItemName, items: [], deadline: null};
                 my.tempList.items.push(firstItem);
                 my.currentItems.push(firstItem);
 
-                renderPreview(my.tempList.key, my.tempList.items);
+                if (!my.tempList || my.tempList.items.length === 0) {
+                    alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
+                    return;
+                }
 
+                my.listsData[my.tempList.key] = my.tempList.items;
+                if (!my.listState[my.tempList.key]) {
+                    my.listState[my.tempList.key] = {items: {}, collapsed: false};
+                }
+                initializeState(my.tempList.key, my.tempList.items, my.listState[my.tempList.key]);
+
+                await self.store.set({key: studentId, listsData: my.listsData, listState: my.listState})
+                    .then(() => console.log('Daten erfolgreich gespeichert:', my))
+                    .catch(e => {
+                        console.error('Fehler beim Speichern:', e);
+                        alert('Fehler beim Speichern der Liste. Bitte überprüfe die Konsole.');
+                    });
+
+                await renderLists();
+                my.tempList = null;
+                my.currentItems = [];
                 listForm.style.display = 'block';
                 createListForm.querySelector('#list-name').value = '';
                 createListForm.querySelector('#first-item-name').value = '';
@@ -223,12 +249,13 @@ ccm.files["ccm.checklist.js"] = {
                         alert('Fehler beim Speichern der Liste. Bitte überprüfe die Konsole.');
                     });
 
-                await renderLists(itemElement, previewList);
+
+                await renderLists();
 
                 listForm.style.display = 'none';
                 previewList.innerHTML = '';
-                my.tempList = null;
-                my.currentItems = [];
+                /*my.tempList = null;
+                my.currentItems = [];*/
             },
             onCancelListButton: (listForm, previewList) => {
                 listForm.style.display = 'none';
@@ -242,7 +269,7 @@ ccm.files["ccm.checklist.js"] = {
                 const subitemNameInput = self.element.querySelector('.list-item-name');
                 subitemNameInput.focus();
             },
-            onConfirmSubitem: (listInput) => {
+            onConfirmSubitem: async (listInput) => {
                 const subitemNameInput = self.element.querySelector('.list-item-name');
                 const subitemName = subitemNameInput.value.trim();
                 if (!istEingabeGueltig(subitemName)) return;
@@ -250,7 +277,7 @@ ccm.files["ccm.checklist.js"] = {
                     alert('Bitte geben Sie einen Namen für das Listenobjekt ein.');
                     return;
                 }
-                const subitemKey = `item_${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
+                const subitemKey = `item§§§${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '§§§').toLowerCase()}§§§${Date.now()}`;
                 const newSubitem = {key: subitemKey, name: subitemName, items: [], deadline: null};
 
                 my.tempList.items.push(newSubitem);
@@ -259,11 +286,11 @@ ccm.files["ccm.checklist.js"] = {
                 console.log('Updated tempList:', JSON.stringify(my.tempList, null, 2));
                 console.log('Updated currentItems:', JSON.stringify(my.currentItems, null, 2));
 
-                renderPreview(my.tempList.key, my.tempList.items);
+                await renderLists();
                 subitemNameInput.value = '';
                 listInput.classList.remove('active');
             },
-            confirmSubitem: (itemKey, item, event) => {
+            confirmSubitem: async (itemKey, item, event) => {
                 if (event) event.stopPropagation();
                 const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
 
@@ -298,15 +325,16 @@ ccm.files["ccm.checklist.js"] = {
                     return;
                 }
 
-                const newSubitemKey = `subitem_${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '_').toLowerCase()}_${Date.now()}`;
+                const newSubitemKey = `subitem§§§${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '§§§').toLowerCase()}§§§${Date.now()}`;
                 const newSubitem = {key: newSubitemKey, name: subitemName, items: [], deadline: null, note: ""};
 
                 if (!item.items) {
                     item.items = [];
                 }
                 item.items.push(newSubitem);
+                console.log(item.items)
 
-                renderPreview(my.tempList.key, my.tempList.items);
+                await renderLists();
                 subitemNameInputForNew.value = '';
                 subitemInputContainer.classList.remove('active');
             },
@@ -561,7 +589,7 @@ ccm.files["ccm.checklist.js"] = {
                 if (!istEingabeGueltig(newName)) return;
                 if (newName && newName !== my.tempList.key) {
                     my.tempList.key = newName.replace(/\s+/g, '');
-                    renderPreview(my.tempList.key, my.tempList.items); // Wichtig: Vorschau neu rendern
+                    renderPreview(my.tempList.key, my.tempList.items);
                 } else if (!newName) {
                     alert('Der Listenname darf nicht leer sein.');
                     nameInput.focus();
@@ -595,6 +623,11 @@ ccm.files["ccm.checklist.js"] = {
                 }
                 studentId = studentId.key;
 
+                //console.log(await this.store.set());
+                //await self.store.set({key: studentId, listsData: {}, listState: {}});
+                //console.log(await this.store.get(studentId));
+
+
                 my = await self.store.get(studentId) || {listsData: {}, listState: {}};
                 my.listsData = my.listsData || {};
                 my.listState = my.listState || {};
@@ -622,7 +655,7 @@ ccm.files["ccm.checklist.js"] = {
                     saveListText: self.text.saveListText,
                     myListText: self.text.myListText,
                     cancelText: self.text.cancelText,
-                    onStartCreateButton: () => self.events.onStartCreateButton(createListForm, listForm, previewList),
+                    onStartCreateButton: () => self.events.onStartCreateButton(createListForm, listForm, previewList, itemElement),
                     onSaveListButton: () => self.events.onSaveListButton(listForm, previewList, itemElement),
                     onCancelListButton: () => self.events.onCancelListButton(listForm, previewList),
                 }));
@@ -633,7 +666,7 @@ ccm.files["ccm.checklist.js"] = {
                 const previewList = self.element.querySelector('#preview-list');
                 const itemElement = self.element.querySelector('#items');
 
-                await renderLists(itemElement, previewList);
+                await renderLists();
             } catch (e) {
                 console.error("Error in start method:", e);
                 self.element.innerHTML = `<p>Error: ${e.message}. Check console for details.</p>`;
@@ -658,7 +691,6 @@ ccm.files["ccm.checklist.js"] = {
             const listHtml = document.createElement('div');
             listHtml.className = 'list-item';
 
-            // Handler definieren, die die DOM-Elemente an die Logik übergeben
             const editListName = (event) => {
                 const wrapper = listHtml.querySelector('.title-edit-wrapper-left');
                 self.events.editListName(event, wrapper.querySelector('.list-name-edit-form'), wrapper.querySelector('.list-title'), wrapper.querySelector('.edit-item-name-btn'), wrapper.querySelector('.list-name-input-field'));
@@ -713,7 +745,7 @@ ccm.files["ccm.checklist.js"] = {
             const itemKey = parentKey ? `${parentKey}§§§${item.key}` : item.key;
             const isEndPoint = item.items.length === 0;
             const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(my.tempList.key, itemKey, item.items, itemKey);
-            const deadlineGroupId = `deadline_preview_${itemKey.replace(/\W/g, '_')}`;
+            const deadlineGroupId = `deadline§§§preview$$$${itemKey.replace(/\W/g, '§§§')}`;
 
             console.log('Rendering preview item (editable name):', {itemKey, isEndPoint, subitemProgress, item});
 
@@ -807,9 +839,12 @@ ccm.files["ccm.checklist.js"] = {
             return totalPoints > 0 ? (checkedPoints / totalPoints) * 100 : 0;
         }
 
-        async function renderLists(itemElement, previewList) {
+        async function renderLists() {
+
+            itemElement = self.element.querySelector('#items');
             try {
                 itemElement.innerHTML = '';
+
                 console.log('Rendering lists with data:', JSON.stringify(my.listsData, null, 2));
 
                 for (const key of Object.keys(my.listsData)) {
@@ -834,30 +869,8 @@ ccm.files["ccm.checklist.js"] = {
                         editText: self.text.editText,
                         onDeleteButton: () => self.events.onDeleteButton(key, itemElement, listHtml),
                         onClickToggleButton: () => self.events.onClickToggleButton(key, itemContent, toggleButton),
-                        onEditButton: () => this.self.editList(key, previewList),
+
                     }));
-
-                    this.editList = async (listKey, previewList) => {
-                        my.tempList = {
-                            key: listKey,
-                            items: JSON.parse(JSON.stringify(my.listsData[listKey]))
-                        };
-                        my.currentItems = [];
-                        previewList.innerHTML = '';
-
-                        function populateCurrentItems(items) {
-                            items.forEach(item => {
-                                my.currentItems.push(item);
-                                populateCurrentItems(item.items);
-                            });
-                        }
-
-                        populateCurrentItems(my.tempList.items);
-
-                        renderPreview(my.tempList.key, my.tempList.items);
-                        const listForm = self.element.querySelector('.list-form');
-                        listForm.style.display = 'block';
-                    };
 
                     itemElement.appendChild(listHtml);
 
@@ -927,7 +940,9 @@ ccm.files["ccm.checklist.js"] = {
                 onSaveNoteButton: (event) => self.events.onSaveNoteButton(event, item, itemHtml, noteInput, listKey, noteEditForm, editNoteBtn),
                 onCancelNoteBtn: (event) => self.events.onCancelNoteBtn(event, noteEditForm, editNoteBtn, noteDisplay, notePlaceholder, item),
                 onDeadlinePicker: async (event) => await self.events.onDeadlinePicker(event, item, listKey),
-                onCheckboxChange: (event) => self.events.onCheckboxChange(event, item, listKey, itemKey, isEndPoint, itemHtml, listContent)
+                onCheckboxChange: (event) => self.events.onCheckboxChange(event, item, listKey, itemKey, isEndPoint, itemHtml, listContent),
+                confirmSubitem: () => self.events.confirmSubitem(itemKey, item),
+                onAddSubitem: () => self.events.onAddSubitem(itemKey),
             }));
 
             parentElement.appendChild(itemHtml);
