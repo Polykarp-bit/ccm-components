@@ -112,6 +112,7 @@ ccm.files["ccm.checklist.js"] = {
                     <div class="subitem-list-children"></div>
                 </div>`,
             renderList: `
+               <div class="list-container" id="%listTitle%">
                 <div class="item-header">
                     <h3>%listTitle%</h3>
                     <div class="progress-prozent"></div>
@@ -120,18 +121,29 @@ ccm.files["ccm.checklist.js"] = {
                         <button class="delete-list" title="%deleteText%" onclick="%onDeleteButton%">🗑</button>
                     </div>
                     </div>
-                    <button class="toggle-item" onclick=%onClickToggleButton%>▼</button>
+                    <button class="toggle-item" onclick="%onClickToggleButton%">▼</button>
                     <div class="item-content">
                         <div class="progress-bar">
                             <div class="progress-fill"></div>
                         </div>
-                    <div class="subitem-list"></div>
+                    <div class="subitem-list">
+                    <div class='action-button-group'>
+                        <button class='add-subitem' onclick="%onAddSubitemToRoot%">
+                            %addSubpointText% </button> 
+                        </div>
+                        <div class='subitem-input' style="display: none">
+                            <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
+                        </div>
+                    </div>
+                </div>
                 </div>`,
             renderItem: `
                 <div class="%isEndPoint%" id="%itemKey%">
                     <div class="%isEndPoint%--header">
                         <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox" checked="%checkboxChecked%" onchange="%onCheckboxChange%">
                         <label for="%itemKey%" class="%isEndPoint%--title">%itemName%</label>
+                      
+                        
                         <div class='action-button-group'>
                         <button class='remove-subitem' onclick="%onRemoveSubitem%">%removeText%</button>
                         <button class='add-subitem' onclick="%onAddSubitem%">
@@ -172,6 +184,17 @@ ccm.files["ccm.checklist.js"] = {
             onAddSubitem: (itemKey, event) => {
                 if (event) event.stopPropagation();
                 const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
+                const subitemInputContainer = currentItemRenderedRoot.querySelector('.subitem-input');
+                subitemInputContainer.style.display === 'none' ? subitemInputContainer.style.display = 'block' : subitemInputContainer.style.display = 'none';
+                const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
+                if (subitemNameInputForNew) {
+                    subitemNameInputForNew.focus();
+                }
+            },
+            onAddSubitemToRoot: (itemKey, event) => {
+                if (event) event.stopPropagation();
+                const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
+                console.log(currentItemRenderedRoot);
                 const subitemInputContainer = currentItemRenderedRoot.querySelector('.subitem-input');
                 subitemInputContainer.style.display === 'none' ? subitemInputContainer.style.display = 'block' : subitemInputContainer.style.display = 'none';
                 const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
@@ -292,6 +315,60 @@ ccm.files["ccm.checklist.js"] = {
                 listInput.classList.remove('active');
             },
             confirmSubitem: async (itemKey, item, event) => {
+                if (event) event.stopPropagation();
+                const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
+
+                /*
+                if (!currentItemRenderedRoot) {
+                    console.error(`confirmSubitem: Element mit ID '${itemKey}' nicht gefunden!`);
+                    return;
+                }
+                */
+                const subitemInputContainer = currentItemRenderedRoot.querySelector('.subitem-input');
+
+                /*
+                if (!subitemInputContainer) {
+                    console.error(`confirmSubitem: '.subitem-input' nicht in Element mit ID '${itemKey}' gefunden.`);
+                    console.log("Inhalt von currentItemRenderedRoot (ID: " + itemKey + "):", currentItemRenderedRoot.innerHTML);
+                    return;
+                } */
+
+                const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
+
+                /*
+                if (!subitemNameInputForNew) {
+                    console.error(`confirmSubitem: '.subitem-name' Input nicht im subitemInputContainer für itemKey '${itemKey}' gefunden.`);
+                    return;
+                }*/
+
+                const subitemName = subitemNameInputForNew.value.trim();
+                if (!istEingabeGueltig(subitemName)) return;
+                if (!subitemName) {
+                    alert('Bitte geben Sie einen Namen für den Unterpunkt ein.');
+                    subitemNameInputForNew.focus();
+                    return;
+                }
+
+                const newSubitemKey = `subitem§§§${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '§§§').toLowerCase()}§§§${Date.now()}`;
+                const newSubitem = {key: newSubitemKey, name: subitemName, items: [], deadline: null, note: ""};
+
+
+                console.log('New item added:', item);
+                if(my.listsData[itemKey]){
+                    my.listsData[itemKey].push(newSubitem);
+                } else{
+
+                if (!item.items) {
+                    item.items = [];
+                }
+                item.items.push(newSubitem);
+                console.log(item.items)
+                }
+                await renderLists();
+                subitemNameInputForNew.value = '';
+                subitemInputContainer.classList.remove('active');
+            },
+            confirmSubitemForList: async (itemKey, item, event) => {
                 if (event) event.stopPropagation();
                 const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
 
@@ -919,6 +996,8 @@ ccm.files["ccm.checklist.js"] = {
                         editText: self.text.editText,
                         onDeleteButton: () => self.events.onDeleteButton(key, itemElement, listHtml),
                         onClickToggleButton: () => self.events.onClickToggleButton(key, itemContent, toggleButton),
+                        onAddSubitemToRoot: () => self.events.onAddSubitemToRoot(listTitle),
+                        confirmSubitem: () => self.events.confirmSubitem(listTitle, my.listsData),
 
                     }));
 
