@@ -19,7 +19,7 @@ ccm.files["ccm.checklist.js"] = {
             saveListText: "Liste speichern",
             myListText: "Meine Listen",
             cancelText: "Abbrechen",
-            addListObjectText: "Listenobjekt hinzufügen",
+            addListObjectText: "+ Listenobjekt hinzufügen",
             addText: "Hinzufügen",
             secondItemNameText: "Objekt-Name (z.B. Aufgabe 2)",
             addSubpointText: "+ Unterpunkt hinzufügen",
@@ -62,27 +62,27 @@ ccm.files["ccm.checklist.js"] = {
                 </div>`,
             // In config.html
             previewList: `
-    <div class="item-header">
-        <div class='title-edit-wrapper'>
-            <div class="title-edit-wrapper-left">
-                <button class='edit-item-name-btn' title='Listennamen bearbeiten' onclick="%editListName%">✎</button>
-                <h3 class='list-title'>%listTitle%</h3>
-                <div class='list-name-edit-form' style="display: none;">
-                    <input type="text" class='list-name-input-field'/>
-                    <button class='save-list-name-btn' onclick="%saveListName%">OK</button>
-                    <button class='cancel-list-name-btn' onclick="%cancelListName%">X</button>
+                <div class="item-header">
+                    <div class='title-edit-wrapper'>
+                        <div class="title-edit-wrapper-left">
+                            <button class='edit-item-name-btn' title='Listennamen bearbeiten' onclick="%editListName%">✎</button>
+                            <h3 class='list-title'>%listTitle%</h3>
+                            <div class='list-name-edit-form' style="display: none;">
+                                <input type="text" class='list-name-input-field'/>
+                                <button class='save-list-name-btn' onclick="%saveListName%">OK</button>
+                                <button class='cancel-list-name-btn' onclick="%cancelListName%">X</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="item-content">
-        <button class="add-subitem" onclick="%onAddSubmitItem%">%addListObject%</button>
-        <div class="list-input" style="display: none;">
-            <input type="text" class="list-item-name" placeholder="%secondItemName%">
-            <button class="confirm-subitem" onclick="%onConfirmSubitem%">%addText%</button>
-        </div>
-        <div class="subitem-list"></div>
-    </div>`,
+                <div class="item-content">
+                    <button class="add-subitem" onclick="%onAddSubmitItem%">%addListObject%</button>
+                    <div class="list-input" style="display: none;">
+                        <input type="text" class="list-item-name" placeholder="%secondItemName%">
+                        <button class="confirm-subitem" onclick="%onConfirmSubitem%">%addText%</button>
+                    </div>
+                    <div class="subitem-list"></div>
+                </div>`,
             renderpreviewList: `
                <div class="%isEndpoint%" id="%itemKey%">
                     <div class="%isEndpointHeader%">
@@ -216,7 +216,7 @@ ccm.files["ccm.checklist.js"] = {
                 }
                 initializeState(my.tempList.key, my.tempList.items, my.listState[my.tempList.key]);
 
-                self.store.set({key: studentId, listsData: my.listsData, listState: my.listState})
+                await self.store.set({key: studentId, listsData: my.listsData, listState: my.listState})
                     .then(() => console.log('Daten erfolgreich gespeichert:', my))
                     .catch(e => {
                         console.error('Fehler beim Speichern:', e);
@@ -399,7 +399,7 @@ ccm.files["ccm.checklist.js"] = {
                     renderPreview(my.tempList.key, my.tempList.items); // Re-render preview to reflect changes
                 }
             },
-            onDeleteButton: (key, itemElement, listHtml) => {
+            onDeleteButton: async (key, itemElement, listHtml) => {
                 delete my.listsData[key];
                 delete my.listState[key];
                 itemElement.removeChild(listHtml);
@@ -409,11 +409,11 @@ ccm.files["ccm.checklist.js"] = {
                     listState: my.listState
                 });
             },
-            onClickToggleButton: (key, itemContent, toggleButton) => {
+            onClickToggleButton: async (key, itemContent, toggleButton) => {
                 my.listState[key].collapsed = !my.listState[key].collapsed;
                 itemContent.style.display = my.listState[key].collapsed ? 'none' : 'block';
                 toggleButton.textContent = my.listState[key].collapsed ? '▶' : '▼';
-                self.store.set({
+                await self.store.set({
                     key: studentId,
                     listsData: my.listsData,
                     listState: my.listState
@@ -487,7 +487,7 @@ ccm.files["ccm.checklist.js"] = {
                     if (notePlaceholder) notePlaceholder.style.display = 'block';
                 }
             },
-            onDeadlinePicker: (event, item, listKey) => {
+            onDeadlinePicker: async (event, item, listKey) => {
                 const newDeadline = event.target.value || null;
 
                 function updateDeadline(items) {
@@ -502,7 +502,7 @@ ccm.files["ccm.checklist.js"] = {
                 }
 
                 updateDeadline(my.listsData[listKey]);
-                self.store.set({key: studentId, listsData: my.listsData, listState: my.listState});
+                await self.store.set({key: studentId, listsData: my.listsData, listState: my.listState});
             },
             onCheckboxChange: async (event, item, listKey, itemKey, isEndPoint, itemHtml, listContent) => {
                 my.listState[listKey].items[itemKey].checked = event.target.checked;
@@ -926,7 +926,7 @@ ccm.files["ccm.checklist.js"] = {
                 onEditeNote: (event) => self.events.onEditNote(event, itemHtml, item, noteDisplay, notePlaceholder, editNoteBtn, noteEditForm, noteInput),
                 onSaveNoteButton: (event) => self.events.onSaveNoteButton(event, item, itemHtml, noteInput, listKey, noteEditForm, editNoteBtn),
                 onCancelNoteBtn: (event) => self.events.onCancelNoteBtn(event, noteEditForm, editNoteBtn, noteDisplay, notePlaceholder, item),
-                onDeadlinePicker: (event) => self.events.onDeadlinePicker(event, item, listKey),
+                onDeadlinePicker: async (event) => await self.events.onDeadlinePicker(event, item, listKey),
                 onCheckboxChange: (event) => self.events.onCheckboxChange(event, item, listKey, itemKey, isEndPoint, itemHtml, listContent)
             }));
 
