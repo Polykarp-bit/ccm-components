@@ -6,11 +6,11 @@
 
 ccm.files["ccm.checklist.js"] = {
     name: "checklist",
-    //ccm: "../../libs/ccm/ccm.js",
     ccm: "https://ccmjs.github.io/ccm/ccm.js",
     config: {
         store: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_checklist_data"}],
         css: ["ccm.load", "./resources/style.css"],
+        user: ["ccm.instance", "https://ccmjs.github.io/akless-components/user/ccm.user.js"],
         text: {
             previewListText: "Vorschau der Liste",
             listName: "Listen Name (z.B. Projekt 2024)",
@@ -32,11 +32,17 @@ ccm.files["ccm.checklist.js"] = {
             writeNoteText: "Notiz eingeben...",
             editNoteText: "Notiz bearbeiten",
             addNoteText: "Notiz hinzufügen",
-         /*   notePlaceholderText: "Keine Notiz",*/
+            errorLoginRequired: "Bitte melde dich an, um fortzufahren.",
         },
         helper: ["ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-7.2.0.mjs"],
         html: {
             main: `
+                <div class="main">
+                    <div id="user"></div>
+                    <div id="content"></div>
+                </div>
+            `,
+            mainContent: `
                 <div class="container">
                     <h1>%myListText%</h1>
                     <div class="create-list">
@@ -127,57 +133,30 @@ ccm.files["ccm.checklist.js"] = {
                         <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox" checked="%checkboxChecked%" onchange="%onCheckboxChange%">
                         <label for="%itemKey%" class="%isEndPoint%--title">%itemName%</label>
                         <div class="note-container">
-                        <button class="edit-note-btn" title="%noteTitle%" onclick="%onEditeNote%">🗒️</button>
-                        <p class="%subItemNoteClass%">%noteShow%</p>
-                        <div class="note-edit-form" style="display: none;">
-                            <textarea class="note-input" rows="3" placeholder=" ">%itemNote%</textarea>
-                            <button class="save-note-btn" onclick="%onSaveNoteButton%">%saveText%</button>
-                            <button class="cancel-note-btn" onclick="%onCancelNoteBtn%">%cancelText%</button>
-                        </div>
+                            <button class="edit-note-btn" title="%noteTitle%" onclick="%onEditeNote%">🗒️</button>
+                            <p class="%subItemNoteClass%">%noteShow%</p>
+                            <div class="note-edit-form" style="display: none;">
+                                <textarea class="note-input" rows="3" placeholder=" ">%itemNote%</textarea>
+                                <button class="save-note-btn" onclick="%onSaveNoteButton%">%saveText%</button>
+                                <button class="cancel-note-btn" onclick="%onCancelNoteBtn%">%cancelText%</button>
+                            </div>
                         </div>
                         <input type="date" class="deadline-picker" value=%itemDeadline% onchange="%onDeadlinePicker%">
                         %subitemProgress%
-                        
                     </div>
-
-                    
-                        %subItemList%
-                        
-                        </div>`,
+                    %subItemList% 
+                </div>`,
         }
     },
     Instance: function () {
         let self = this;
         let my;
-        let stuentId;
+        let studentId;
 
         this.init = async () => {
-
-            try {
-                my = await self.store.get("checklist_data") || {listsData: {}, listState: {}};
-                my.listsData = my.listsData || {};
-                my.listState = my.listState || {};
-                my.tempList = null;
-                my.currentItems = [];
-
-                Object.keys(my.listsData).forEach(listKey => {
-                    ensureNotesField(my.listsData[listKey]);
-
-                    if (!my.listState[listKey]) {
-                        console.log(`Initialisiere listState für ${listKey}`);
-                        my.listState[listKey] = {items: {}, collapsed: false};
-                        initializeState(listKey, my.listsData[listKey], my.listState[listKey]);
-                    }
-                });
-                $ = Object.assign({}, this.ccm.helper, this.helper);
-                $.use(this.ccm);
-                if (this.user) this.user.onchange = this.start;
-
-                console.log("Initialized store:", JSON.stringify(my, null, 2));
-            } catch (e) {
-                console.error("Failed to initialize store:", e);
-                self.element.innerHTML = `<p>Error initializing store: ${e.message}</p>`;
-            }
+            $ = Object.assign({}, this.ccm.helper, this.helper);
+            $.use(this.ccm);
+            if (this.user) this.user.onchange = this.start;
         };
 
         this.events = {
@@ -237,7 +216,7 @@ ccm.files["ccm.checklist.js"] = {
                 }
                 initializeState(my.tempList.key, my.tempList.items, my.listState[my.tempList.key]);
 
-                self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState})
+                self.store.set({key: studentId, listsData: my.listsData, listState: my.listState})
                     .then(() => console.log('Daten erfolgreich gespeichert:', my))
                     .catch(e => {
                         console.error('Fehler beim Speichern:', e);
@@ -425,7 +404,7 @@ ccm.files["ccm.checklist.js"] = {
                 delete my.listState[key];
                 itemElement.removeChild(listHtml);
                 self.store.set({
-                    key: "checklist_data",
+                    key: studentId,
                     listsData: my.listsData,
                     listState: my.listState
                 });
@@ -435,7 +414,7 @@ ccm.files["ccm.checklist.js"] = {
                 itemContent.style.display = my.listState[key].collapsed ? 'none' : 'block';
                 toggleButton.textContent = my.listState[key].collapsed ? '▶' : '▼';
                 self.store.set({
-                    key: "checklist_data",
+                    key: studentId,
                     listsData: my.listsData,
                     listState: my.listState
                 });
@@ -486,7 +465,7 @@ ccm.files["ccm.checklist.js"] = {
                         currentNotePlaceholder.style.display = '';
                     }
                 }
-                await self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
+                await self.store.set({key: studentId, listsData: my.listsData, listState: my.listState});
             },
             onEditNote: (event, itemHtml, item, noteDisplay, notePlaceholder, editNoteBtn, noteEditForm, noteInput) => {
                 event.stopPropagation();
@@ -523,7 +502,7 @@ ccm.files["ccm.checklist.js"] = {
                 }
 
                 updateDeadline(my.listsData[listKey]);
-                self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
+                self.store.set({key: studentId, listsData: my.listsData, listState: my.listState});
             },
             onCheckboxChange: async (event, item, listKey, itemKey, isEndPoint, itemHtml, listContent) => {
                 my.listState[listKey].items[itemKey].checked = event.target.checked;
@@ -562,7 +541,7 @@ ccm.files["ccm.checklist.js"] = {
                     listItem.classList.remove('completed');
                 }
 
-                await self.store.set({key: "checklist_data", listsData: my.listsData, listState: my.listState});
+                await self.store.set({key: studentId, listsData: my.listsData, listState: my.listState});
             },
             editListName: (event, nameEditForm, titleDisplay, editBtn, nameInput) => {
                 event.stopPropagation();
@@ -601,9 +580,41 @@ ccm.files["ccm.checklist.js"] = {
 
         this.start = async () => {
             try {
-                const itemHtml = document.createElement('div');
+                $.setContent(this.element, $.html(this.html.main));
 
-                $.setContent(itemHtml, $.html(self.html.main, {
+                if (this.user) {
+                    $.setContent(this.element.querySelector('#user'), this.user.root);
+                    this.user.start();
+                }
+
+                studentId = await this.user.getValue();
+                if (!studentId) {
+                    alert(self.text.errorLoginRequired);
+                    console.log("User is not logged in");
+                    return;
+                }
+                studentId = studentId.key;
+
+                my = await self.store.get(studentId) || {listsData: {}, listState: {}};
+                my.listsData = my.listsData || {};
+                my.listState = my.listState || {};
+                my.tempList = null;
+                my.currentItems = [];
+
+                Object.keys(my.listsData).forEach(listKey => {
+                    ensureNotesField(my.listsData[listKey]);
+
+                    if (!my.listState[listKey]) {
+                        console.log(`Initialisiere listState für ${listKey}`);
+                        my.listState[listKey] = {items: {}, collapsed: false};
+                        initializeState(listKey, my.listsData[listKey], my.listState[listKey]);
+                    }
+                });
+
+                console.log("Initialized store:", JSON.stringify(my, null, 2));
+
+                const itemHtml = document.createElement('div');
+                $.setContent(itemHtml, $.html(self.html.mainContent, {
                     previewListText: self.text.previewListText,
                     firstItemNameText: self.text.firstItemName,
                     listName: self.text.listName,
@@ -615,7 +626,7 @@ ccm.files["ccm.checklist.js"] = {
                     onSaveListButton: () => self.events.onSaveListButton(listForm, previewList, itemElement),
                     onCancelListButton: () => self.events.onCancelListButton(listForm, previewList),
                 }));
-                $.setContent(self.element, itemHtml);
+                $.setContent(self.element.querySelector('#content'), itemHtml);
 
                 const createListForm = self.element.querySelector('.create-list');
                 const listForm = self.element.querySelector('.list-form');

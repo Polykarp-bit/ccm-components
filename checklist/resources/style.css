@@ -32,7 +32,9 @@ button {
     border: 1px solid #595959;
 }
 
-
+#user{
+    float: right;
+}
 
 .create-list {
     display: flex;
