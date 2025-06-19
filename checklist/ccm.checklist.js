@@ -90,6 +90,7 @@ ccm.files["ccm.checklist.js"] = {
     </div>
     </div>`,
             renderItem: `
+                <div class="item-content">
                 <div class="%isEndPoint%" id="%itemKey%">
                     <div class="%isEndPoint%--header">
                         <div class="item-main-content">
@@ -130,6 +131,7 @@ ccm.files["ccm.checklist.js"] = {
                         </div>
                     </div>
                     %subItemList% 
+                </div>
                 </div>`,
         }
     },

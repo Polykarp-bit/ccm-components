@@ -1,18 +1,20 @@
 #element{
     --background-color: #f4f6f9;
-    --container-background: #ffffff;
+    --container-background: #f4f6f9;
     --text-primary: #2d3748;
     --text-secondary: #64748b;
     --accent-color: #2563eb;
     --danger-color: #ef4444;
-    --border-color: #e2e8f0;
+    /*--border-color: #e2e8f0;*/
 
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-    background-color: var(--background-color);
+   /* background-color: var(--background-color);*/
     margin: 0;
     padding: 20px;
     color: var(--text-primary);
+    background-color: #FFFFFF;
+;
     line-height: 1.6;
 }
 
@@ -127,14 +129,13 @@ button {
 /* ==============================================
    2. CONTAINER & BASISELEMENTE
    ============================================== */
-.container {
-    max-width: 960px;
-    margin: 0 auto;
+.list-container {
     background-color: #ffffff;
-    padding: 24px;
     border-radius: 16px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 10rem; /* oder ein anderer Wert */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
 }
+
 
 /* ==============================================
    3. HEADER & TITEL
@@ -145,7 +146,7 @@ button {
     align-items: center;
     justify-content: space-between;
     padding: 1rem 0; /* Dein bisheriger Wert, kannst du anpassen */
-    border-bottom: 1px solid var(--border-color);
+  /*  border-bottom: 1px solid var(--border-color);*/
 }
 
 .item-header h3 {
@@ -319,6 +320,8 @@ button {
 .add-button:hover {
     background-color: #e1e4e8;
 }
+
+
 
 .remove-subitem {
     opacity: 1;
@@ -509,3 +512,13 @@ button {
     background-color: #e5e7eb;
     color: var(--text-primary);
 }
+
+
+.list-container {
+    /* Hier könnten schon andere Stile von dir stehen, wie background-color, box-shadow etc. */
+    background-color: #ffffff;
+    border-radius: 16px;
+    /*box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);*/
+    padding: 20px;
+
+    margin-bottom: 10rem;}
