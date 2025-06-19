@@ -60,83 +60,42 @@ ccm.files["ccm.checklist.js"] = {
                     </div>-->
                     <div id="items"></div>
                 </div>`,
-            // In config.html
-            previewList: `
-                <div class="item-header">
-                    <div class='title-edit-wrapper'>
-                        <div class="title-edit-wrapper-left">
-                            <button class='edit-item-name-btn' title='Listennamen bearbeiten' onclick="%editListName%">✎</button>
-                            <h3 class='list-title'>%listTitle%</h3>
-                            <div class='list-name-edit-form' style="display: none;">
-                                <input type="text" class='list-name-input-field'/>
-                                <button class='save-list-name-btn' onclick="%saveListName%">OK</button>
-                                <button class='cancel-list-name-btn' onclick="%cancelListName%">X</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="item-content">
-                    <button class="add-subitem" onclick="%onAddSubmitItem%">%addListObject%</button>
-                    <div class="list-input" style="display: none;">
-                        <input type="text" class="list-item-name" placeholder="%secondItemName%">
-                        <button class="confirm-subitem" onclick="%onConfirmSubitem%">%addText%</button>
-                    </div>
-                    <div class="subitem-list"></div>
-                </div>`,
-            renderpreviewList: `
-               <div class="%isEndpoint%" id="%itemKey%">
-                    <div class="%isEndpointHeader%">
-                        <div class='title-edit-wrapper'>
-                        <div class="title-edit-wrapper-left">
-                            <button class='edit-item-name-btn' title='Namen bearbeiten' onclick="%editName%">&#9998;</button>
-                            <p class='%isEndpointTitle%'>%itemName%</p>
-                            <div class='item-name-edit-form' style="display: none;">
-                                <input type="text" class='item-name-input-field'/>
-                                <button class='save-item-name-btn' onclick="%saveItemName%">OK</button>
-                                <button class='cancel-item-name-btn' onclick="%cancelNameButton%">X</button>
-                            </div>
-                            </div>
-                            <button class='remove-subitem' onclick="%onRemoveSubitem%">%removeText%</button>
-                        </div>
-                    </div>
-                    <div class="deadline-group"> <label for="%deadlineGroupId%">%deadlineText%</label>
-                        <input type="date" id="%deadlineGroupId%" class="deadline-picker" value="%deadlinePickerValue%" onchange="%onDeadlineChange%" /> %progressSpanHTML%
-                    </div>
-                    <div class='action-button-group'>
-                        <button class='add-subitem' onclick="%onAddSubitem%">
-                            %addSubpointText% </button> 
-                    </div>
-                    <div class='subitem-input' style="display: none">
-                        <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
-                    </div>
-                    <div class="subitem-list-children"></div>
-                </div>`,
+            // in config.html
             renderList: `
-               <div class="list-container" id="%listTitle%">
-                <div class="item-header">
-                    <h3>%listTitle%</h3>
-                    <div class="progress-prozent"></div>
-                    <div class="item-header-right">
-                        <button class="edit-list" title="%editText%" onclick="%onEditButton%">✎</button>
-                        <button class="delete-list" title="%deleteText%" onclick="%onDeleteButton%">🗑</button>
-                    </div>
-                    </div>
-                    <button class="toggle-item" onclick="%onClickToggleButton%">▼</button>
-                    <div class="item-content">
-                        <div class="progress-bar">
-                            <div class="progress-fill"></div>
-                        </div>
-                    <div class="subitem-list">
-                    <div class='action-button-group'>
-                        <button class='add-subitem' onclick="%onAddSubitemToRoot%">
-                            %addSubpointText% </button> 
-                        </div>
-                        <div class='subitem-input' style="display: none">
-                            <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
-                        </div>
-                    </div>
-                </div>
-                </div>`,
+   <div class="list-container" data-id="%listKey%">
+    <div class="item-header">
+        <div class="list-title-wrapper">
+            <h3 class="list-title-heading">%listTitle%</h3>
+
+            <div class="list-name-edit-form" style="display: none;">
+                <input type="text" class="list-name-input-field" value="%listTitle%">
+                <button class="save-list-name-btn" onclick="%onSaveListName%">%saveText%</button>
+                <button class="cancel-list-name-btn" onclick="%onCancelListName%">%cancelText%</button>
+            </div>
+        </div>
+
+        <div class="progress-prozent"></div>
+        <div class="item-header-right">
+             <button class="edit-list-name-btn" title="%editText%" onclick="%onEditListName%">&#9998;</button>
+            <button class="delete-list" title="%deleteText%" onclick="%onDeleteButton%">🗑</button>
+        </div>
+        </div>
+        <button class="toggle-item" onclick="%onClickToggleButton%">▼</button>
+        <div class="item-content">
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        <div class="subitem-list">
+        <div class='action-button-group'>
+            <button class='add-subitem' onclick="%onAddSubitemToRoot%">
+                %addSubpointText% </button> 
+            </div>
+            <div class='subitem-input' style="display: none">
+                <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
+            </div>
+        </div>
+    </div>
+    </div>`,
             renderItem: `
                 <div class="%isEndPoint%" id="%itemKey%">
                     <div class="%isEndPoint%--header">
@@ -182,16 +141,22 @@ ccm.files["ccm.checklist.js"] = {
         let my;
         let studentId;
 
+
+
         this.init = async () => {
             $ = Object.assign({}, this.ccm.helper, this.helper);
             $.use(this.ccm);
             if (this.user) this.user.onchange = this.start;
         };
 
+
         this.events = {
             onAddSubitem: (itemKey, event) => {
                 if (event) event.stopPropagation();
-                const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
+                // KORREKTUR: Auch hier den Attribut-Selektor verwenden.
+                const currentItemRenderedRoot = self.element.querySelector(`[data-id="${itemKey}"]`);
+
+                // Der Rest der Funktion bleibt gleich
                 const subitemInputContainer = currentItemRenderedRoot.querySelector('.subitem-input');
                 subitemInputContainer.style.display === 'none' ? subitemInputContainer.style.display = 'block' : subitemInputContainer.style.display = 'none';
                 const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
@@ -201,8 +166,12 @@ ccm.files["ccm.checklist.js"] = {
             },
             onAddSubitemToRoot: (itemKey, event) => {
                 if (event) event.stopPropagation();
-                const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
-                console.log(currentItemRenderedRoot);
+                // KORREKTUR: Wir suchen nach dem data-id Attribut statt der ID.
+                // Dieser Selektor funktioniert mit JEDEM String, auch mit UUIDs, die mit Zahlen beginnen.
+                const currentItemRenderedRoot = self.element.querySelector(`[data-id="${itemKey}"]`);
+
+                // Der Rest der Funktion bleibt gleich
+                console.log(currentItemRenderedRoot); // Sollte jetzt das korrekte <div> finden
                 const subitemInputContainer = currentItemRenderedRoot.querySelector('.subitem-input');
                 subitemInputContainer.style.display === 'none' ? subitemInputContainer.style.display = 'block' : subitemInputContainer.style.display = 'none';
                 const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
@@ -210,58 +179,49 @@ ccm.files["ccm.checklist.js"] = {
                     subitemNameInputForNew.focus();
                 }
             },
-            onStartCreateButton: async (createListForm, listForm, previewList, itemElement) => {
-                const listName = createListForm.querySelector('#list-name').value.trim();
+            onStartCreateButton: async (createListForm) => {
+                const listNameInput = createListForm.querySelector('#list-name').value.trim();
                 const firstItemName = createListForm.querySelector('#first-item-name').value.trim();
 
-                if(checkListNameExists(listName.replace(/\s+/g, ''))){
-                    return;
-                }
-
-                if (!istEingabeGueltig(listName) || !istEingabeGueltig(firstItemName)) {
-                    return;
-                }
-
-                if (!listName || !firstItemName) {
+                // --- Validierung ---
+                if (!listNameInput || !firstItemName) {
                     alert('Bitte geben Sie einen Listennamen und ein erstes Listenobjekt ein.');
                     return;
                 }
-                my.tempList = {
-                    key: listName.replace(/\s+/g, ''),
-                    items: []
-                };
-                my.currentItems = [];
-
-                const firstItemKey = `item§§§${firstItemName.replace(/[^a-zA-Z0-9äöüß]/g, '§§§').toLowerCase()}§§§${Date.now()}`;
-                const firstItem = {key: firstItemKey, name: firstItemName, items: [], deadline: null};
-                my.tempList.items.push(firstItem);
-                my.currentItems.push(firstItem);
-
-                if (!my.tempList || my.tempList.items.length === 0) {
-                    alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
+                // Die Funktion istEingabeGueltig prüft auf '§§§'. Das ist für Item-Namen gut,
+                // für den Listennamen hier aber nicht zwingend nötig, schadet aber auch nicht.
+                if (!istEingabeGueltig(listNameInput) || !istEingabeGueltig(firstItemName)) {
                     return;
                 }
 
-                my.listsData[my.tempList.key] = my.tempList.items;
-                if (!my.listState[my.tempList.key]) {
-                    my.listState[my.tempList.key] = {items: {}, collapsed: false};
-                }
-                initializeState(my.tempList.key, my.tempList.items, my.listState[my.tempList.key]);
+                // --- Datenerstellung ---
 
-                await self.store.set({key: studentId, listsData: my.listsData, listState: my.listState})
-                    .then(() => console.log('Daten erfolgreich gespeichert:', my))
-                    .catch(e => {
-                        console.error('Fehler beim Speichern:', e);
-                        alert('Fehler beim Speichern der Liste. Bitte überprüfe die Konsole.');
-                    });
+                // 1. Erstellen Sie die eindeutige, technische ID für die Liste.
+                const listKey = $.generateKey(); // z.B. "f4a5c6e7-1b2c-4d5e-8f6a-7b8c9d0e1f2a"
 
+                // 2. Erstellen Sie das erste Item für die Liste.
+                const firstItemKey = `item§§§${firstItemName.replace(/[^a-zA-Z0-9äöüß]/g, '§§§').toLowerCase()}§§§${Date.now()}`;
+                const firstItem = { key: firstItemKey, name: firstItemName, items: [], deadline: null, note: "" };
+
+                // 3. ERSTELLEN SIE DIE KORREKTE DATENSTRUKTUR!
+                // Der Schlüssel ist die UUID. Der Wert ist ein Objekt mit 'name' und 'items'.
+                my.listsData[listKey] = {
+                    name: listNameInput, // Der für den Benutzer sichtbare Name
+                    items: [firstItem]   // Das Array der Listen-Objekte
+                };
+
+                // 4. Initialisieren Sie den Zustand für die neue Liste unter derselben UUID.
+                my.listState[listKey] = { items: {}, collapsed: false };
+                // Wichtig: Geben Sie hier das items-Array an die Funktion weiter.
+                initializeState(listKey, my.listsData[listKey].items, my.listState[listKey]);
+
+                // 5. Speichern Sie das gesamte 'my'-Objekt im Store.
+                await self.store.set({ key: studentId, listsData: my.listsData, listState: my.listState });
+
+                // 6. Rendern Sie die Listen neu und setzen Sie die Formularfelder zurück.
                 await renderLists();
-                my.tempList = null;
-                my.currentItems = [];
-                listForm.style.display = 'block';
                 createListForm.querySelector('#list-name').value = '';
-                createListForm.querySelector('#first-item-name').value = '';
-            },
+                createListForm.querySelector('#first-item-name').value = '';},
             onSaveListButton: async (listForm, previewList, itemElement) => {
                 if (!my.tempList || my.tempList.items.length === 0) {
                     alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
@@ -295,61 +255,22 @@ ccm.files["ccm.checklist.js"] = {
                 my.currentItems = [];
                 previewList.innerHTML = '';
             },
-            onAddSubmitItem: () => {
-                const listInput = self.element.querySelector('.list-input');
-                listInput.style.display === 'none' ? listInput.style.display = 'block' : listInput.style.display = 'none';
-                const subitemNameInput = self.element.querySelector('.list-item-name');
-                subitemNameInput.focus();
-            },
-            onConfirmSubitem: async (listInput) => {
-                const subitemNameInput = self.element.querySelector('.list-item-name');
-                const subitemName = subitemNameInput.value.trim();
-                if (!istEingabeGueltig(subitemName)) return;
-                if (!subitemName) {
-                    alert('Bitte geben Sie einen Namen für das Listenobjekt ein.');
-                    return;
-                }
-                const subitemKey = `item§§§${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '§§§').toLowerCase()}§§§${Date.now()}`;
-                const newSubitem = {key: subitemKey, name: subitemName, items: [], deadline: null};
-
-                my.tempList.items.push(newSubitem);
-                my.currentItems.push(newSubitem);
-                console.log('New item added:', newSubitem);
-                console.log('Updated tempList:', JSON.stringify(my.tempList, null, 2));
-                console.log('Updated currentItems:', JSON.stringify(my.currentItems, null, 2));
-
-                await renderLists();
-                subitemNameInput.value = '';
-                listInput.classList.remove('active');
-            },
             confirmSubitem: async (itemKey, item, event) => {
                 if (event) event.stopPropagation();
-                const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
 
-                /*
+                // KORREKTUR: Den robusten Attribut-Selektor verwenden.
+                const currentItemRenderedRoot = self.element.querySelector(`[data-id="${itemKey}"]`);
+
+                // Eine kleine zusätzliche Sicherheitsprüfung, falls das Element nicht gefunden wird.
                 if (!currentItemRenderedRoot) {
-                    console.error(`confirmSubitem: Element mit ID '${itemKey}' nicht gefunden!`);
+                    console.error(`confirmSubitem: Konnte das Elternelement mit data-id "${itemKey}" nicht finden.`);
                     return;
                 }
-                */
+
                 const subitemInputContainer = currentItemRenderedRoot.querySelector('.subitem-input');
-
-                /*
-                if (!subitemInputContainer) {
-                    console.error(`confirmSubitem: '.subitem-input' nicht in Element mit ID '${itemKey}' gefunden.`);
-                    console.log("Inhalt von currentItemRenderedRoot (ID: " + itemKey + "):", currentItemRenderedRoot.innerHTML);
-                    return;
-                } */
-
                 const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
-
-                /*
-                if (!subitemNameInputForNew) {
-                    console.error(`confirmSubitem: '.subitem-name' Input nicht im subitemInputContainer für itemKey '${itemKey}' gefunden.`);
-                    return;
-                }*/
-
                 const subitemName = subitemNameInputForNew.value.trim();
+
                 if (!istEingabeGueltig(subitemName)) return;
                 if (!subitemName) {
                     alert('Bitte geben Sie einen Namen für den Unterpunkt ein.');
@@ -358,71 +279,35 @@ ccm.files["ccm.checklist.js"] = {
                 }
 
                 const newSubitemKey = `subitem§§§${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '§§§').toLowerCase()}§§§${Date.now()}`;
-                const newSubitem = {key: newSubitemKey, name: subitemName, items: [], deadline: null, note: ""};
+                const newSubitem = { key: newSubitemKey, name: subitemName, items: [], deadline: null, note: "" };
 
+                // WICHTIG: Die Logik zum Hinzufügen muss die neue Datenstruktur berücksichtigen
+                let parentItemList;
 
-                console.log('New item added:', item);
-                if(my.listsData[itemKey]){
-                    my.listsData[itemKey].push(newSubitem);
-                } else{
-
-                if (!item.items) {
-                    item.items = [];
+                // Fall 1: Wir fügen zur Hauptliste hinzu. 'item' ist hier das ganze `my.listsData`-Objekt.
+                // 'itemKey' ist die UUID der Liste.
+                if (my.listsData[itemKey] && my.listsData[itemKey].items) {
+                    parentItemList = my.listsData[itemKey].items;
                 }
-                item.items.push(newSubitem);
-                console.log(item.items)
+                // Fall 2: Wir fügen zu einem Unterpunkt hinzu. 'item' ist das Eltern-Item-Objekt.
+                else if (item && item.items) {
+                    parentItemList = item.items;
+                } else {
+                    console.error("Konnte die Liste der Unterpunkte nicht finden, um das neue Element hinzuzufügen.");
+                    return;
                 }
+
+                parentItemList.push(newSubitem);
+
+                // Den Zustand für das neue Item initialisieren.
+                // Wir brauchen den listKey (die UUID), der bei einem tiefen Unterpunkt nicht direkt verfügbar ist.
+                // Am einfachsten ist es, die ganze Liste neu zu rendern, da initializeState und renderLists alles neu aufbauen.
+
+                await self.store.set({ key: studentId, listsData: my.listsData, listState: my.listState });
                 await renderLists();
+
                 subitemNameInputForNew.value = '';
-                subitemInputContainer.classList.remove('active');
-            },
-            confirmSubitemForList: async (itemKey, item, event) => {
-                if (event) event.stopPropagation();
-                const currentItemRenderedRoot = self.element.querySelector(`#${itemKey}`);
-
-                /*
-                if (!currentItemRenderedRoot) {
-                    console.error(`confirmSubitem: Element mit ID '${itemKey}' nicht gefunden!`);
-                    return;
-                }
-                */
-                const subitemInputContainer = currentItemRenderedRoot.querySelector('.subitem-input');
-
-                /*
-                if (!subitemInputContainer) {
-                    console.error(`confirmSubitem: '.subitem-input' nicht in Element mit ID '${itemKey}' gefunden.`);
-                    console.log("Inhalt von currentItemRenderedRoot (ID: " + itemKey + "):", currentItemRenderedRoot.innerHTML);
-                    return;
-                } */
-
-                const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
-
-                /*
-                if (!subitemNameInputForNew) {
-                    console.error(`confirmSubitem: '.subitem-name' Input nicht im subitemInputContainer für itemKey '${itemKey}' gefunden.`);
-                    return;
-                }*/
-
-                const subitemName = subitemNameInputForNew.value.trim();
-                if (!istEingabeGueltig(subitemName)) return;
-                if (!subitemName) {
-                    alert('Bitte geben Sie einen Namen für den Unterpunkt ein.');
-                    subitemNameInputForNew.focus();
-                    return;
-                }
-
-                const newSubitemKey = `subitem§§§${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '§§§').toLowerCase()}§§§${Date.now()}`;
-                const newSubitem = {key: newSubitemKey, name: subitemName, items: [], deadline: null, note: ""};
-
-                if (!item.items) {
-                    item.items = [];
-                }
-                item.items.push(newSubitem);
-                console.log(item.items)
-
-                await renderLists();
-                subitemNameInputForNew.value = '';
-                subitemInputContainer.classList.remove('active');
+                subitemInputContainer.style.display = 'none';
             },
             editName: (event) => {
                 event.stopPropagation();
@@ -438,7 +323,6 @@ ccm.files["ccm.checklist.js"] = {
                 input.focus();
                 input.select();
             },
-
             saveItemName: async (event, listKey, item) => {
                 event.stopPropagation();
                 const saveButton = event.target;
@@ -537,39 +421,6 @@ ccm.files["ccm.checklist.js"] = {
                     await renderLists();
                 }
             },
-           /* onRemoveSubitem: (item, parentKey) => {
-                if (my.tempList.items.length === 1 && item.items.length === 0 && !parentKey) {
-                    alert('Die Liste muss mindestens ein Listenobjekt enthalten.');
-                    return;
-                }
-
-                function removeItemRecursive(items, targetKey) {
-                    for (let i = 0; i < items.length; i++) {
-                        if (items[i].key === targetKey) {
-                            items.splice(i, 1);
-                            return true;
-                        }
-                        if (items[i].items && removeItemRecursive(items[i].items, targetKey)) return true;
-                    }
-                    return false;
-                }
-
-                removeItemRecursive(my.tempList.items, item.key);
-
-                if (my.currentItems && Array.isArray(my.currentItems)) {
-                    function collectAllItemKeys(itemsArr, keysSet = new Set()) {
-                        itemsArr.forEach(it => {
-                            keysSet.add(it.key);
-                            if (it.items) collectAllItemKeys(it.items, keysSet);
-                        });
-                        return keysSet;
-                    }
-
-                    const keysInTempList = collectAllItemKeys(my.tempList.items);
-                    my.currentItems = my.currentItems.filter(ci => keysInTempList.has(ci.key));
-                }
-                renderLists();
-            }, */
             onDeadlineChange: (event, item) => {
                 if (event) event.stopPropagation();
                 const newDeadline = event.target.value || null;
@@ -733,43 +584,66 @@ ccm.files["ccm.checklist.js"] = {
 
                 await self.store.set({key: studentId, listsData: my.listsData, listState: my.listState});
             },
-            editListName: (event, nameEditForm, titleDisplay, editBtn, nameInput) => {
+            editListName: (event) => {
                 event.stopPropagation();
-                titleDisplay.style.display = 'none';
-                editBtn.style.display = 'none';
-                nameEditForm.style.display = 'flex';
-                nameInput.value = titleDisplay.textContent.trim();
-                nameInput.focus();
+                const wrapper = event.target.closest('.item-header').querySelector('.list-title-wrapper');
+                wrapper.querySelector('.list-title-heading').style.display = 'none';
+                wrapper.querySelector('.list-name-edit-form').style.display = 'flex';
+                // Den Bearbeiten-Button selbst auch ausblenden
+                event.target.style.display = 'none';
+
+                const input = wrapper.querySelector('.list-name-input-field');
+                input.focus();
+                input.select();
             },
 
-            saveListName: (event, nameEditForm, titleDisplay, editBtn, nameInput) => {
+            /**
+             * Bricht die Bearbeitung ab und stellt die normale Ansicht wieder her.
+             */
+            cancelListName: (event) => {
                 event.stopPropagation();
-                if(checkListNameExists(nameInput.value.trim())){
-                    return
-                }
-                const newName = nameInput.value.trim();
-                if (!istEingabeGueltig(newName)) return;
-                if (newName && newName !== my.tempList.key) {
-                    my.tempList.key = newName.replace(/\s+/g, '');
-                    renderPreview(my.tempList.key, my.tempList.items);
-                } else if (!newName) {
+                const wrapper = event.target.closest('.item-header').querySelector('.list-title-wrapper');
+                wrapper.querySelector('.list-name-edit-form').style.display = 'none';
+                wrapper.querySelector('.list-title-heading').style.display = 'block';
+                // Den Bearbeiten-Button wieder einblenden
+                event.target.closest('.item-header').querySelector('.edit-list-name-btn').style.display = 'inline-block';
+            },
+
+            /**
+             * Speichert den neuen Namen der Liste.
+             * @param {Event} event - Das Klick-Event.
+             * @param {string} listKey - Die UUID der zu bearbeitenden Liste.
+             */
+            saveListName: async (event, listKey) => {
+                event.stopPropagation();
+                const wrapper = event.target.closest('.list-name-edit-form');
+                const input = wrapper.querySelector('.list-name-input-field');
+                const newName = input.value.trim();
+
+                // Validierung
+                if (!newName) {
                     alert('Der Listenname darf nicht leer sein.');
-                    nameInput.focus();
-                } else {
-                    self.events.cancelListName(event, nameEditForm, titleDisplay, editBtn);
+                    return;
                 }
-            },
 
-            cancelListName: (event, nameEditForm, titleDisplay, editBtn) => {
-                event.stopPropagation();
-                nameEditForm.style.display = 'none';
-                titleDisplay.style.display = '';
-                editBtn.style.display = '';
-            },
+                // --- DIE NEUE, EINFACHE LOGIK ---
+                // Ändere einfach das 'name'-Attribut des Listenobjekts. Der Key bleibt unberührt.
+                my.listsData[listKey].name = newName;
+
+                // Speichere die geänderten Daten im Store.
+                await self.store.set({ key: studentId, listsData: my.listsData, listState: my.listState });
+
+                // Rendere die gesamte Ansicht neu, um den neuen Namen anzuzeigen.
+                await renderLists();
+            }
         }
 
         this.start = async () => {
             try {
+                console.log(await this.store.get());
+                //await this.store.del("tniede2s")
+
+
                 $.setContent(this.element, $.html(this.html.main));
 
                 if (this.user) {
@@ -797,14 +671,21 @@ ccm.files["ccm.checklist.js"] = {
                 my.currentItems = [];
 
                 Object.keys(my.listsData).forEach(listKey => {
-                    ensureNotesField(my.listsData[listKey]);
+                    const list = my.listsData[listKey];
+                    // Stellen Sie sicher, dass es ein gültiges Listenobjekt mit einem items-Array ist
+                    if (list && Array.isArray(list.items)) {
+                        // KORREKTER AUFRUF:
+                        ensureNotesField(list.items);
 
-                    if (!my.listState[listKey]) {
-                        console.log(`Initialisiere listState für ${listKey}`);
-                        my.listState[listKey] = {items: {}, collapsed: false};
-                        initializeState(listKey, my.listsData[listKey], my.listState[listKey]);
+                        if (!my.listState[listKey]) {
+                            console.log(`Initialisiere listState für ${listKey}`);
+                            my.listState[listKey] = { items: {}, collapsed: false };
+                            initializeState(listKey, list.items, my.listState[listKey]);
+                        }
                     }
                 });
+
+
 
                 console.log("Initialized store:", JSON.stringify(my, null, 2));
 
@@ -846,47 +727,6 @@ ccm.files["ccm.checklist.js"] = {
             });
         }
 
-        function renderPreview(listKey, items) {
-            const previewList = self.element.querySelector('#preview-list');
-            previewList.innerHTML = '';
-            const listTitle = listKey;
-            const listHtml = document.createElement('div');
-            listHtml.className = 'list-item';
-
-            const editListName = (event) => {
-                const wrapper = listHtml.querySelector('.title-edit-wrapper-left');
-                self.events.editListName(event, wrapper.querySelector('.list-name-edit-form'), wrapper.querySelector('.list-title'), wrapper.querySelector('.edit-item-name-btn'), wrapper.querySelector('.list-name-input-field'));
-            };
-            const saveListName = (event) => {
-                const wrapper = listHtml.querySelector('.title-edit-wrapper-left');
-                self.events.saveListName(event, wrapper.querySelector('.list-name-edit-form'), wrapper.querySelector('.list-title'), wrapper.querySelector('.edit-item-name-btn'), wrapper.querySelector('.list-name-input-field'));
-            };
-            const cancelListName = (event) => {
-                const wrapper = listHtml.querySelector('.title-edit-wrapper-left');
-                self.events.cancelListName(event, wrapper.querySelector('.list-name-edit-form'), wrapper.querySelector('.list-title'), wrapper.querySelector('.edit-item-name-btn'));
-            };
-
-            $.setContent(listHtml, $.html(self.html.previewList, {
-                listTitle: listTitle,
-                // Deine anderen Platzhalter...
-                addListObject: self.text.addListObjectText,
-                addText: self.text.addText,
-                secondItemName: self.text.secondItemNameText,
-                onAddSubmitItem: () => self.events.onAddSubmitItem(),
-                onConfirmSubitem: () => self.events.onConfirmSubitem(listHtml.querySelector('.list-input')),
-
-                // Die neuen Handler verknüpfen
-                editListName: editListName,
-                saveListName: saveListName,
-                cancelListName: cancelListName
-            }));
-
-            $.append(previewList, listHtml);
-
-            items.forEach(item => {
-                renderPreviewItem(item, listHtml.querySelector('.subitem-list'), '');
-            });
-        }
 
         function updateItemNameInTempList(itemsArray, targetItemKey, updatedName) {
             for (let i = 0; i < itemsArray.length; i++) {
@@ -901,63 +741,6 @@ ccm.files["ccm.checklist.js"] = {
                 }
             }
             return false;
-        }
-
-        function renderPreviewItem(item, parentElement, parentKey) {
-            const itemKey = parentKey ? `${parentKey}§§§${item.key}` : item.key;
-            const isEndPoint = item.items.length === 0;
-            const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(my.tempList.key, itemKey, item.items, itemKey);
-            const deadlineGroupId = `deadline§§§preview$$$${itemKey.replace(/\W/g, '§§§')}`;
-
-            console.log('Rendering preview item (editable name):', {itemKey, isEndPoint, subitemProgress, item});
-
-            const itemHtml = document.createElement('div');
-            itemHtml.className = isEndPoint ? 'point-item' : 'subitem';
-            itemHtml.dataset.id = itemKey;
-
-            $.setContent(itemHtml, $.html(self.html.renderpreviewList, {
-                itemKey: itemKey,
-                isEndpointHeader: `${isEndPoint ? 'point' : 'subitem'}--header`,
-                addSubpointText: self.text.addSubpointText,
-                isEndpoint: isEndPoint ? 'point-item' : 'subitem-preview',
-                isEndpointTitle: isEndPoint ? 'point-title' : 'subitem-title',
-                deadlineGroupId: deadlineGroupId,
-                deadlineText: self.text.deadlineText,
-                removeText: self.text.removeText,
-                subPointName: self.text.subPointName,
-                progressSpanHTML: !isEndPoint ? `<span class="subitem-progress">${Math.round(subitemProgress)}%</span>` : '',
-                itemName: item.name,
-                deadlinePickerValue: item.deadline || '',
-                onAddSubitem: () => self.events.onAddSubitem(itemKey),
-                confirmSubitem: () => self.events.confirmSubitem(itemKey, item),
-                editName: (event) => self.events.editName(event, item, nameEditForm, titleDisplay, editNameBtn, nameInput),
-                saveItemName: (event) => self.events.saveItemName(event, item, nameEditForm, titleDisplay, editNameBtn, nameInput),
-                cancelNameButton: (event) => self.events.cancelNameButton(event, nameEditForm, titleDisplay, editNameBtn),
-                onRemoveSubitem: () => self.events.onRemoveSubitem(item, parentKey),
-                onDeadlineChange: (event) => self.events.onDeadlineChange(event, item),
-            }))
-
-            console.log(itemHtml, itemHtml);
-            $.append(parentElement, itemHtml);
-
-            const nameEditForm = itemHtml.querySelector('.item-name-edit-form');
-            const titleDisplay = itemHtml.querySelector('.point-title, .subitem-title');
-            const editNameBtn = itemHtml.querySelector('.edit-item-name-btn');
-            const nameInput = nameEditForm.querySelector('.item-name-input-field');
-
-            console.log(itemHtml, itemHtml);
-
-            // Recursive Call for Sub-items
-            if (!isEndPoint) {
-                const subitemListDisplayContainer = itemHtml.querySelector('.subitem-list-children');
-                if (subitemListDisplayContainer) {
-                    console.log(`Item '${item.name}' (Key: ${itemKey}) hat ${item.items.length} Sub-Items. Rufe Rekursion auf.`);
-                    item.items.forEach(subItem => {
-                        console.log(`  -> Rekursiver Aufruf für Sub-Item:`, JSON.parse(JSON.stringify(subItem)), `ParentKey für Rekursion: ${itemKey}`);
-                        renderPreviewItem(subItem, subitemListDisplayContainer, itemKey);
-                    });
-                }
-            }
         }
 
         function initializeState(listKey, items, state = my.listState[listKey], parentKey = '') {
@@ -1004,67 +787,83 @@ ccm.files["ccm.checklist.js"] = {
             return totalPoints > 0 ? (checkedPoints / totalPoints) * 100 : 0;
         }
 
+        // KORRIGIERTE VERSION von renderLists
+
         async function renderLists() {
+            const itemElement = self.element.querySelector('#items');
+            itemElement.innerHTML = '';
 
-            itemElement = self.element.querySelector('#items');
-            try {
-                itemElement.innerHTML = '';
+            console.log('Rendering lists with data:', JSON.stringify(my.listsData, null, 2));
 
-                console.log('Rendering lists with data:', JSON.stringify(my.listsData, null, 2));
+            // KORREKTUR: Die Schleife wird angepasst, um mit der { name, items } Struktur zu arbeiten.
+            for (const key of Object.keys(my.listsData)) {
 
-                for (const key of Object.keys(my.listsData)) {
-                    if (!my.listsData[key] || !Array.isArray(my.listsData[key])) {
-                        console.warn(`Ungültige Daten für Liste ${key}, überspringe...`);
-                        continue;
-                    }
-                    if (!my.listState[key]) {
-                        console.log(`Initialisiere listState für ${key} in renderLists`);
-                        my.listState[key] = {items: {}, collapsed: false};
-                        initializeState(key, my.listsData[key], my.listState[key]);
-                    }
+                // 1. Das Listen-Objekt holen
+                const listData = my.listsData[key];
 
-                    const listTitle = key;
-                    const listHtml = document.createElement('div');
-                    listHtml.className = 'list-item';
-                    listHtml.dataset.id = key;
-
-                    $.setContent(listHtml, $.html(self.html.renderList, {
-                        listTitle: listTitle,
-                        deleteText: self.text.deleteText,
-                        editText: self.text.editText,
-                        onDeleteButton: () => self.events.onDeleteButton(key, itemElement, listHtml),
-                        onClickToggleButton: () => self.events.onClickToggleButton(key, itemContent, toggleButton),
-                        onAddSubitemToRoot: () => self.events.onAddSubitemToRoot(listTitle),
-                        confirmSubitem: () => self.events.confirmSubitem(listTitle, my.listsData),
-
-                    }));
-
-                    itemElement.appendChild(listHtml);
-
-                    const itemContent = listHtml.querySelector('.item-content');
-                    const subitemList = listHtml.querySelector('.subitem-list');
-                    const toggleButton = listHtml.querySelector('.toggle-item');
-
-                    if (my.listState[key].collapsed) {
-                        itemContent.style.display = 'none';
-                        toggleButton.textContent = '▶';
-                    }
-
-                    my.listsData[key].forEach(item => {
-                        renderItem(key, item, subitemList, itemContent, '');
-                    });
-
-                    const progress = calculateProgress(key, my.listsData[key]);
-                    listHtml.querySelector('.progress-fill').style.width = `${Math.round(progress)}%`;
-                    const progressProzent = listHtml.querySelector('.progress-prozent');
-                    progressProzent.innerText = `${Math.round(progress)}%`;
-                    if (progress === 100) {
-                        listHtml.classList.add('completed');
-                    }
+                // 2. Prüfen, ob es ein gültiges Objekt mit einem 'items'-Array ist.
+                if (!listData || !Array.isArray(listData.items)) {
+                    console.warn(`Ungültige Datenstruktur für Liste ${key}, wird übersprungen.`);
+                    continue; // Überspringe, wenn die Daten nicht passen
                 }
-            } catch (e) {
-                console.error("Fehler beim Rendern der Listen:", e);
-                itemElement.innerHTML = `<p>Error rendering lists: ${e.message}</p>`;
+
+                // 3. Den korrekten Anzeigenamen aus listData.name holen
+                const listTitle = listData.name;
+
+                const listHtml = document.createElement('div');
+                listHtml.className = 'list-item';
+                listHtml.dataset.id = key;
+
+                // ... in der renderLists-Funktion, innerhalb der for-Schleife
+                $.setContent(listHtml, $.html(self.html.renderList, {
+                    listKey: key, // Die UUID für das data-id Attribut
+                    listTitle: listTitle,
+                    saveText: self.text.saveText,
+                    cancelText: self.text.cancelText,
+                    deleteText: self.text.deleteText,
+                    editText: self.text.editText,
+                    addSubpointText: self.text.addSubpointText,
+                    subPointName: self.text.subPointText,
+
+                    // Bestehende Events
+                    onDeleteButton: () => self.events.onDeleteButton(key, itemElement, listHtml),
+                    onClickToggleButton: () => self.events.onClickToggleButton(key, itemContent, toggleButton),
+                    onAddSubitemToRoot: () => self.events.onAddSubitemToRoot(key),
+                    confirmSubitem: () => self.events.confirmSubitem(key, null),
+
+                    // --- NEUE EVENTS FÜR DIE NAMENSBEARBEITUNG ---
+                    onEditListName: (event) => self.events.editListName(event),
+                    onSaveListName: (event) => self.events.saveListName(event, key), // Wichtig: Die UUID (key) übergeben!
+                    onCancelListName: (event) => self.events.cancelListName(event)
+                }));
+
+                itemElement.appendChild(listHtml);
+
+                const itemContent = listHtml.querySelector('.item-content');
+                const subitemList = listHtml.querySelector('.subitem-list');
+                const toggleButton = listHtml.querySelector('.toggle-item');
+
+                if (my.listState[key] && my.listState[key].collapsed) {
+                    itemContent.style.display = 'none';
+                    toggleButton.textContent = '▶';
+                }
+
+                // 4. Durch das korrekte 'items'-Array iterieren
+                listData.items.forEach(item => {
+                    renderItem(key, item, subitemList, itemContent, '');
+                });
+
+                // 5. Die Progress-Berechnung muss ebenfalls das korrekte Array verwenden
+                const progress = calculateProgress(key, listData.items);
+                const progressFill = listHtml.querySelector('.progress-fill');
+                const progressProzent = listHtml.querySelector('.progress-prozent');
+
+                if (progressFill) progressFill.style.width = `${Math.round(progress)}%`;
+                if (progressProzent) progressProzent.innerText = `${Math.round(progress)}%`;
+
+                if (progress === 100) {
+                    listHtml.classList.add('completed');
+                }
             }
         }
 
@@ -1228,10 +1027,4 @@ ccm.files["ccm.checklist.js"] = {
 
     }
 };
-
-
-
-
-
-
 
