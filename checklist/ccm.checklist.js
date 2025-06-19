@@ -302,72 +302,24 @@ ccm.files["ccm.checklist.js"] = {
                 label.style.display = '';
                 editButton.style.display = '';
             },
-            // KORRIGIERTE VERSION von onRemoveSubitem
 
             onRemoveSubitem: async (item, listKey) => {
-                // Diese Funktion ist nur für gespeicherte Listen, da es keine Vorschau mehr gibt.
-                if (!my.listsData[listKey]) {
-                    console.error(`Liste mit key ${listKey} nicht gefunden.`);
-                    return;
-                }
-
-                // KORREKTUR 1: Greife auf das .items-Array für die Längenprüfung zu.
                 const listItems = my.listsData[listKey].items;
 
-                // Prüfe, ob es das letzte Element auf der obersten Ebene ist.
                 if (listItems.length === 1 && listItems[0].key === item.key) {
-                    alert('Die Liste muss mindestens ein Listenobjekt enthalten. Löschen Sie stattdessen die ganze Liste.');
+                    alert('Die Liste muss mindestens ein Listenobjekt enthalten...');
                     return;
                 }
 
-                // Die rekursive Such- und Löschfunktion (diese ist in Ordnung)
-                function removeItemRecursive(items, targetKey) {
-                    for (let i = 0; i < items.length; i++) {
-                        if (items[i].key === targetKey) {
-                            // Element gefunden und aus dem Array entfernt.
-                            items.splice(i, 1);
-                            return true;
-                        }
-                        // Wenn das aktuelle Element Kinder hat, suche dort weiter.
-                        if (items[i].items && removeItemRecursive(items[i].items, targetKey)) {
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-
-                // KORREKTUR 2: Übergebe das korrekte .items-Array an die rekursive Funktion.
-                if (removeItemRecursive(listItems, item.key)) {
-                    // Wenn das Löschen erfolgreich war:
-
-                    // 1. Speichere den neuen Zustand im Store.
+                // Die Callback-Funktion nutzt hier alle 3 Parameter: item, parentArray und index
+                if (findAndOperateRecursive(listItems, item.key, (foundItem, parentArray, index) => {
+                    parentArray.splice(index, 1); // Element aus seinem Eltern-Array löschen
+                })) {
                     await self.store.set({ key: studentId, listsData: my.listsData, listState: my.listState });
-
-                    // 2. Rendere die gesamte Ansicht neu, um die Änderung anzuzeigen.
                     await renderLists();
-
                     console.log(`Item "${item.name}" wurde gelöscht.`);
                 } else {
-                    console.warn(`Item "${item.name}" konnte in den Daten nicht zum Löschen gefunden werden.`);
-                }
-            },
-            onDeadlineChange: (event, item) => {
-                if (event) event.stopPropagation();
-                const newDeadline = event.target.value || null;
-
-                function updateDeadlineRecursive(items, targetKey, deadlineValue) {
-                    for (let current of items) {
-                        if (current.key === targetKey) {
-                            current.deadline = deadlineValue;
-                            return true;
-                        }
-                        if (current.items && updateDeadlineRecursive(current.items, targetKey, deadlineValue)) return true;
-                    }
-                    return false;
-                }
-
-                if (updateDeadlineRecursive(my.tempList.items, item.key, newDeadline)) {
-                    renderPreview(my.tempList.key, my.tempList.items); // Re-render preview to reflect changes
+                    console.warn(`Item "${item.name}" konnte nicht zum Löschen gefunden werden.`);
                 }
             },
             onDeleteButton: async (key, itemElement, listHtml) => {
@@ -390,58 +342,21 @@ ccm.files["ccm.checklist.js"] = {
                     listState: my.listState
                 });
             },
-            // KORRIGIERTE VERSION von onSaveNoteButton
 
-            onSaveNoteButton: async (event, item, itemHtml, noteInput, listKey, noteEditForm, editNoteBtn) => {
+            onSaveNoteButton: async (event, item, listKey) => {
                 event.stopPropagation();
-                const newNote = noteInput.value.trim();
+                // Hol dir die Elemente, die du brauchst, direkt aus dem Event-Target
+                const noteEditForm = event.target.closest('.note-edit-form');
+                const newNote = noteEditForm.querySelector('.note-input').value.trim();
 
-                // Diese rekursive Funktion ist in Ordnung, sie brauchte nur die richtigen Startdaten.
-                function updateNote(items, targetKey, updatedNote) {
-                    for (let current of items) {
-                        if (current.key === targetKey) {
-                            current.note = updatedNote;
-                            return true;
-                        }
-                        if (current.items && updateNote(current.items, targetKey, updatedNote)) return true;
-                    }
-                    return false;
-                }
-
-                // KORREKTUR: Hier wird das .items-Array übergeben, nicht das ganze Listen-Objekt.
-                if (updateNote(my.listsData[listKey].items, item.key, newNote)) {
-                    // Die Notiz wurde gefunden und aktualisiert.
-
-                    // UI aktualisieren (dein bestehender Code ist hier gut)
-                    const noteContainer = noteEditForm.parentElement;
-                    const currentNoteDisplay = noteContainer.querySelector('.subitem-note');
-
-                    noteEditForm.style.display = 'none';
-                    editNoteBtn.style.display = '';
-
-                    if (newNote) {
-                        if (currentNoteDisplay) {
-                            currentNoteDisplay.textContent = newNote;
-                            currentNoteDisplay.style.display = '';
-                        } else {
-                            // Falls vorher keine Notiz da war, muss eventuell ein neues p-Element erzeugt werden.
-                            // Deine renderLists() Funktion sollte das aber nach dem Speichern erledigen.
-                        }
-                    } else {
-                        if (currentNoteDisplay) {
-                            currentNoteDisplay.textContent = ''; // Oder ausblenden
-                        }
-                    }
-
-                    // Speichere den neuen Zustand im Store
+                // Nutze die neue Hilfsfunktion mit einer kurzen Pfeilfunktion
+                if (findAndOperateRecursive(my.listsData[listKey].items, item.key, (foundItem) => {
+                    foundItem.note = newNote;
+                })) {
                     await self.store.set({key: studentId, listsData: my.listsData, listState: my.listState});
-
-                    // Optional: renderLists() aufrufen, um die gesamte Ansicht zu synchronisieren.
-                    // Das ist der sicherste Weg, um alle UI-Teile zu aktualisieren.
-                    await renderLists();
-
+                    await renderLists(); // Sicherster Weg, um die UI zu aktualisieren
                 } else {
-                    console.error("Konnte die Notiz zum Speichern nicht im Datenmodell finden.", {listKey, itemKey: item.key});
+                    console.error("Konnte die Notiz zum Speichern nicht finden.", {listKey, itemKey: item.key});
                 }
             },
             onEditNote: (event, itemHtml, item, noteDisplay, notePlaceholder, editNoteBtn, noteEditForm, noteInput) => {
@@ -464,39 +379,20 @@ ccm.files["ccm.checklist.js"] = {
                     if (notePlaceholder) notePlaceholder.style.display = 'block';
                 }
             },
-            // KORRIGIERTE VERSION von onDeadlinePicker
 
             onDeadlinePicker: async (event, item, listKey) => {
-                event.stopPropagation(); // Gute Praxis, um unerwünschte Klick-Events zu stoppen
+                event.stopPropagation();
                 const newDeadline = event.target.value || null;
 
-                // Eine robuste, rekursive Funktion, um die Deadline zu aktualisieren
-                function updateDeadlineRecursive(items, targetKey, deadlineValue) {
-                    for (const currentItem of items) {
-                        if (currentItem.key === targetKey) {
-                            currentItem.deadline = deadlineValue;
-                            return true; // Erfolg!
-                        }
-                        // Nur weiter suchen, wenn es auch Unterpunkte gibt
-                        if (currentItem.items && currentItem.items.length > 0) {
-                            if (updateDeadlineRecursive(currentItem.items, targetKey, deadlineValue)) {
-                                return true; // Erfolg in einem der Kinder!
-                            }
-                        }
-                    }
-                    return false; // In diesem Zweig nicht gefunden
-                }
-
-                // KORREKTUR: Starte die Suche im korrekten .items-Array!
-                if (updateDeadlineRecursive(my.listsData[listKey].items, item.key, newDeadline)) {
-                    // Wenn die Aktualisierung erfolgreich war, speichere den neuen Zustand
+                if (findAndOperateRecursive(my.listsData[listKey].items, item.key, (foundItem) => {
+                    foundItem.deadline = newDeadline;
+                })) {
                     await self.store.set({key: studentId, listsData: my.listsData, listState: my.listState});
                     console.log(`Deadline für Item "${item.name}" auf ${newDeadline} gesetzt.`);
                 } else {
                     console.error(`Konnte Item mit Schlüssel ${item.key} nicht finden, um Deadline zu aktualisieren.`);
                 }
             },
-            // KORRIGIERTE VERSION von onCheckboxChange
 
             onCheckboxChange: async (event, item, listKey, itemKey, isEndPoint, itemHtml, listContent) => {
                 my.listState[listKey].items[itemKey].checked = event.target.checked;
@@ -511,7 +407,7 @@ ccm.files["ccm.checklist.js"] = {
                     });
                     const progressElement = itemHtml.querySelector('.subitem-progress');
                     if (progressElement) {
-                        progressElement.textContent = `${Math.round(calculateSubitemProgress(listKey, itemKey, item.items, itemKey))}%`;
+                        progressElement.textContent = `${Math.round(calculateProgress(listKey, item.items, itemKey))}%`;
                     }
                 }
 
@@ -621,8 +517,12 @@ ccm.files["ccm.checklist.js"] = {
                 my = await self.store.get(studentId) || {listsData: {}, listState: {}};
                 my.listsData = my.listsData || {};
                 my.listState = my.listState || {};
+
+                /*
                 my.tempList = null;
                 my.currentItems = [];
+
+                 */
 
                 Object.keys(my.listsData).forEach(listKey => {
                     const list = my.listsData[listKey];
@@ -674,21 +574,6 @@ ccm.files["ccm.checklist.js"] = {
             });
         }
 
-        function updateItemNameInTempList(itemsArray, targetItemKey, updatedName) {
-            for (let i = 0; i < itemsArray.length; i++) {
-                if (itemsArray[i].key === targetItemKey) {
-                    itemsArray[i].name = updatedName;
-                    return true;
-                }
-                if (itemsArray[i].items && itemsArray[i].items.length > 0) {
-                    if (updateItemNameInTempList(itemsArray[i].items, targetItemKey, updatedName)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
         function initializeState(listKey, items, state = my.listState[listKey], parentKey = '') {
             if (!state) {
                 state = {items: {}, collapsed: false};
@@ -728,11 +613,12 @@ ccm.files["ccm.checklist.js"] = {
             return totalPoints > 0 ? (checkedPoints / totalPoints) * 100 : 0;
         }
 
+        /*
         function calculateSubitemProgress(listKey, subitemKey, items, parentKey = '') {
             const [totalPoints, checkedPoints] = countItemPoints(items, listKey, parentKey);
             return totalPoints > 0 ? (checkedPoints / totalPoints) * 100 : 0;
         }
-
+        */
         async function renderLists() {
             const itemElement = self.element.querySelector('#items');
             itemElement.innerHTML = '';
@@ -808,7 +694,7 @@ ccm.files["ccm.checklist.js"] = {
         function renderItem(listKey, item, parentElement, listContent, parentKey) {
             const itemKey = parentKey ? `${parentKey}§§§${item.key}` : item.key;
             const isEndPoint = item.items.length === 0;
-            const subitemProgress = isEndPoint ? 0 : calculateSubitemProgress(listKey, itemKey, item.items, itemKey);
+            const subitemProgress = isEndPoint ? 0 : calculateProgress(listKey, item.items, itemKey);
 
 
             if (!my.listState[listKey]) {
@@ -880,11 +766,6 @@ ccm.files["ccm.checklist.js"] = {
             }
         }
 
-        function parentElementForId(rootElement, itemId) {
-            return rootElement.querySelector(`[data-id="${itemId}"]`);
-        }
-
-        // NEUE, BESSERE HILFSFUNKTION (ersetzt die alte 'findChildItemsInData')
         function findItemDataRecursive(items, targetKey) {
             // Gehe jedes Element im übergebenen Array durch
             for (const item of items) {
@@ -905,8 +786,25 @@ ccm.files["ccm.checklist.js"] = {
             // Wenn die Schleife durchgelaufen ist und nichts gefunden wurde
             return null;
         }
-        // KORRIGIERTE UND VERBESSERTE VERSION von updateParentState
-        // FINALE, KORRIGIERTE VERSION von updateParentState
+
+        function findAndOperateRecursive(items, targetKey, callback) {
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                if (item.key === targetKey) {
+                    // Element gefunden! Führe die Aktion aus.
+                    callback(item, items, i);
+                    return true;
+                }
+                if (item.items && item.items.length > 0) {
+                    // Suche in den Kindern weiter
+                    if (findAndOperateRecursive(item.items, targetKey, callback)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         const updateParentState = (itemId, currentListKey, currentListContent) => {
             const parts = itemId.split('§§§');
             if (parts.length <= 3) return;
@@ -948,7 +846,7 @@ ccm.files["ccm.checklist.js"] = {
                 // Fortschritt des Elternelements aktualisieren
                 const parentProgressElement = parentElementInDOM.querySelector('.subitem-progress');
                 if (parentProgressElement) {
-                    const parentSubitemProgress = calculateSubitemProgress(currentListKey, parentStateKey, childItems, parentStateKey);
+                    const parentSubitemProgress = calculateProgress(currentListKey, childItems, parentStateKey);
                     parentProgressElement.textContent = `${Math.round(parentSubitemProgress)}%`;
                 }
 
