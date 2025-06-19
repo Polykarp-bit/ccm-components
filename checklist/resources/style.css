@@ -57,7 +57,6 @@ button {
     .title-edit-wrapper{
         display: flex;
         align-items: center;
-        width: 100%;
         justify-content: space-between;
     }
 
@@ -140,11 +139,13 @@ button {
 /* ==============================================
    3. HEADER & TITEL
    ============================================== */
+
 .item-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1.5rem;
+    padding: 1rem 0; /* Dein bisheriger Wert, kannst du anpassen */
+    border-bottom: 1px solid var(--border-color);
 }
 
 .item-header h3 {
@@ -152,8 +153,13 @@ button {
     font-size: 1.5rem;
     font-weight: 600;
     color: var(--text-primary);
-    width: 100%;
     overflow-wrap: break-word;
+}
+
+.item-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* Abstand zwischen Titel und Fortschritts-Badge */
 }
 
 /* ==============================================
@@ -166,11 +172,32 @@ button {
 .point--header,
 .subitem--header {
     display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem 0;
-    position: relative; /* Für absolute Positionierung der note-edit-form */
+    justify-content: space-between; /* WICHTIG: Schiebt den linken und rechten Block auseinander. */
+    align-items: center;            /* Richtet alles auf einer horizontalen Mittellinie aus. */
+    width: 100%;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0; /* Eine feine Trennlinie */
 }
+
+/* 2. Der linke Block (Checkbox, Name, Aktionen) */
+/* Wir sagen ihm, dass er den verfügbaren Platz einnehmen soll. */
+.item-main-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* Abstand zwischen den Elementen im linken Block */
+    flex-grow: 1; /* ENTSCHEIDEND: Dieser Block wächst und füllt den leeren Raum. */
+    min-width: 0; /* Verhindert, dass der Block bei langem Text das Layout sprengt. */
+}
+
+/* 3. Der rechte Block (Notiz, Datum, etc.) */
+/* Wir sagen ihm, dass er seine Größe beibehalten soll. */
+.item-meta-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;      /* Abstand zwischen den Elementen im rechten Block */
+    flex-shrink: 0; /* WICHTIG: Verhindert, dass dieser Block zusammengedrückt wird. */
+}
+
 
 .point--checkbox,
 .subitem--checkbox {
@@ -207,38 +234,27 @@ button {
 }
 
 .progress-prozent {
-    font-size: 0.875rem;
+    font-size: 0.875rem; /* Etwas kleiner für ein Badge-Gefühl */
     color: var(--accent-color);
     font-weight: 600;
-    width: 40%;
+
+    background-color: #e0eaff; /* Ein heller Blauton */
+    padding: 4px 12px;
+    border-radius: 99px; /* Macht es zu einer Pille */
 }
 
 .item-header-right {
-    width: 10%;
+    /* width: 10%; <-- DIESE ZEILE LÖSCHEN! */
+
+    /* Stattdessen stellen wir sicher, dass es auch ein Flex-Container ist */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Kleiner Abstand zwischen den Icons/Buttons */
 }
 
 /* ==============================================
    6. BEARBEITUNGSMODUS
    ============================================== */
-.title-edit-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.edit-item-name-btn {
-    background: none;
-    border: none;
-    padding: 0.25rem;
-    cursor: pointer;
-    color: var(--text-secondary);
-}
-
-.item-name-edit-form {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
 
 .item-name-input-field {
     padding: 0.5rem;
@@ -325,7 +341,7 @@ button {
 .subitem-list-children {
     margin-left: 0;
     padding-left: 2.5rem;
-    border-left: 2px solid gray;
+    border-left: 1px solid lightgrey;
     display: block;
 }
 
@@ -454,3 +470,42 @@ button {
     opacity: 1;
 }
 
+.edit-item-name-btn,
+.action-button-group .add-subitem {
+    opacity: 0; /* Standardmäßig komplett unsichtbar */
+    transition: opacity 0.2s ease-in-out; /* Für einen weichen Übergang */
+}
+/* Buttons bei Hover auf die Zeile einblenden */
+.point--header:hover .edit-item-name-btn,
+.subitem--header:hover .edit-item-name-btn,
+.point--header:hover .action-button-group .add-subitem,
+.subitem--header:hover .action-button-group .add-subitem {
+    opacity: 1; /* Bei Hover auf die Zeile sichtbar machen */
+}
+
+.edit-item-name-btn,
+.action-button-group .add-subitem,
+.note-container .edit-note-btn{
+    background: none;       /* Keinen Hintergrund */
+    border: none;           /* Keinen Rand */
+    padding: 0.25rem;       /* Etwas Platz zum Klicken */
+    cursor: pointer;
+    color: var(--text-secondary); /* Eine dezente Farbe für das Icon */
+    border-radius: 50%;
+    font-size: 1.2rem;/* Macht den klickbaren Bereich rund */
+
+    /* Stellt sicher, dass das Icon zentriert ist */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;            /* Feste Größe für einheitliches Aussehen */
+    height: 28px;
+}
+
+/* Ein leichter Hintergrund, wenn man direkt über den Icon-Button fährt */
+.edit-item-name-btn:hover,
+.action-button-group .add-subitem:hover,
+.note-container .edit-note-btn:hover{
+    background-color: #e5e7eb;
+    color: var(--text-primary);
+}

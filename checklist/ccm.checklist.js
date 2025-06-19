@@ -21,7 +21,7 @@ ccm.files["ccm.checklist.js"] = {
             addListObjectText: "+ Listenobjekt hinzufügen",
             addText: "Hinzufügen",
             secondItemNameText: "Objekt-Name (z.B. Aufgabe 2)",
-            addSubpointText: "+ Unterpunkt hinzufügen",
+            addSubpointText: "+",
             deadlineText: "Fälligkeitsdatum",
             removeText: "Enfernen",
             subPointText: 'Unterpunkt-Name (z.B. Unteraufgabe)',
@@ -52,22 +52,24 @@ ccm.files["ccm.checklist.js"] = {
                     <div id="items"></div>
                 </div>`,
             renderList: `
-   <div class="list-container" data-id="%listKey%">
+  <div class="list-container" data-id="%listKey%">
     <div class="item-header">
-        <div class="list-title-wrapper">
-            <h3 class="list-title-heading">%listTitle%</h3>
-            <div class="list-name-edit-form" style="display: none;">
-                <input type="text" class="list-name-input-field" value="%listTitle%">
-                <button class="save-list-name-btn" onclick="%onSaveListName%">%saveText%</button>
-                <button class="cancel-list-name-btn" onclick="%onCancelListName%">%cancelText%</button>
+        
+        <div class="item-header-left">
+            <div class="list-title-wrapper">
+                <h3 class="list-title-heading">%listTitle%</h3>
+                <div class="list-name-edit-form" style="display: none;">
+                    <input type="text" class="list-name-input-field" value="%listTitle%">
+                    <button class="save-list-name-btn" onclick="%onSaveListName%">%saveText%</button>
+                    <button class="cancel-list-name-btn" onclick="%onCancelListName%">%cancelText%</button>
+                </div>
             </div>
+            <button class="edit-list-name-btn" title="%editText%" onclick="%onEditListName%">&#9998;</button>
+            <div class="progress-prozent"></div>
         </div>
 
-        <div class="progress-prozent"></div>
         <div class="item-header-right">
              <input type="date" class="deadline-picker" value="%listDeadline%" onchange="%onListDeadlineChange%">
-             
-             <button class="edit-list-name-btn" title="%editText%" onclick="%onEditListName%">&#9998;</button>
              <button class="delete-list" title="%deleteText%" onclick="%onDeleteButton%">🗑</button>
         </div>
     </div>
@@ -90,11 +92,13 @@ ccm.files["ccm.checklist.js"] = {
             renderItem: `
                 <div class="%isEndPoint%" id="%itemKey%">
                     <div class="%isEndPoint%--header">
+                        <div class="item-main-content">
                         <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox" checked="%checkboxChecked%" onchange="%onCheckboxChange%">
                         
                         <div class="title-edit-wrapper">
-                             <button class="edit-item-name-btn" title="%editItemNameText%" onclick="%editName%">&#9998;</button>
                              <label for="checkbox-%itemKey%" class="%isEndPoint%-title">%itemName%</label>
+                             <button class="edit-item-name-btn" title="%editItemNameText%" onclick="%editName%">&#9998;</button>
+
                              <div class="item-name-edit-form" style="display: none;">
                                  <input type="text" class="item-name-input-field" value="%itemName%">
                                  <button class="save-item-name-btn" onclick="%saveItemName%">%saveText%</button>
@@ -103,14 +107,14 @@ ccm.files["ccm.checklist.js"] = {
                         </div>
                         
                         <div class='action-button-group'>
-                        <button class='remove-subitem' onclick="%onRemoveSubitem%">🗑</button>
                         <button class='add-subitem' onclick="%onAddSubitem%">
                             + </button> 
                         </div>
                         <div class='subitem-input' style="display: none">
                             <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
                         </div>
-                    
+                        </div>
+                        <div class="item-meta-actions">
                         <div class="note-container">
                             <button class="edit-note-btn" title="%noteTitle%" onclick="%onEditeNote%">🗒️</button>
                             <p class="%subItemNoteClass%">%noteShow%</p>
@@ -122,6 +126,8 @@ ccm.files["ccm.checklist.js"] = {
                         </div>
                         <input type="date" class="deadline-picker" value=%itemDeadline% onchange="%onDeadlinePicker%">
                         %subitemProgress%
+                        <button class='remove-subitem' onclick="%onRemoveSubitem%">🗑</button>
+                        </div>
                     </div>
                     %subItemList% 
                 </div>`,
@@ -253,33 +259,23 @@ ccm.files["ccm.checklist.js"] = {
                 input.focus();
                 input.select();
             },
+            // in deinem events-Objekt
+
             saveItemName: async (event, listKey, item) => {
                 event.stopPropagation();
-                const saveButton = event.target;
-                const editForm = saveButton.closest('.item-name-edit-form');
-                const input = editForm.querySelector('input');
+                const editForm = event.target.closest('.item-name-edit-form');
+                const input = editForm.querySelector('.item-name-input-field');
                 const newName = input.value.trim();
 
                 if (!istEingabeGueltig(newName)) return;
 
                 if (newName && newName !== item.name) {
-                    const updateNameRecursive = (items, targetKey, name) => {
-                        // Sicherheitscheck: Wenn `items` undefiniert ist, abbrechen.
-                        if (!items) return false;
-                        for (let i = 0; i < items.length; i++) {
-                            if (items[i].key === targetKey) {
-                                items[i].name = name;
-                                return true;
-                            }
-                            // Stelle sicher, dass item[i].items existiert, bevor du es weitergibst
-                            if (items[i].items && updateNameRecursive(items[i].items, targetKey, name)) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    };
-
-                    if (updateNameRecursive(my.listsData[listKey], item.key, newName)) {
+                    // Benutze die zentrale, korrekte Hilfsfunktion
+                    if (findAndOperateRecursive(my.listsData[listKey].items, item.key, (foundItem) => {
+                        // Dies ist die einfache "Aktion": Ändere den Namen des gefundenen Elements.
+                        foundItem.name = newName;
+                    })) {
+                        // Wenn die Aktion erfolgreich war, speichere und rendere neu.
                         await self.store.set({ key: studentId, listsData: my.listsData, listState: my.listState });
                         await renderLists();
                     }
@@ -287,6 +283,7 @@ ccm.files["ccm.checklist.js"] = {
                     alert('Der Name darf nicht leer sein.');
                     input.focus();
                 } else {
+                    // Name ist unverändert, schließe einfach das Formular
                     self.events.cancelNameButton(event);
                 }
             },
@@ -343,43 +340,51 @@ ccm.files["ccm.checklist.js"] = {
                 });
             },
 
-            onSaveNoteButton: async (event, item, listKey) => {
-                event.stopPropagation();
-                // Hol dir die Elemente, die du brauchst, direkt aus dem Event-Target
-                const noteEditForm = event.target.closest('.note-edit-form');
-                const newNote = noteEditForm.querySelector('.note-input').value.trim();
+            // in deinem events-Objekt
 
-                // Nutze die neue Hilfsfunktion mit einer kurzen Pfeilfunktion
+            // in deinem events-Objekt
+
+            onEditNote: (event, itemHtml, item, noteDisplay, notePlaceholder, editNoteBtn, noteEditForm, noteInput) => {
+                event.stopPropagation();
+
+                // Wir können die übergebenen Elemente direkt verwenden
+                if (noteDisplay) noteDisplay.style.display = 'none';
+                if (notePlaceholder) notePlaceholder.style.display = 'none';
+
+                editNoteBtn.style.display = 'none';
+                noteEditForm.style.display = 'block';
+                noteInput.value = item.note || '';
+                noteInput.focus();
+            },
+
+            onSaveNoteButton: async (event, item, itemHtml, noteInput, listKey, noteEditForm, editNoteBtn) => {
+                event.stopPropagation();
+                // noteInput und listKey sind jetzt die korrekten Variablen
+                const newNote = noteInput.value.trim();
+
                 if (findAndOperateRecursive(my.listsData[listKey].items, item.key, (foundItem) => {
                     foundItem.note = newNote;
                 })) {
                     await self.store.set({key: studentId, listsData: my.listsData, listState: my.listState});
-                    await renderLists(); // Sicherster Weg, um die UI zu aktualisieren
+                    await renderLists();
                 } else {
                     console.error("Konnte die Notiz zum Speichern nicht finden.", {listKey, itemKey: item.key});
                 }
             },
-            onEditNote: (event, itemHtml, item, noteDisplay, notePlaceholder, editNoteBtn, noteEditForm, noteInput) => {
-                event.stopPropagation();
 
-                if (noteDisplay) noteDisplay.style.display = 'none';
-                if (notePlaceholder) notePlaceholder.style.display = 'none';
-                editNoteBtn.style.display = 'none';
-                noteEditForm.style.display = 'block';
-                noteInput.value = item.note ? item.note : '';
-                noteInput.focus();
-            },
             onCancelNoteBtn: (event, noteEditForm, editNoteBtn, noteDisplay, notePlaceholder, item) => {
                 event.stopPropagation();
+
                 noteEditForm.style.display = 'none';
                 editNoteBtn.style.display = 'block';
+
+                // Die Logik, um den alten Text wieder anzuzeigen
                 if (item.note) {
                     if (noteDisplay) noteDisplay.style.display = 'block';
                 } else {
                     if (notePlaceholder) notePlaceholder.style.display = 'block';
                 }
             },
-
             onDeadlinePicker: async (event, item, listKey) => {
                 event.stopPropagation();
                 const newDeadline = event.target.value || null;
