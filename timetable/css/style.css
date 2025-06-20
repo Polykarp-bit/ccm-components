@@ -31,8 +31,8 @@ h1, h2, h3, h4 {
 h1 {
     font-size: 2rem;
     margin-bottom: 24px;
-    border-bottom: 2px solid #e5e7eb; /* Visuelle Trennlinie */
-    padding-bottom: 16px;
+    border-bottom: none; /* Entfernt die Trennlinie */
+    padding-bottom: 0;   /* Entfernt den Abstand, der für die Linie da war */
 }
 
 h1 { font-size: 2rem; margin-bottom: 24px; } /* 32px */
@@ -539,52 +539,73 @@ textarea.event-note-input {
 }
 
 /* === STUNDENPLANANSICHT (Wochenansicht) === */
+
+/* === STUNDENPLANANSICHT (Wochenansicht) === */
+
+/* Der Haupt-Container wird zur einzigen, großen Karte */
 .week-schedule {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    background-color: transparent;
-    padding: 4px 4px 20px 4px;
-    border-radius: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+    overflow: hidden;
 }
 
+/* Der einzelne Tag hat keinen eigenen Karten-Stil mehr */
 .day {
-    flex: 1 1 240px;
-    min-width: 240px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
     padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    /* Die dezente Trennlinie auf der rechten Seite */
+    border-right: 1px solid #e5e7eb;
+}
+
+/* Die letzte Spalte bekommt keine Trennlinie rechts */
+.day:last-child {
+    border-right: none;
 }
 
 .day h3 {
     font-size: 1.125rem;
     color: #1e293b;
-    margin-bottom: 20px;
-    padding-bottom: 0;
-    border-bottom: none;
+    margin: 0 0 20px 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
     text-align: left;
     font-weight: 600;
 }
 
-/*
- * Stil für einen einzelnen Termin (Kurs) innerhalb eines Tages.
- */
+/* Stil für den "Keine Kurse"-Text */
+.day .events-container p {
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    font-weight: 400;
+    text-align: center;
+    padding-top: 40px;
+}
+
+/* Stile für die eigentliche Termin-Karte */
 .event {
-    /* Der Hintergrund ist jetzt immer weiß */
     background-color: #ffffff;
-    padding: 12px;
-    margin-bottom: 12px;
-    border-radius: 8px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-    /* Ein neutraler, heller Rand für die gesamte Karte */
+    padding: 16px;
+    padding-left: 24px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     border: 1px solid #e5e7eb;
+    position: relative;
+    overflow: hidden;
+}
 
-    /* Hier wird die CSS-Variable aus dem JS für den farbigen Seitenstreifen genutzt */
-    border-left: 5px solid var(--event-color, #ccc);
+/* Der abgerundete Farbstreifen */
+.event::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background-color: var(--event-color, #ccc);
 }
 
 .event:hover {
@@ -592,23 +613,19 @@ textarea.event-note-input {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
 }
 
-.day .events-container p {
-    color: #6c757d;
-    text-align: center;
-    padding: 20px 0;
-}
-
 .event-header {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 4px;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
 }
 
 .event-header strong {
     font-weight: 600;
-    font-size: 0.95rem;
-    color: #1e293b;
+    font-size: 1rem;
+    color: #111827;
+    line-height: 1.4;
 }
 
 .event span {
@@ -616,20 +633,19 @@ textarea.event-note-input {
     font-size: 0.9rem;
     color: #4b5563;
     line-height: 1.7;
-
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-/* Dein ursprüngliches Notiz-Icon, das nun korrekt angezeigt wird */
+/* Stile für das Notiz-Icon */
 .note-icon {
     font-size: 0.875rem;
     cursor: pointer;
     position: relative;
     color: rgba(0, 0, 0, 0.5);
     margin-left: 6px;
-    flex-shrink: 0; /* Verhindert, dass das Icon bei langem Text gequetscht wird */
+    flex-shrink: 0;
 }
 
 .note-icon .tooltip {
@@ -648,9 +664,6 @@ textarea.event-note-input {
     width: 200px;
     opacity: 0;
     transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
 }
 
 .note-icon .tooltip::after {
@@ -668,6 +681,7 @@ textarea.event-note-input {
     visibility: visible;
     opacity: 1;
 }
+
 
 /* === MODAL === */
 .modal {

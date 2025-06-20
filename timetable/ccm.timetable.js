@@ -333,7 +333,9 @@ ccm.files["ccm.timetable.js"] = {
                     </span>
                 `,
                 linksSection: `
-                    <a href="%url%" target="_blank" rel="noopener noreferrer">%linkName%</a>
+                    <div class="modal-link-item">
+                        <a href="%url%" target="_blank" rel="noopener noreferrer">%linkName%</a>
+                    </div>
                 `,
                 noEvents: `<p>Keine Kurse an diesem Tag.</p>`
             }
@@ -934,7 +936,7 @@ ccm.files["ccm.timetable.js"] = {
                     linkUrlText: self.text.linkUrlText,
                     addLinkInlineButtonText: self.text.addLinkInlineButtonText,
                     noteLabelText: self.text.noteLabelText,
-                    noteText: self.text.noteText,
+                    noteText: self.text.noteLabelText,
                     onAddLink: async () => {
                         const title = newLinkTitleInput.value.trim();
                         let url = newLinkUrlInput.value.trim();
@@ -1103,7 +1105,7 @@ ccm.files["ccm.timetable.js"] = {
                 linkTitleText: self.text.linkTitleText,
                 noLinksText: self.text.noLinksText,
                 noNotesText: self.text.noNotesText,
-                noteText: self.text.noteText
+                noteText: self.text.noteLabelText
             });
             const scheduleContainer = mainContainer.querySelector('.week-schedule');
 
