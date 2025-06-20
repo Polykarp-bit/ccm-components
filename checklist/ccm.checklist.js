@@ -224,6 +224,7 @@ ccm.files["ccm.checklist.js"] = {
                 const subitemName = subitemNameInputForNew.value.trim();
 
                 if (!isInputValid(subitemName)) return;
+
                 if (!subitemName) {
                     alert('Bitte geben Sie einen Namen für den Unterpunkt ein.');
                     subitemNameInputForNew.focus();
@@ -270,6 +271,7 @@ ccm.files["ccm.checklist.js"] = {
                 const label = wrapper.querySelector('label');
                 const editForm = wrapper.querySelector('.item-name-edit-form');
                 const input = editForm.querySelector('input');
+
 
                 label.style.display = 'none';
                 editButton.style.display = 'none';
@@ -362,6 +364,11 @@ ccm.files["ccm.checklist.js"] = {
             onSaveNoteButton: async (event, item, itemHtml, noteInput, listKey, noteEditForm, editNoteBtn) => {
                 event.stopPropagation();
                 const newNote = noteInput.value.trim();
+
+                if (newNote.length > 20) {
+                    alert('Maximal 20 Zeichen.');
+                    return;
+                }
 
                 if (findAndOperateRecursive(my.listsData[listKey].items, item.key, (foundItem) => {
                     foundItem.note = newNote;
@@ -469,6 +476,8 @@ ccm.files["ccm.checklist.js"] = {
                 const wrapper = event.target.closest('.list-name-edit-form');
                 const input = wrapper.querySelector('.list-name-input-field');
                 const newName = input.value.trim();
+
+                if (!isInputValid(newName)) return;
 
                 if (!newName) {
                     alert('Der Listenname darf nicht leer sein.');
@@ -831,14 +840,6 @@ ccm.files["ccm.checklist.js"] = {
                 return false;
             }
             return true;
-        }
-
-        function checkListNameExists(listName) {
-            const nameExist = Object.keys(my.listsData).includes(listName)
-            if (nameExist) {
-                alert(`Die Liste "${listName}" existiert bereits. Bitte wählen Sie einen anderen Namen.`);
-            }
-            return Object.keys(my.listsData).includes(listName);
         }
 
     }

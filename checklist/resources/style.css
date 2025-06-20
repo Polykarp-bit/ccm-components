@@ -426,7 +426,7 @@ button {
     transition: width 0.3s ease;
 }
 
-.progress-prozent {
+.progress-percentage {
     font-size: 0.875rem;
     color: var(--accent-color);
     font-weight: 600;
