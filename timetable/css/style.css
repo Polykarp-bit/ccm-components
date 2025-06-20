@@ -28,6 +28,13 @@ h1, h2, h3, h4 {
     margin-bottom: 16px;
 }
 
+h1 {
+    font-size: 2rem;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #e5e7eb; /* Visuelle Trennlinie */
+    padding-bottom: 16px;
+}
+
 h1 { font-size: 2rem; margin-bottom: 24px; } /* 32px */
 h2 { font-size: 1.5rem; margin-bottom: 20px; } /* 24px */
 h3 { font-size: 1.25rem; margin-bottom: 12px; } /* 20px */
@@ -111,7 +118,11 @@ button:active {
 #toggle-view-button {
     background-color: #2563eb;
     color: #fff;
-    border-color: #2563eb;
+    border: none; /* Rand entfernen */
+    padding: 12px 24px; /* Größer und klickbarer machen */
+    border-radius: 8px; /* Stärkere Abrundung */
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Dezenter Schatten */
 }
 #toggle-view-button:hover {
     background-color: #2563eb;
@@ -319,48 +330,53 @@ input[type="checkbox"]:indeterminate {
 
 /* === STUNDENPLAN-KARTEN (`.course-item`) === */
 #selected-schedule .course-item {
-    margin: 20px 0;
+    margin: 24px 0;
     background-color: #ffffff;
-    border-radius: var(--card-border-radius);
-    border-left: 5px solid var(--border-color, #ccc);
-    box-shadow: var(--shadow);
+    border-radius: 12px; /* Stärkere Abrundung */
+    border: 1px solid #e5e7eb; /* Dünner Rahmen für Definition */
+    border-left-width: 5px; /* Dicke für den farbigen Indikator beibehalten */
+    border-left-color: var(--border-color, #ccc); /* Fallback, wird inline überschrieben */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Weicher, moderner Schatten */
     display: flex;
     flex-direction: column;
-    transition: box-shadow 0.3s ease;
-    align-items: unset;
+    transition: box-shadow 0.2s ease;
+    padding: 0; /* Padding wird in Header/Body gesteuert */
+    align-items: unset; /* Wichtig, um alte Stile zu überschreiben */
 }
 
 #selected-schedule .course-item:hover {
-    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); /* Deutlicherer Hover-Schatten */
 }
+
 
 /* --- Header: Titel & Aktionen --- */
 .card-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    padding: var(--card-padding);
-    border-bottom: 1px solid var(--border-color);
+    align-items: flex-start; /* Titel und Aktionen auf einer Höhe */
+    padding: 24px; /* Großzügiges Padding */
+    border-bottom: 1px solid #e5e7eb;
     gap: 20px;
+    flex-wrap: wrap; /* Bricht um auf kleinen Bildschirmen */
 }
 
 .course-details h3 {
-    margin-top: 0;
-    margin-bottom: 8px;
-    font-size: 1.5em;
-    font-weight: 700;
+    margin: 0 0 4px 0;
+    font-size: 1.25rem; /* 20px */
+    font-weight: 600;
+    color: #1e293b;
 }
 
 .event-info {
-    color: var(--gray-color);
-    font-size: 0.9em;
+    color: #6b7280;
+    font-size: 0.9rem; /* 14.4px */
 }
 
 .course-actions {
     display: flex;
     align-items: center;
-    gap: 16px;
-    flex-shrink: 0;
+    gap: 20px;
+    flex-shrink: 0; /* Verhindert, dass die Buttons schrumpfen */
 }
 
 .event-color-picker {
@@ -370,42 +386,48 @@ input[type="checkbox"]:indeterminate {
 }
 
 .event-color-picker label {
-    font-size: 0.9em;
-    color: var(--gray-color);
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin: 0;
 }
 
 .color-picker {
-    width: 30px;
-    height: 30px;
-    border: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    background-color: transparent;
+    border: 1px solid #d1d5db;
     border-radius: 50%;
     cursor: pointer;
-    background-color: transparent;
     padding: 0;
 }
-
-.color-picker::-webkit-color-swatch-wrapper {
-    padding: 0;
-}
-
 .color-picker::-webkit-color-swatch {
-    border: 1px solid var(--border-color);
     border-radius: 50%;
+    border: none;
+}
+.color-picker::-moz-color-swatch {
+    border-radius: 50%;
+    border: none;
 }
 
 /* --- Body: Links & Notizen --- */
 .card-body {
-    padding: var(--card-padding);
+    padding: 24px;
     display: flex;
     flex-direction: column;
+    gap: 24px; /* Abstand zwischen den Sektionen (Links, Notizen) */
 }
 
 .event-section .section-label {
     display: block;
-    margin: 12px 0;
-    color: #333;
-    font-weight: bold;
+    margin-bottom: 12px;
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 1rem;
 }
+
 
 /* --- Formulare (allgemein) --- */
 .form-inline {
@@ -516,54 +538,64 @@ textarea.event-note-input {
     .form-inline { flex-direction: column; align-items: stretch; }
 }
 
-/* --- STUNDENPLANANSICHT (Wochenansicht) --- */
+/* === STUNDENPLANANSICHT (Wochenansicht) === */
 .week-schedule {
     display: flex;
-    flex-wrap: nowrap;
-    gap: 12px;
+    gap: 20px;
     overflow-x: auto;
-    background-color: #e5e7eb;
-    padding: 16px;
-    border-radius: 8px;
+    background-color: transparent;
+    padding: 4px 4px 20px 4px;
+    border-radius: 0;
 }
 
 .day {
-    flex: 1 1 200px;
-    min-width: 200px;
-    max-width: 260px;
-    background: #fff;
-    border: 1px solid #d1d5db;
-    padding: 12px;
-    border-radius: 6px;
-    box-sizing: border-box;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    flex: 1 1 240px;
+    min-width: 240px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .day h3 {
-    font-size: 1rem;
+    font-size: 1.125rem;
     color: #1e293b;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #2563eb;
-    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 0;
+    border-bottom: none;
+    text-align: left;
+    font-weight: 600;
 }
 
+/*
+ * Stil für einen einzelnen Termin (Kurs) innerhalb eines Tages.
+ */
 .event {
-    padding: 8px 10px;
-    margin-bottom: 8px;
-    font-size: 0.875rem;
-    color: #1e293b;
-    cursor: pointer;
-    border-radius: 6px;
-    position: relative;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    /* Der Hintergrund ist jetzt immer weiß */
+    background-color: #ffffff;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    /* Ein neutraler, heller Rand für die gesamte Karte */
+    border: 1px solid #e5e7eb;
+
+    /* Hier wird die CSS-Variable aus dem JS für den farbigen Seitenstreifen genutzt */
+    border-left: 5px solid var(--event-color, #ccc);
 }
 
 .event:hover {
     transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.day .events-container p {
+    color: #6c757d;
+    text-align: center;
+    padding: 20px 0;
 }
 
 .event-header {
@@ -575,24 +607,29 @@ textarea.event-note-input {
 
 .event-header strong {
     font-weight: 600;
-    line-height: 1.3;
-    flex-grow: 1;
+    font-size: 0.95rem;
+    color: #1e293b;
 }
 
 .event span {
     display: block;
-    font-size: 0.8125rem;
-    color: #6b7280;
-    line-height: 1.4;
-    margin-bottom: 2px;
+    font-size: 0.9rem;
+    color: #4b5563;
+    line-height: 1.7;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+/* Dein ursprüngliches Notiz-Icon, das nun korrekt angezeigt wird */
 .note-icon {
     font-size: 0.875rem;
     cursor: pointer;
     position: relative;
     color: rgba(0, 0, 0, 0.5);
     margin-left: 6px;
+    flex-shrink: 0; /* Verhindert, dass das Icon bei langem Text gequetscht wird */
 }
 
 .note-icon .tooltip {

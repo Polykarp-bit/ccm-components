@@ -5,6 +5,7 @@
  */
 
 ccm.files["ccm.timetable.js"] = {
+    //name: timetable
     name: "time-table",
     ccm: "https://ccmjs.github.io/ccm/ccm.js",
     config: {
@@ -315,14 +316,14 @@ ccm.files["ccm.timetable.js"] = {
                     </div>
                 `,
                 eventItem: `
-                    <div class="event" data-course-id="%courseId%" data-event-id="%eventId%" style="background-color: %color%;">
+                         <div class="event" data-course-id="%courseId%" data-event-id="%eventId%" style="--event-color: %color%;">
                         <div class="event-header">
                             <strong>%title%</strong>
                             %noteIcon%
                         </div>
-                        <span>%time%</span><br>
-                        <span>%eventItemRoomText% %room%</span><br>
-                        <span>%eventItemWhoText% %who%</span><br>
+                        <span>%time%</span>
+                        <span>%eventItemRoomText% %room%</span>
+                        <span>%eventItemWhoText% %who%</span>
                         <span>%eventItemPeriodText% %period%</span>
                     </div>
                 `,
@@ -566,6 +567,9 @@ ccm.files["ccm.timetable.js"] = {
         };
 
         this.renderEditView = async () => {
+
+           // const obj = self.text;
+
             const mainHtml = self.ccm.helper.html(self.html.editView.main, {
                 timetableEditText: self.text.timetableEditText,
                 addOwnCourseText: self.text.addOwnCourseText,
