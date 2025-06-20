@@ -423,24 +423,67 @@ input[type="checkbox"]:indeterminate {
 }
 
 .color-picker {
-    -webkit-appearance: none;
+    -webkit-appearance: none; /* Wichtig: Standard-Styling entfernen */
     -moz-appearance: none;
     appearance: none;
+
+    /* Größe des gesamten Color Pickers beibehalten */
     width: 28px;
     height: 28px;
+
+    /* Hintergrund des input-Elements selbst (transparent, damit die Farbe des Swatch sichtbar wird) */
     background-color: transparent;
-    border: 1px solid #d1d5db;
-    border-radius: 50%;
+
+    /* Außenrahmen: Nicht perfekt rund, aber mit stark abgerundeten Ecken.
+       Dies kaschiert den inneren, oft eckigen Farbwähler besser,
+       als wenn der äußere Rahmen perfekt rund wäre. */
+    border: 1px solid #d1d5db; /* Dezenter Rand */
+    border-radius: 6px;       /* Stark abgerundete Ecken, kein kompletter Kreis mehr */
+
+    /* Sicherstellen, dass keine ungewollten Überläufe passieren,
+       auch wenn der innere Swatch vielleicht nicht perfekt passt. */
+    overflow: hidden;
+
+    /* Cursor und Übergänge */
     cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    /* Wichtig: Alle internen Paddings und Margins für das Input-Element entfernen */
     padding: 0;
+    margin: 0;
+    outline: none; /* Entfernt den blauen Standard-Fokus-Rahmen */
 }
+
+/* --- Styling für den internen Farbwähler (der "Swatch") --- */
+/* Hier setzen wir nur die absoluten Mindest-Resets,
+   da wir wissen, dass wir ihn nicht vollständig kontrollieren können. */
 .color-picker::-webkit-color-swatch {
-    border-radius: 50%;
-    border: none;
+    border: none;       /* Entfernt jeglichen Standard-Rand */
+    padding: 0;         /* Entfernt jeglichen Standard-Padding */
+    margin: 0;          /* Entfernt jeglichen Standard-Margin */
+    border-radius: 4px; /* Eine leichte Abrundung, falls der Browser es akzeptiert */
+    /* Versuche, den Box-Shadow zu entfernen, aber es ist nicht garantiert,
+       dass dies den internen Browser-Schatten eliminiert. */
+    box-shadow: none;
 }
+
 .color-picker::-moz-color-swatch {
-    border-radius: 50%;
-    border: none;
+    border: none;       /* Entfernt jeglichen Standard-Rand */
+    padding: 0;         /* Entfernt jeglichen Standard-Padding */
+    margin: 0;          /* Entfernt jeglichen Standard-Margin */
+    border-radius: 4px; /* Leichte Abrundung */
+    box-shadow: none;
+}
+
+/* --- Fokus-Stil für Zugänglichkeit --- */
+.color-picker:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+/* --- Hover-Stil --- */
+.color-picker:hover {
+    border-color: #a0aec0;
 }
 
 /* --- Body: Links & Notizen --- */

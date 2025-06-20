@@ -73,7 +73,7 @@ ccm.files["ccm.timetable.js"] = {
             linkUrlText: "https://beispiel.de",
             addLinkInlineButtonText: "Link hinzufügen",
             noteLabelText: "Notizen:",
-            noteText: "Hier deine Notizen zur Veranstaltung eintragen",
+            noteText: "Notizen:",
             eventItemRoomText: "Raum: ",
             eventItemWhoText: "Dozent: ",
             eventItemPeriodText: "Zeitraum: ",
@@ -300,7 +300,7 @@ ccm.files["ccm.timetable.js"] = {
                             <div class="modal-content">
                                 <span class="close">×</span>
                                 <h3 id="modal-title"></h3>
-                                <h4>%linkTitleText%</h4>
+                                <h4>%linksLabelText%</h4>
                                 <div id="modal-links">%noLinksText%</div>
                                 <br>
                                 <h4>%noteText%</h4>
@@ -991,7 +991,10 @@ ccm.files["ccm.timetable.js"] = {
                     const newColor = e.target.value;
                     event.color = newColor;
                     if (courseHtml) {
-                        courseHtml.style.borderLeft = `5px solid ${newColor}`;
+                        courseHtml.style.borderLeftColor = newColor;
+                        courseHtml.style.borderTopColor = newColor;
+                        courseHtml.style.borderRightColor = newColor;
+                        courseHtml.style.borderBottomColor = newColor;
                     }
                     await self.saveSelectedCourses();
                 });
@@ -1121,7 +1124,7 @@ ccm.files["ccm.timetable.js"] = {
             const schedule = {};
             const mainContainer = $.html(self.html.scheduleView.main, {
                 timeTableForText: self.text.timeTableForText + studentId,
-                linkTitleText: self.text.linkTitleText,
+                linksLabelText: self.text.linksLabelText,
                 noLinksText: self.text.noLinksText,
                 noNotesText: self.text.noNotesText,
                 noteText: self.text.noteText
