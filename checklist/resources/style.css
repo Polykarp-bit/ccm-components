@@ -30,8 +30,8 @@ input[type="text"] {
 
 button {
     padding: 0.5rem 1rem;
-    border-radius: 6px;
-    border: 1px solid #595959;
+    border-radius: 30px;
+    border: 0px solid #595959;
 }
 
 #user{
@@ -41,6 +41,7 @@ button {
 .create-list {
     display: flex;
     gap: 5px;
+    padding-bottom: 10px;
 }
 
 .list-item {
@@ -52,9 +53,6 @@ button {
         font-size: 1.5rem;
     }
 
-    .delete-list {
-        font-size: 1.5rem;
-    }
 
     .title-edit-wrapper{
         display: flex;
@@ -167,7 +165,7 @@ button {
    4. LISTENELEMENTE
    ============================================== */
 .item-content {
-    padding: 1rem;
+    padding: 1rem 0 1rem 1rem;
 }
 
 .point--header,
@@ -199,6 +197,11 @@ button {
     flex-shrink: 0; /* WICHTIG: Verhindert, dass dieser Block zusammengedrückt wird. */
 }
 
+
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+}
 
 .point--checkbox,
 .subitem--checkbox {
@@ -287,6 +290,21 @@ button {
     display: flex;
     gap: 0.5rem;
     margin-top: 1rem;
+}
+
+.top-add-subitem {
+    opacity: 1;
+    background-color: #e5e7eb;
+    color: var(--text-primary);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    font-size: 1.25rem;
 }
 
 .add-subitem,
@@ -522,3 +540,13 @@ button {
     padding: 20px;
 
     margin-bottom: 10rem;}
+
+.add-subitem.top-add-subitem {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.subitem-progress{
+    display: none;
+}

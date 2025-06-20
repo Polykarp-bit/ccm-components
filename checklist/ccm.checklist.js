@@ -56,6 +56,7 @@ ccm.files["ccm.checklist.js"] = {
     <div class="item-header">
         
         <div class="item-header-left">
+           <button class="toggle-item" onclick="%onClickToggleButton%">▼</button>
             <div class="list-title-wrapper">
                 <h3 class="list-title-heading">%listTitle%</h3>
                 <div class="list-name-edit-form" style="display: none;">
@@ -73,18 +74,18 @@ ccm.files["ccm.checklist.js"] = {
              <button class="delete-list" title="%deleteText%" onclick="%onDeleteButton%">🗑</button>
         </div>
     </div>
-        <button class="toggle-item" onclick="%onClickToggleButton%">▼</button>
         <div class="item-content">
             <div class="progress-bar">
                 <div class="progress-fill"></div>
             </div>
         <div class="subitem-list">
         <div class='action-button-group'>
-            <button class='add-subitem' onclick="%onAddSubitemToRoot%">
+            <button class='add-subitem top-add-subitem' onclick="%onAddSubitemToRoot%">
                 %addSubpointText% </button> 
             </div>
             <div class='subitem-input' style="display: none">
-                <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
+                            <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
+                             <button class='cancel-subitem' onclick="%onCancelAddSubitem%">%cancelText%</button>
             </div>
         </div>
     </div>
@@ -113,6 +114,7 @@ ccm.files["ccm.checklist.js"] = {
                         </div>
                         <div class='subitem-input' style="display: none">
                             <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
+                             <button class='cancel-subitem' onclick="%onCancelAddSubitem%">%cancelText%</button>
                         </div>
                         </div>
                         <div class="item-meta-actions">
@@ -158,6 +160,7 @@ ccm.files["ccm.checklist.js"] = {
                 subitemInputContainer.style.display === 'none' ? subitemInputContainer.style.display = 'block' : subitemInputContainer.style.display = 'none';
                 const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
                 if (subitemNameInputForNew) {
+                    subitemNameInputForNew.value = '';
                     subitemNameInputForNew.focus();
                 }
             },
@@ -170,6 +173,7 @@ ccm.files["ccm.checklist.js"] = {
                 subitemInputContainer.style.display === 'none' ? subitemInputContainer.style.display = 'block' : subitemInputContainer.style.display = 'none';
                 const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
                 if (subitemNameInputForNew) {
+                    subitemNameInputForNew.value = '';
                     subitemNameInputForNew.focus();
                 }
             },
@@ -208,6 +212,8 @@ ccm.files["ccm.checklist.js"] = {
 
                 const currentItemRenderedRoot = self.element.querySelector(`[data-id="${itemKey}"]`);
 
+
+
                 if (!currentItemRenderedRoot) {
                     console.error(`confirmSubitem: Konnte das Elternelement mit data-id "${itemKey}" nicht finden.`);
                     return;
@@ -220,6 +226,11 @@ ccm.files["ccm.checklist.js"] = {
                 if (!istEingabeGueltig(subitemName)) return;
                 if (!subitemName) {
                     alert('Bitte geben Sie einen Namen für den Unterpunkt ein.');
+                    subitemNameInputForNew.focus();
+                    return;
+                }
+                if (subitemName.length>20) {
+                    alert('Maximal 20 Zeichen.');
                     subitemNameInputForNew.focus();
                     return;
                 }
@@ -239,7 +250,7 @@ ccm.files["ccm.checklist.js"] = {
                     return;
                 }
 
-                parentItemList.push(newSubitem);
+                parentItemList.unshift(newSubitem);
 
                 await self.store.set({ key: studentId, listsData: my.listsData, listState: my.listState });
                 await renderLists();
@@ -342,9 +353,6 @@ ccm.files["ccm.checklist.js"] = {
                 });
             },
 
-            // in deinem events-Objekt
-
-            // in deinem events-Objekt
 
             onEditNote: (event, itemHtml, item, noteDisplay, notePlaceholder, editNoteBtn, noteEditForm, noteInput) => {
                 event.stopPropagation();
@@ -412,6 +420,7 @@ ccm.files["ccm.checklist.js"] = {
                     item.items.forEach(subItem => {
                         renderItem(listKey, subItem, subitemList, listContent, itemKey);
                     });
+
                     const progressElement = itemHtml.querySelector('.subitem-progress');
                     if (progressElement) {
                         progressElement.textContent = `${Math.round(calculateProgress(listKey, item.items, itemKey))}%`;
@@ -499,7 +508,17 @@ ccm.files["ccm.checklist.js"] = {
                 await self.store.set({ key: studentId, listsData: my.listsData, listState: my.listState });
 
                 await renderLists();
-            }
+            },
+            onCancelAddSubitem: (event) => {
+                if (event) event.stopPropagation();
+                const subitemInputContainer = event.target.closest('.subitem-input');
+                if (subitemInputContainer) {
+                    subitemInputContainer.style.display = 'none';
+                    subitemInputContainer.querySelector('.subitem-name').value = ''; // Clear the input field
+                }
+            },
+
+
         }
 
         this.start = async () => {
@@ -667,7 +686,8 @@ ccm.files["ccm.checklist.js"] = {
 
                     onEditListName: (event) => self.events.editListName(event),
                     onSaveListName: (event) => self.events.saveListName(event, key), // Wichtig: Die UUID (key) übergeben!
-                    onCancelListName: (event) => self.events.cancelListName(event)
+                    onCancelListName: (event) => self.events.cancelListName(event),
+                    onCancelAddSubitem: (event) => self.events.onCancelAddSubitem(event), // Neu
                 }));
 
                 itemElement.appendChild(listHtml);
@@ -745,6 +765,8 @@ ccm.files["ccm.checklist.js"] = {
                 editName:         (event) => self.events.editName(event),
                 saveItemName:     (event) => self.events.saveItemName(event, listKey, item),
                 cancelNameButton: (event) => self.events.cancelNameButton(event),
+                onCancelAddSubitem: (event) => self.events.onCancelAddSubitem(event)
+
             }));
 
             parentElement.appendChild(itemHtml);
