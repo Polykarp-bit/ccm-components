@@ -53,7 +53,7 @@ ccm.files["ccm.checklist.js"] = {
                 </div>
             `,
             renderList: `
-                  <div class="list-container" data-id="%listKey%">
+                <div class="list-container" data-id="%listKey%">
                     <div class="item-header">
                         
                         <div class="item-header-left">
@@ -67,7 +67,7 @@ ccm.files["ccm.checklist.js"] = {
                                 </div>
                             </div>
                             <button class="edit-list-name-btn" title="%editText%" onclick="%onEditListName%">&#9998;</button>
-                            <div class="progress-prozent"></div>
+                            <div class="progress-percentage"></div>
                         </div>
                 
                         <div class="item-header-right">
@@ -79,63 +79,63 @@ ccm.files["ccm.checklist.js"] = {
                             <div class="progress-bar">
                                 <div class="progress-fill"></div>
                             </div>
-                        <div class="subitem-list">
-                        <div class='action-button-group'>
-                            <button class='add-subitem top-add-subitem' onclick="%onAddSubitemToRoot%">
-                                %addSubpointText% </button> 
-                            </div>
+                            <div class="subitem-list">
+                                <div class='action-button-group'>
+                                    <button class='add-subitem top-add-subitem' onclick="%onAddSubitemToRoot%">
+                                        %addSubpointText% </button> 
+                                </div>
                             <div class='subitem-input' style="display: none">
-                                  <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
+                                <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%onConfirmSubitem%">Hinzufügen</button>
                                 <button class='cancel-subitem' onclick="%onCancelAddSubitem%">%cancelText%</button>
                             </div>
                         </div>
                     </div>
-                    </div>`,
+                </div>`,
             renderItem: `
                 <div class="item-content">
-                <div class="%isEndPoint%" id="%itemKey%">
-                    <div class="%isEndPoint%--header">
-                        <div class="item-main-content">
-                        <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox" checked="%checkboxChecked%" onchange="%onCheckboxChange%">
-                        
-                        <div class="title-edit-wrapper">
-                             <label for="checkbox-%itemKey%" class="%isEndPoint%-title">%itemName%</label>
-                             <button class="edit-item-name-btn" title="%editItemNameText%" onclick="%editName%">&#9998;</button>
-
-                             <div class="item-name-edit-form" style="display: none;">
-                                 <input type="text" class="item-name-input-field" value="%itemName%">
-                                 <button class="save-item-name-btn" onclick="%saveItemName%">%saveText%</button>
-                                 <button class="cancel-item-name-btn" onclick="%cancelNameButton%">%cancelText%</button>
-                             </div>
-                        </div>
-                        
-                        <div class='action-button-group'>
-                        <button class='add-subitem' onclick="%onAddSubitem%">
-                            + </button> 
-                        </div>
-                        <div class='subitem-input' style="display: none">
-                            <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%confirmSubitem%">Hinzufügen</button>
-                             <button class='cancel-subitem' onclick="%onCancelAddSubitem%">%cancelText%</button>
-                        </div>
-                        </div>
-                        <div class="item-meta-actions">
-                        <div class="note-container">
-                            <button class="edit-note-btn" title="%noteTitle%" onclick="%onEditeNote%">🗒️</button>
-                            <p class="%subItemNoteClass%">%noteShow%</p>
-                            <div class="note-edit-form" style="display: none;">
-                                <textarea class="note-input" rows="3" placeholder=" ">%itemNote%</textarea>
-                                <button class="save-note-btn" onclick="%onSaveNoteButton%">%saveText%</button>
-                                <button class="cancel-note-btn" onclick="%onCancelNoteBtn%">%cancelText%</button>
+                    <div class="%isEndPoint%" id="%itemKey%">
+                        <div class="%isEndPoint%--header">
+                            <div class="item-main-content">
+                            <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox" checked="%checkboxChecked%" onchange="%onCheckboxChange%">
+                            
+                            <div class="title-edit-wrapper">
+                                 <label for="checkbox-%itemKey%" class="%isEndPoint%-title">%itemName%</label>
+                                 <button class="edit-item-name-btn" title="%editItemNameText%" onclick="%onEditName%">&#9998;</button>
+    
+                                 <div class="item-name-edit-form" style="display: none;">
+                                     <input type="text" class="item-name-input-field" value="%itemName%">
+                                     <button class="save-item-name-btn" onclick="%onSaveItemName%">%saveText%</button>
+                                     <button class="cancel-item-name-btn" onclick="%onCancelNameButton%">%cancelText%</button>
+                                 </div>
+                            </div>
+                            
+                            <div class='action-button-group'>
+                                <button class='add-subitem' onclick="%onAddSubitem%">+</button> 
+                            </div>
+                            <div class='subitem-input' style="display: none">
+                                <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%onConfirmSubitem%">Hinzufügen</button>
+                                 <button class='cancel-subitem' onclick="%onCancelAddSubitem%">%cancelText%</button>
+                            </div>
+                                </div>
+                                <div class="item-meta-actions">
+                                    <div class="note-container">
+                                        <button class="edit-note-btn" title="%noteTitle%" onclick="%onEditeNote%">🗒️</button>
+                                        <p class="%subItemNoteClass%">%noteShow%</p>
+                                        <div class="note-edit-form" style="display: none;">
+                                            <textarea class="note-input" rows="3" placeholder=" ">%itemNote%</textarea>
+                                            <button class="save-note-btn" onclick="%onSaveNoteButton%">%saveText%</button>
+                                            <button class="cancel-note-btn" onclick="%onCancelNoteBtn%">%cancelText%</button>
+                                        </div>
+                                </div>
+                                <input type="date" class="deadline-picker" value=%itemDeadline% onchange="%onDeadlinePicker%">
+                                %subitemProgress%
+                                <button class='remove-subitem' onclick="%onRemoveSubitem%">🗑</button>
                             </div>
                         </div>
-                        <input type="date" class="deadline-picker" value=%itemDeadline% onchange="%onDeadlinePicker%">
-                        %subitemProgress%
-                        <button class='remove-subitem' onclick="%onRemoveSubitem%">🗑</button>
-                        </div>
+                        %subItemList% 
                     </div>
-                    %subItemList% 
                 </div>
-                </div>`,
+            `,
         }
     },
     Instance: function () {
@@ -149,7 +149,6 @@ ccm.files["ccm.checklist.js"] = {
             $.use(this.ccm);
             if (this.user) this.user.onchange = this.start;
         };
-
 
         this.events = {
             onAddSubitem: (itemKey, event) => {
@@ -185,7 +184,7 @@ ccm.files["ccm.checklist.js"] = {
                     return;
                 }
 
-                if (!istEingabeGueltig(listNameInput) || !istEingabeGueltig(firstItemName)) {
+                if (!isInputValid(listNameInput) || !isInputValid(firstItemName)) {
                     return;
                 }
                 const listKey = $.generateKey();
@@ -207,13 +206,16 @@ ccm.files["ccm.checklist.js"] = {
                 createListForm.querySelector('#list-name').value = '';
                 createListForm.querySelector('#first-item-name').value = '';
             },
-            confirmSubitem: async (itemKey, item, event) => {
-                if (event) event.stopPropagation();
+            onConfirmSubitem: async (itemKey, item, event, listKey) => {
+                if (event && typeof event.stopPropagation === 'function') {
+                    event.stopPropagation();
+                }
+                const parentItemKey = itemKey;
 
                 const currentItemRenderedRoot = self.element.querySelector(`[data-id="${itemKey}"]`);
 
                 if (!currentItemRenderedRoot) {
-                    console.error(`confirmSubitem: Konnte das Elternelement mit data-id "${itemKey}" nicht finden.`);
+                    console.error(`onConfirmSubitem: Konnte das Elternelement mit data-id "${itemKey}" nicht finden.`);
                     return;
                 }
 
@@ -221,7 +223,7 @@ ccm.files["ccm.checklist.js"] = {
                 const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
                 const subitemName = subitemNameInputForNew.value.trim();
 
-                if (!istEingabeGueltig(subitemName)) return;
+                if (!isInputValid(subitemName)) return;
                 if (!subitemName) {
                     alert('Bitte geben Sie einen Namen für den Unterpunkt ein.');
                     subitemNameInputForNew.focus();
@@ -248,13 +250,20 @@ ccm.files["ccm.checklist.js"] = {
                 }
                 parentItemList.unshift(newSubitem);
 
+                console.log(itemKey)
+                if (my.listState[listKey] && my.listState[listKey].items && my.listState[listKey].items[parentItemKey]) {
+                    if (my.listState[listKey].items[parentItemKey].checked) {
+                        my.listState[listKey].items[parentItemKey].checked = false;
+                    }
+                }
+
                 await self.store.set({key: studentId, listsData: my.listsData, listState: my.listState});
                 await renderLists();
 
                 subitemNameInputForNew.value = '';
                 subitemInputContainer.style.display = 'none';
             },
-            editName: (event) => {
+            onEditName: (event) => {
                 event.stopPropagation();
                 const editButton = event.target;
                 const wrapper = editButton.closest('.title-edit-wrapper');
@@ -268,13 +277,13 @@ ccm.files["ccm.checklist.js"] = {
                 input.focus();
                 input.select();
             },
-            saveItemName: async (event, listKey, item) => {
+            onSaveItemName: async (event, listKey, item) => {
                 event.stopPropagation();
                 const editForm = event.target.closest('.item-name-edit-form');
                 const input = editForm.querySelector('.item-name-input-field');
                 const newName = input.value.trim();
 
-                if (!istEingabeGueltig(newName)) return;
+                if (!isInputValid(newName)) return;
 
                 if (newName && newName !== item.name) {
                     if (findAndOperateRecursive(my.listsData[listKey].items, item.key, (foundItem) => {
@@ -287,10 +296,10 @@ ccm.files["ccm.checklist.js"] = {
                     alert('Der Name darf nicht leer sein.');
                     input.focus();
                 } else {
-                    self.events.cancelNameButton(event);
+                    self.events.onCancelNameButton(event);
                 }
             },
-            cancelNameButton: (event) => {
+            onCancelNameButton: (event) => {
                 event.stopPropagation();
                 const cancelButton = event.target;
                 const editForm = cancelButton.closest('.item-name-edit-form');
@@ -352,7 +361,6 @@ ccm.files["ccm.checklist.js"] = {
             },
             onSaveNoteButton: async (event, item, itemHtml, noteInput, listKey, noteEditForm, editNoteBtn) => {
                 event.stopPropagation();
-                // noteInput und listKey sind jetzt die korrekten Variablen
                 const newNote = noteInput.value.trim();
 
                 if (findAndOperateRecursive(my.listsData[listKey].items, item.key, (foundItem) => {
@@ -412,13 +420,13 @@ ccm.files["ccm.checklist.js"] = {
 
                 if (listItem) {
                     const progressFill = listItem.querySelector('.progress-fill');
-                    const progressProzent = listItem.querySelector('.progress-prozent');
+                    const progressPercentage = listItem.querySelector('.progress-percentage');
 
-                    if (progressFill && progressProzent) {
+                    if (progressFill && progressPercentage) {
                         progressFill.style.width = `${Math.round(progress)}%`;
-                        progressProzent.innerText = `${Math.round(progress)}%`;
+                        progressPercentage.innerText = `${Math.round(progress)}%`;
                     } else {
-                        console.warn('Progress elements not found in list item:', {progressFill, progressProzent});
+                        console.warn('Progress elements not found in list item:', {progressFill, progressPercentage: progressPercentage});
                     }
 
                     if (progress === 100) {
@@ -433,7 +441,7 @@ ccm.files["ccm.checklist.js"] = {
 
                 await self.store.set({key: studentId, listsData: my.listsData, listState: my.listState});
             },
-            editListName: (event) => {
+            onEditListName: (event) => {
                 event.stopPropagation();
                 const wrapper = event.target.closest('.item-header').querySelector('.list-title-wrapper');
                 wrapper.querySelector('.list-title-heading').style.display = 'none';
@@ -449,14 +457,14 @@ ccm.files["ccm.checklist.js"] = {
                 my.listsData[listKey].deadline = newDeadline;
                 await self.store.set({key: studentId, listsData: my.listsData, listState: my.listState});
             },
-            cancelListName: (event) => {
+            onCancelListName: (event) => {
                 event.stopPropagation();
                 const wrapper = event.target.closest('.item-header').querySelector('.list-title-wrapper');
                 wrapper.querySelector('.list-name-edit-form').style.display = 'none';
                 wrapper.querySelector('.list-title-heading').style.display = 'block';
                 event.target.closest('.item-header').querySelector('.edit-list-name-btn').style.display = 'inline-block';
             },
-            saveListName: async (event, listKey) => {
+            onSaveListName: async (event, listKey) => {
                 event.stopPropagation();
                 const wrapper = event.target.closest('.list-name-edit-form');
                 const input = wrapper.querySelector('.list-name-input-field');
@@ -479,7 +487,6 @@ ccm.files["ccm.checklist.js"] = {
                     subitemInputContainer.querySelector('.subitem-name').value = ''; // Clear the input field
                 }
             },
-
 
         }
 
@@ -621,14 +628,14 @@ ccm.files["ccm.checklist.js"] = {
                     onDeleteButton: () => self.events.onDeleteButton(key, itemElement, listHtml),
                     onClickToggleButton: () => self.events.onClickToggleButton(key, itemContent, toggleButton),
                     onAddSubitemToRoot: () => self.events.onAddSubitemToRoot(key),
-                    confirmSubitem: () => self.events.confirmSubitem(key, null),
+                    onConfirmSubitem: () => self.events.onConfirmSubitem(key, null),
 
                     listDeadline: listData.deadline || '',
                     onListDeadlineChange: (event) => self.events.onListDeadlineChange(event, key),
 
-                    onEditListName: (event) => self.events.editListName(event),
-                    onSaveListName: (event) => self.events.saveListName(event, key),
-                    onCancelListName: (event) => self.events.cancelListName(event),
+                    onEditListName: (event) => self.events.onEditListName(event),
+                    onSaveListName: (event) => self.events.onSaveListName(event, key),
+                    onCancelListName: (event) => self.events.onCancelListName(event),
                     onCancelAddSubitem: (event) => self.events.onCancelAddSubitem(event),
                 }));
 
@@ -649,10 +656,10 @@ ccm.files["ccm.checklist.js"] = {
 
                 const progress = calculateProgress(key, listData.items);
                 const progressFill = listHtml.querySelector('.progress-fill');
-                const progressProzent = listHtml.querySelector('.progress-prozent');
+                const progressPercentage = listHtml.querySelector('.progress-percentage');
 
                 if (progressFill) progressFill.style.width = `${Math.round(progress)}%`;
-                if (progressProzent) progressProzent.innerText = `${Math.round(progress)}%`;
+                if (progressPercentage) progressPercentage.innerText = `${Math.round(progress)}%`;
 
                 if (progress === 100) {
                     listHtml.classList.add('completed');
@@ -698,12 +705,11 @@ ccm.files["ccm.checklist.js"] = {
                 onCancelNoteBtn: (event) => self.events.onCancelNoteBtn(event, noteEditForm, editNoteBtn, noteDisplay, notePlaceholder, item),
                 onDeadlinePicker: async (event) => await self.events.onDeadlinePicker(event, item, listKey),
                 onCheckboxChange: (event) => self.events.onCheckboxChange(event, item, listKey, itemKey, isEndPoint, itemHtml, listContent),
-                confirmSubitem: () => self.events.confirmSubitem(itemKey, item),
-                onAddSubitem: () => self.events.onAddSubitem(itemKey),
+                onConfirmSubitem: () => self.events.onConfirmSubitem(itemKey, item, null, listKey),                onAddSubitem: () => self.events.onAddSubitem(itemKey),
                 onRemoveSubitem: () => self.events.onRemoveSubitem(item, listKey),
-                editName: (event) => self.events.editName(event),
-                saveItemName: (event) => self.events.saveItemName(event, listKey, item),
-                cancelNameButton: (event) => self.events.cancelNameButton(event),
+                onEditName: (event) => self.events.onEditName(event),
+                onSaveItemName: (event) => self.events.onSaveItemName(event, listKey, item),
+                onCancelNameButton: (event) => self.events.onCancelNameButton(event),
                 onCancelAddSubitem: (event) => self.events.onCancelAddSubitem(event)
 
             }));
@@ -818,7 +824,7 @@ ccm.files["ccm.checklist.js"] = {
             });
         }
 
-        function istEingabeGueltig(inputText) {
+        function isInputValid(inputText) {
             const forbiddenSequence = '§§§';
             if (inputText.includes(forbiddenSequence)) {
                 alert(`Die Zeichenfolge "${forbiddenSequence}" ist im Namen nicht erlaubt.`);
@@ -828,8 +834,8 @@ ccm.files["ccm.checklist.js"] = {
         }
 
         function checkListNameExists(listName) {
-            const exist = Object.keys(my.listsData).includes(listName)
-            if (exist) {
+            const nameExist = Object.keys(my.listsData).includes(listName)
+            if (nameExist) {
                 alert(`Die Liste "${listName}" existiert bereits. Bitte wählen Sie einen anderen Namen.`);
             }
             return Object.keys(my.listsData).includes(listName);
