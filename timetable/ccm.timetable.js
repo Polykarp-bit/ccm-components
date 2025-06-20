@@ -245,12 +245,13 @@ ccm.files["ccm.timetable.js"] = {
                 `,
                 courseItem: `
                     <div class="course-item" data-key="%key%" style="border-color: %borderColor%">
-                        <div class="card-header">
+                        <div class="card-header" id="card-header-%eventKey%">
                             <div class="course-details">
                                 <h3>%courseTitle%</h3>
                                 <div class="event-info" data-event-key="%eventKey%">%eventTimeData%</div>
                             </div>
                             <div class="course-actions">
+                                <div id="toggle-icon-%eventKey%" class="card-toggle-icon">▼</div>
                                 <div class="event-color-picker">
                                     <label for="event-color-%eventKey%">%eventColorText%</label>
                                     <input type="color" class="color-picker" id="event-color-%eventKey%" value="%colorValue%">
@@ -258,7 +259,7 @@ ccm.files["ccm.timetable.js"] = {
                                 <button class="button button-danger remove-event-button">%removeButtonText%</button>
                             </div>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body" id="card-body-%eventKey%">
                             <div class="event-section" id="event-links-section-%eventKey%">
                                 <label class="section-label">%linksLabelText%</label>
                                 <form class="form-inline">
@@ -967,6 +968,24 @@ ccm.files["ccm.timetable.js"] = {
 
                 $.append(selectedScheduleContainer, courseHtml);
 
+                const cardHeader = courseHtml.querySelector(`#card-header-${event.key}`);
+                const cardBody = courseHtml.querySelector(`#card-body-${event.key}`);
+                const toggleIcon = courseHtml.querySelector(`#toggle-icon-${event.key}`);
+
+                cardBody.classList.add('collapsed'); // Karte standardmäßig einklappen
+                toggleIcon.textContent = '▶';
+
+                cardHeader.addEventListener('click', (e) => {
+                    // Verhindert das Ausklappen, wenn man auf einen Button oder den Color-Picker klickt
+                    if (e.target.closest('button, input')) {
+                        return;
+                    }
+
+                    // Klappt den Body-Bereich um und ändert das Icon
+                    const isCollapsed = cardBody.classList.toggle('collapsed');
+                    toggleIcon.textContent = isCollapsed ? '▶' : '▼';
+                });
+
                 const colorPicker = courseHtml.querySelector(`#event-color-${event.key}`);
                 colorPicker.addEventListener('input', async (e) => {
                     const newColor = e.target.value;
@@ -1105,7 +1124,7 @@ ccm.files["ccm.timetable.js"] = {
                 linkTitleText: self.text.linkTitleText,
                 noLinksText: self.text.noLinksText,
                 noNotesText: self.text.noNotesText,
-                noteText: self.text.noteLabelText
+                noteText: self.text.noteText
             });
             const scheduleContainer = mainContainer.querySelector('.week-schedule');
 

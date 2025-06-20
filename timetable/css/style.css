@@ -35,10 +35,9 @@ h1 {
     padding-bottom: 0;   /* Entfernt den Abstand, der für die Linie da war */
 }
 
-h1 { font-size: 2rem; margin-bottom: 24px; } /* 32px */
-h2 { font-size: 1.5rem; margin-bottom: 20px; } /* 24px */
-h3 { font-size: 1.25rem; margin-bottom: 12px; } /* 20px */
-h4 { font-size: 1.125rem; margin-bottom: 10px; } /* 18px */
+h2 { font-size: 1.5rem; margin-bottom: 20px; }
+h3 { font-size: 1.25rem; margin-bottom: 12px; }
+h4 { font-size: 1.125rem; margin-bottom: 10px; }
 
 /* === ALLGEMEINE STILE FÜR FORMULAR-ELEMENTE === */
 input[type="text"],
@@ -74,28 +73,104 @@ textarea {
     min-height: 80px;
 }
 
-/* === BUTTON-STILE === */
-button, .button-style {
+/* === BUTTON-STILE (KORRIGIERT & KONSOLIDIERT) === */
+
+/*
+ * Grundlegendes Button-Styling. Gilt für alle Buttons.
+ * Definiert Größe, Schrift, Übergänge und den transparenten Hintergrund.
+*/
+button,
+.button,
+.button-style {
     font-family: inherit;
     cursor: pointer;
     padding: 8px 16px;
     font-size: 0.875rem;
     font-weight: 600;
-    border-radius: 6px;
-    border: 1px solid transparent;
+    border-radius: 8px; /* Moderner, etwas runderer Radius */
     text-decoration: none;
-    display: inline-block;
-    line-height: 1.5;
-    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease-in-out;
+
+    /* Das Kernprinzip des Outline-Stils */
+    background-color: transparent;
+    border-width: 1.5px;
+    border-style: solid;
 }
 
-button:hover {
-    transform: translateY(-1px); /* Subtiler Hover-Effekt */
+/* Hover-Effekt für alle Buttons */
+button:hover,
+.button:hover,
+.button-style:hover {
+    transform: translateY(-1px);
 }
-
-button:active {
+button:active,
+.button:active,
+.button-style:active {
     transform: scale(0.98);
 }
+
+
+/* --- GRUPPE 1: Primäre Aktionen (Blau) --- */
+#toggle-view-button,
+#course-form button[type="submit"],
+.dropdown-button,
+.button-primary,
+.save-item-name-btn {
+    border-color: #2563eb;
+    color: #2563eb;
+}
+
+#toggle-view-button:hover,
+#course-form button[type="submit"]:hover,
+.dropdown-button:hover,
+.button-primary:hover,
+.save-item-name-btn:hover {
+    background-color: #2563eb;
+    color: #fff;
+}
+
+
+/* --- GRUPPE 2: Sekundäre Aktionen (Grau) --- */
+#add-course-button,
+#cancel-button,
+.cancel-item-name-btn {
+    border-color: #6b7280;
+    color: #6b7280;
+}
+
+#add-course-button:hover,
+#cancel-button:hover,
+.cancel-item-name-btn:hover {
+    background-color: #6b7280;
+    color: #fff;
+}
+
+
+/* --- GRUPPE 3: Gefahren-Aktionen (Rot) --- */
+.button-danger,
+.remove-single-link-button {
+    border-color: var(--danger-color); /* #dc3545 */
+    color: var(--danger-color);
+}
+
+.button-danger:hover,
+.remove-single-link-button:hover {
+    background-color: var(--danger-color);
+    color: #fff;
+}
+
+
+/* --- Spezifische Größenanpassung für kleinere Buttons in den Karten --- */
+.course-item .button-danger,
+.course-item .button-primary,
+.course-item .remove-single-link-button {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
 
 /* === LAYOUT-STILE === */
 .container {
@@ -115,20 +190,6 @@ button:active {
     right: 24px;
 }
 
-#toggle-view-button {
-    background-color: #2563eb;
-    color: #fff;
-    border: none; /* Rand entfernen */
-    padding: 12px 24px; /* Größer und klickbarer machen */
-    border-radius: 8px; /* Stärkere Abrundung */
-    font-weight: 600;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Dezenter Schatten */
-}
-#toggle-view-button:hover {
-    background-color: #2563eb;
-    border-color: #2563eb;
-}
-
 #schedule-container {
     padding: 16px;
 }
@@ -139,17 +200,6 @@ button:active {
     align-items: center;
     gap: 12px;
     margin-bottom: 24px;
-}
-
-#add-course-button {
-    background-color: 	#D3D3D3;
-    color: #fff;
-    border-color: 	#D3D3D3;
-    float: right;
-}
-#add-course-button:hover {
-    background-color: #293548;
-    border-color: #293548;
 }
 
 #course-form-container {
@@ -196,42 +246,9 @@ button:active {
     margin-top: 0;
 }
 
-#course-form button[type="submit"] {
-    background-color: #2563eb;
-    color: white;
-    border-color: #2563eb;
-}
-#course-form button[type="submit"]:hover {
-    background-color: #1d4ed8;
-    border-color: #1d4ed8;
-}
-
-
-#cancel-button {
-    background-color: #6b7280;
-    color: white;
-    border-color: #6b7280;
-    margin-left: 12px;
-}
-#cancel-button:hover {
-    background-color: #4b5563;
-    border-color: #4b5563;
-}
-
 .dropdown-container {
     position: relative;
     margin-bottom: 24px;
-}
-
-.dropdown-button {
-    background-color: #2563eb;
-    color: #fff;
-    border-color: #2563eb;
-    text-align: left;
-}
-.dropdown-button:hover {
-    background-color: #2563eb;
-    border-color: #2563eb;
 }
 
 .dropdown-content {
@@ -353,11 +370,17 @@ input[type="checkbox"]:indeterminate {
 .card-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start; /* Titel und Aktionen auf einer Höhe */
-    padding: 24px; /* Großzügiges Padding */
+    align-items: center; /* Vertikal zentrieren */
+    padding: 24px;
     border-bottom: 1px solid #e5e7eb;
     gap: 20px;
-    flex-wrap: wrap; /* Bricht um auf kleinen Bildschirmen */
+    flex-wrap: wrap;
+    cursor: pointer; /* NEU: Zeigt an, dass der Bereich klickbar ist */
+    transition: background-color 0.2s ease; /* Sanfter Hover-Effekt */
+}
+
+.card-header:hover {
+    background-color: #f9fafb; /* Leichte Hervorhebung beim Überfahren */
 }
 
 .course-details h3 {
@@ -375,8 +398,16 @@ input[type="checkbox"]:indeterminate {
 .course-actions {
     display: flex;
     align-items: center;
-    gap: 20px;
-    flex-shrink: 0; /* Verhindert, dass die Buttons schrumpfen */
+    gap: 16px; /* Etwas Platz zwischen den Aktionen */
+    flex-shrink: 0;
+}
+
+.card-toggle-icon {
+    font-size: 1.25rem;
+    color: #9ca3af; /* Dezente Farbe */
+    font-weight: bold;
+    user-select: none; /* Verhindert, dass das Icon markiert wird */
+    transition: transform 0.2s ease;
 }
 
 .event-color-picker {
@@ -417,7 +448,11 @@ input[type="checkbox"]:indeterminate {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 24px; /* Abstand zwischen den Sektionen (Links, Notizen) */
+    gap: 24px;
+}
+
+.card-body.collapsed {
+    display: none;
 }
 
 .event-section .section-label {
@@ -457,7 +492,6 @@ textarea.event-note-input:focus {
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
-/* Speziell für die Textarea */
 textarea.event-note-input {
     width: 100%;
     min-height: 80px;
@@ -469,14 +503,12 @@ textarea.event-note-input {
     justify-content: flex-end;
     margin-top: 8px;
 }
-/* Container-Liste ohne Bullet Points */
 .current-event-links {
     list-style: none;
     padding-left: 0;
     margin: 0;
 }
 
-/* Einzelner Linkeintrag */
 .event-link-display-item {
     display: flex;
     align-items: center;
@@ -488,7 +520,6 @@ textarea.event-note-input {
     margin-bottom: 8px;
 }
 
-/* Der eigentliche Link */
 .event-link-display-item a {
     color: var(--primary-color);
     text-decoration: none;
@@ -498,51 +529,11 @@ textarea.event-note-input {
     overflow-wrap: anywhere;
 }
 
-/* Link hover effect */
 .event-link-display-item a:hover {
     text-decoration: underline;
 }
 
-/* Entfernen-Button klein & elegant */
-.remove-single-link-button.small-button {
-    padding: 4px 8px;
-    font-size: 0.75em;
-    background-color: var(--danger-color);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.remove-single-link-button.small-button:hover {
-    background-color: #c82333;
-}
-
-/* --- Allgemeine Button-Styles --- */
-.button {
-    padding: 10px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;
-    font-weight: 500; transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-.button-primary { background-color: var(--primary-color); color: white; }
-.button-primary:hover { background-color: #0056b3; }
-
-.button-danger { background-color: var(--danger-color); color: white; }
-.button-danger:hover { background-color: #c82333; }
-
-/* --- Responsive Design für Mobile --- */
-@media (max-width: 768px) {
-    .card-header { flex-direction: column; align-items: stretch; }
-    .course-actions { flex-direction: row; justify-content: space-between; margin-top: 16px; }
-    .form-inline { flex-direction: column; align-items: stretch; }
-}
-
 /* === STUNDENPLANANSICHT (Wochenansicht) === */
-
-/* === STUNDENPLANANSICHT (Wochenansicht) === */
-
-/* Der Haupt-Container wird zur einzigen, großen Karte */
 .week-schedule {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -553,14 +544,11 @@ textarea.event-note-input {
     overflow: hidden;
 }
 
-/* Der einzelne Tag hat keinen eigenen Karten-Stil mehr */
 .day {
     padding: 20px;
-    /* Die dezente Trennlinie auf der rechten Seite */
     border-right: 1px solid #e5e7eb;
 }
 
-/* Die letzte Spalte bekommt keine Trennlinie rechts */
 .day:last-child {
     border-right: none;
 }
@@ -575,7 +563,6 @@ textarea.event-note-input {
     font-weight: 600;
 }
 
-/* Stil für den "Keine Kurse"-Text */
 .day .events-container p {
     color: #cbd5e1;
     font-size: 0.9rem;
@@ -584,7 +571,6 @@ textarea.event-note-input {
     padding-top: 40px;
 }
 
-/* Stile für die eigentliche Termin-Karte */
 .event {
     background-color: #ffffff;
     padding: 16px;
@@ -597,7 +583,6 @@ textarea.event-note-input {
     overflow: hidden;
 }
 
-/* Der abgerundete Farbstreifen */
 .event::before {
     content: '';
     position: absolute;
@@ -638,7 +623,6 @@ textarea.event-note-input {
     text-overflow: ellipsis;
 }
 
-/* Stile für das Notiz-Icon */
 .note-icon {
     font-size: 0.875rem;
     cursor: pointer;
@@ -681,7 +665,6 @@ textarea.event-note-input {
     visibility: visible;
     opacity: 1;
 }
-
 
 /* === MODAL === */
 .modal {
@@ -832,33 +815,6 @@ textarea.event-note-input {
     line-height: 1.4;
 }
 
-.save-item-name-btn {
-    background-color: #2563eb;
-    color: white;
-    border-color: #2563eb;
-}
-.save-item-name-btn:hover {
-    background-color: #1d4ed8;
-    border-color: #1d4ed8;
-}
-
-.cancel-item-name-btn {
-    background-color: #6b7280;
-    color: white;
-    border-color: #6b7280;
-}
-.cancel-item-name-btn:hover {
-    background-color: #4b5563;
-    border-color: #4b5563;
-}
-
-.subitem-header, .point-header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-}
-
 /* === RESPONSIVE DESIGN === */
 @media (max-width: 768px) {
     body {
@@ -903,12 +859,6 @@ textarea.event-note-input {
 
     .form-group input, .form-group select, .form-group textarea {
         width: 100%;
-    }
-
-    #course-form button[type="submit"], #cancel-button {
-        width: 100%;
-        margin: 8px 0 0 0;
-        padding: 10px;
     }
 
     .add-course-header {
