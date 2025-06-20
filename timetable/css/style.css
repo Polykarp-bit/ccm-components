@@ -3,8 +3,8 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 0;
     padding: 24px;
-    background-color: #f9fafb; /* Sehr helles Grau für Business-Look */
-    color: #1e293b; /* Dunkelgrau für hohen Kontrast */
+    background-color: #f9fafb;
+    color: #1e293b;
     font-size: 15px;
     line-height: 1.6;
     font-weight: 400;
@@ -13,7 +13,7 @@
     --card-padding: 20px;
     --card-border-radius: 8px;
     --primary-color: #007bff;
-    --secondary-color: #6c757d; /* Farbe für Speichern-Button */
+    --secondary-color: #6c757d;
     --danger-color: #dc3545;
     --light-gray-color: #f8f9fa;
     --gray-color: #6c757d;
@@ -31,8 +31,8 @@ h1, h2, h3, h4 {
 h1 {
     font-size: 2rem;
     margin-bottom: 24px;
-    border-bottom: none; /* Entfernt die Trennlinie */
-    padding-bottom: 0;   /* Entfernt den Abstand, der für die Linie da war */
+    border-bottom: none;
+    padding-bottom: 0;
 }
 
 h2 { font-size: 1.5rem; margin-bottom: 20px; }
@@ -49,7 +49,7 @@ textarea {
     font-family: inherit;
     font-size: 0.9375rem;
     padding: 8px 12px;
-    border: 1px solid #d1d5db; /* Sanftes Grau */
+    border: 1px solid #d1d5db;
     border-radius: 6px;
     background-color: #fff;
     color: #1e293b;
@@ -75,10 +75,6 @@ textarea {
 
 /* === BUTTON-STILE (KORRIGIERT & KONSOLIDIERT) === */
 
-/*
- * Grundlegendes Button-Styling. Gilt für alle Buttons.
- * Definiert Größe, Schrift, Übergänge und den transparenten Hintergrund.
-*/
 button,
 .button,
 .button-style {
@@ -87,14 +83,13 @@ button,
     padding: 8px 16px;
     font-size: 0.875rem;
     font-weight: 600;
-    border-radius: 8px; /* Moderner, etwas runderer Radius */
+    border-radius: 8px;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease-in-out;
 
-    /* Das Kernprinzip des Outline-Stils */
     background-color: transparent;
     border-width: 1.5px;
     border-style: solid;
@@ -170,7 +165,6 @@ button:active,
     padding: 6px 12px;
     font-size: 0.85rem;
 }
-
 
 /* === LAYOUT-STILE === */
 .container {
@@ -349,16 +343,16 @@ input[type="checkbox"]:indeterminate {
 #selected-schedule .course-item {
     margin: 24px 0;
     background-color: #ffffff;
-    border-radius: 12px; /* Stärkere Abrundung */
-    border: 1px solid #e5e7eb; /* Dünner Rahmen für Definition */
-    border-left-width: 5px; /* Dicke für den farbigen Indikator beibehalten */
-    border-left-color: var(--border-color, #ccc); /* Fallback, wird inline überschrieben */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Weicher, moderner Schatten */
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    border-left-width: 5px;
+    border-left-color: var(--border-color, #ccc);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
     transition: box-shadow 0.2s ease;
-    padding: 0; /* Padding wird in Header/Body gesteuert */
-    align-items: unset; /* Wichtig, um alte Stile zu überschreiben */
+    padding: 0;
+    align-items: unset;
 }
 
 #selected-schedule .course-item:hover {
@@ -370,43 +364,43 @@ input[type="checkbox"]:indeterminate {
 .card-header {
     display: flex;
     justify-content: space-between;
-    align-items: center; /* Vertikal zentrieren */
+    align-items: center;
     padding: 24px;
     border-bottom: 1px solid #e5e7eb;
     gap: 20px;
     flex-wrap: wrap;
-    cursor: pointer; /* NEU: Zeigt an, dass der Bereich klickbar ist */
-    transition: background-color 0.2s ease; /* Sanfter Hover-Effekt */
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .card-header:hover {
-    background-color: #f9fafb; /* Leichte Hervorhebung beim Überfahren */
+    background-color: #f9fafb;
 }
 
 .course-details h3 {
     margin: 0 0 4px 0;
-    font-size: 1.25rem; /* 20px */
+    font-size: 1.25rem;
     font-weight: 600;
     color: #1e293b;
 }
 
 .event-info {
     color: #6b7280;
-    font-size: 0.9rem; /* 14.4px */
+    font-size: 0.9rem;
 }
 
 .course-actions {
     display: flex;
     align-items: center;
-    gap: 16px; /* Etwas Platz zwischen den Aktionen */
+    gap: 16px;
     flex-shrink: 0;
 }
 
 .card-toggle-icon {
     font-size: 1.25rem;
-    color: #9ca3af; /* Dezente Farbe */
+    color: #9ca3af;
     font-weight: bold;
-    user-select: none; /* Verhindert, dass das Icon markiert wird */
+    user-select: none;
     transition: transform 0.2s ease;
 }
 
@@ -427,51 +421,38 @@ input[type="checkbox"]:indeterminate {
     -moz-appearance: none;
     appearance: none;
 
-    /* Größe des gesamten Color Pickers beibehalten */
     width: 28px;
     height: 28px;
 
-    /* Hintergrund des input-Elements selbst (transparent, damit die Farbe des Swatch sichtbar wird) */
     background-color: transparent;
 
-    /* Außenrahmen: Nicht perfekt rund, aber mit stark abgerundeten Ecken.
-       Dies kaschiert den inneren, oft eckigen Farbwähler besser,
-       als wenn der äußere Rahmen perfekt rund wäre. */
-    border: 1px solid #d1d5db; /* Dezenter Rand */
-    border-radius: 6px;       /* Stark abgerundete Ecken, kein kompletter Kreis mehr */
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
 
-    /* Sicherstellen, dass keine ungewollten Überläufe passieren,
-       auch wenn der innere Swatch vielleicht nicht perfekt passt. */
     overflow: hidden;
 
-    /* Cursor und Übergänge */
     cursor: pointer;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
-    /* Wichtig: Alle internen Paddings und Margins für das Input-Element entfernen */
     padding: 0;
     margin: 0;
-    outline: none; /* Entfernt den blauen Standard-Fokus-Rahmen */
+    outline: none;
 }
 
 /* --- Styling für den internen Farbwähler (der "Swatch") --- */
-/* Hier setzen wir nur die absoluten Mindest-Resets,
-   da wir wissen, dass wir ihn nicht vollständig kontrollieren können. */
 .color-picker::-webkit-color-swatch {
-    border: none;       /* Entfernt jeglichen Standard-Rand */
-    padding: 0;         /* Entfernt jeglichen Standard-Padding */
-    margin: 0;          /* Entfernt jeglichen Standard-Margin */
-    border-radius: 4px; /* Eine leichte Abrundung, falls der Browser es akzeptiert */
-    /* Versuche, den Box-Shadow zu entfernen, aber es ist nicht garantiert,
-       dass dies den internen Browser-Schatten eliminiert. */
+    border: none;
+    padding: 0;
+    margin: 0;
+    border-radius: 4px;
     box-shadow: none;
 }
 
 .color-picker::-moz-color-swatch {
-    border: none;       /* Entfernt jeglichen Standard-Rand */
-    padding: 0;         /* Entfernt jeglichen Standard-Padding */
-    margin: 0;          /* Entfernt jeglichen Standard-Margin */
-    border-radius: 4px; /* Leichte Abrundung */
+    border: none;
+    padding: 0;
+    margin: 0;
+    border-radius: 4px;
     box-shadow: none;
 }
 

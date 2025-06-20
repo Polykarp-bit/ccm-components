@@ -5,8 +5,7 @@
  */
 
 ccm.files["ccm.timetable.js"] = {
-    //name: timetable
-    name: "time-table",
+    name: "timetable",
     ccm: "https://ccmjs.github.io/ccm/ccm.js",
     config: {
         courseStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_teacher_courses"}],
@@ -61,9 +60,6 @@ ccm.files["ccm.timetable.js"] = {
             groupText: "Gruppe (optional)",
             groupPlaceholderText: "z.B. A",
             removeButtonText: "Veranstaltung entfernen",
-        /*    courseItemTitleText: "Kursname", */
-        /*    eventTimeDataText: "Veranstaltungszeit", */
-        /*    eventNoteText: "Notizen", */
             eventColorText: "Farbe:",
             noNotesText: "Keine Notizen vorhanden",
             noLinksText: "Keine Links vorhanden",
@@ -82,19 +78,12 @@ ccm.files["ccm.timetable.js"] = {
             ownCourseText: "[eigene Veranstaltung]",
             noStudyText: "Ohne Studiengang",
             nAText: "N/A",
-          /*  previewListText: "Vorschau Liste",*/
             errorCourseNameRequired: "Bitte gib einen Kursnamen ein.",
-          /*  errorAtLeastOneEvent: "Bitte füge mindestens eine Veranstaltung hinzu.", */
             errorAddCourseFailed: "Fehler beim Hinzufügen des Kurses. Bitte versuche es erneut.",
             errorSaveCoursesFailed: "Fehler beim Speichern der Kurse. Bitte versuche es erneut.",
             errorLoginRequired: "Bitte melde dich an, um fortzufahren.",
-            /*noteSaved: "Notiz gespeichert!",*/
             errorLinkUrlRequired: "Bitte geben Sie eine URL für den Link ein.",
-           /* addNoteButtonText: "Notiz hinzufügen",*/
-           /* noLinksForEvent: "Keine Links für diese Veranstaltung vorhanden.",*/
             removeLinkButtonText: "Link entfernen",
-           /* notePlaceholderText: "Deine Notiz...",*/
-           /* saveNoteButtonText: "Notiz speichern"*/
         },
         user: ["ccm.instance", "https://ccmjs.github.io/akless-components/user/ccm.user.js"],
         helper: ["ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-8.4.2.min.mjs"],
@@ -437,34 +426,6 @@ ccm.files["ccm.timetable.js"] = {
                     alert(e.message);
                 }
             },
-            /*
-            onSaveNoteButton: (eventKey, noteContainer) => {
-                return async () => {
-                    const textarea = noteContainer.querySelector(`#event-note-${eventKey}`);
-                    const course = currentCourses.find(c => c.value.events.some(e => e.key === eventKey));
-                    const event = course?.value.events.find(e => e.key === eventKey);
-                    if (event) {
-                        event.note = textarea.value.trim();
-                        await self.saveSelectedCourses();
-                        alert(self.text.noteSaved);
-                    }
-                };
-            },
-
-            onAddNoteButton: (eventKey, noteContainer) => {
-                return () => {
-                    const noteHtml = self.ccm.helper.html(self.html.editView.noteContainerWithTextarea, {
-                        eventKey: eventKey,
-                        notePlaceholderText: self.text.notePlaceholderText,
-                        noteText: "",
-                        saveNoteButtonText: self.text.saveNoteButtonText,
-                        onSaveNoteButton: self.events.onSaveNoteButton(eventKey, noteContainer)
-                    });
-                    $.setContent(noteContainer, noteHtml);
-                    noteContainer.querySelector(`#event-note-${eventKey}`).focus();
-                };
-            },
-            */
 
             onRemoveLinkButton: (eventKey, linkKey, currentLinksDiv) => {
                 return async () => {
@@ -570,9 +531,6 @@ ccm.files["ccm.timetable.js"] = {
         };
 
         this.renderEditView = async () => {
-
-           // const obj = self.text;
-
             const mainHtml = self.ccm.helper.html(self.html.editView.main, {
                 timetableEditText: self.text.timetableEditText,
                 addOwnCourseText: self.text.addOwnCourseText,
@@ -976,12 +934,10 @@ ccm.files["ccm.timetable.js"] = {
                 toggleIcon.textContent = '▶';
 
                 cardHeader.addEventListener('click', (e) => {
-                    // Verhindert das Ausklappen, wenn man auf einen Button oder den Color-Picker klickt
                     if (e.target.closest('button, input')) {
                         return;
                     }
 
-                    // Klappt den Body-Bereich um und ändert das Icon
                     const isCollapsed = cardBody.classList.toggle('collapsed');
                     toggleIcon.textContent = isCollapsed ? '▶' : '▼';
                 });
