@@ -28,6 +28,8 @@ ccm.files["ccm.checklist.js"] = {
             editText: "Bearbeiten",
             deleteText: "Löschen",
             saveText: "Speichern",
+            sortByDeadline: "Nach Fälligkeit sortieren",
+            sortAlphabetical: "Alphabetisch sortieren",
             writeNoteText: "Notiz eingeben...",
             editNoteText: "Notiz bearbeiten",
             addNoteText: "Notiz hinzufügen",
@@ -44,6 +46,10 @@ ccm.files["ccm.checklist.js"] = {
             mainContent: `
                 <div class="container">
                     <h1>%myListText%</h1>
+                    <div class="filter-controls">
+                        <button onclick="%onSortAlphabetical%">%sortAlphabetical%</button>
+                        <button onclick="%onSortByDeadline%">%sortByDeadline%</button>
+                    </div>
                     <div class="create-list">
                         <input type="text" id="list-name" placeholder="%listName%">
                         <input type="text" id="first-item-name" placeholder="%firstItemNameText%">
@@ -496,6 +502,14 @@ ccm.files["ccm.checklist.js"] = {
                     subitemInputContainer.querySelector('.subitem-name').value = ''; // Clear the input field
                 }
             },
+            onSortByDeadline: async () => {
+                my.filter = 'deadline';
+                await renderLists();
+            },
+            onSortAlphabetical: async () => {
+                my.filter = 'alphabetical';
+                await renderLists();
+            },
 
         }
 
@@ -540,6 +554,10 @@ ccm.files["ccm.checklist.js"] = {
                     saveListText: self.text.saveListText,
                     myListText: self.text.myListText,
                     cancelText: self.text.cancelText,
+                    sortByDeadline: self.text.sortByDeadline,
+                    sortAlphabetical: self.text.sortAlphabetical,
+                    onSortByDeadline: self.events.onSortByDeadline,
+                    onSortAlphabetical: self.events.onSortAlphabetical,
                     onStartCreateButton: () => self.events.onStartCreateButton(createListForm, listForm, previewList, itemElement),
                 }));
                 $.setContent(self.element.querySelector('#content'), itemHtml);
@@ -608,8 +626,24 @@ ccm.files["ccm.checklist.js"] = {
         async function renderLists() {
             const itemElement = self.element.querySelector('#items');
             itemElement.innerHTML = '';
+            let listKeys = Object.keys(my.listsData);
 
-            for (const key of Object.keys(my.listsData)) {
+            if (my.filter === 'alphabetical') {
+                listKeys.sort((a, b) => my.listsData[a].name.localeCompare(my.listsData[b].name));
+            } else if (my.filter === 'deadline') {
+                listKeys.sort((a, b) => {
+                    const deadlineA = my.listsData[a].deadline;
+                    const deadlineB = my.listsData[b].deadline;
+
+                    if (deadlineA && !deadlineB) return -1;
+                    if (!deadlineA && deadlineB) return 1;
+                    if (!deadlineA && !deadlineB) return 0;
+
+                    return new Date(deadlineA) - new Date(deadlineB);
+                });
+            }
+
+            for (const key of listKeys) {
 
                 const listData = my.listsData[key];
 
@@ -648,6 +682,7 @@ ccm.files["ccm.checklist.js"] = {
                     onCancelAddSubitem: (event) => self.events.onCancelAddSubitem(event),
                 }));
 
+
                 itemElement.appendChild(listHtml);
 
                 const itemContent = listHtml.querySelector('.item-content');
@@ -673,6 +708,7 @@ ccm.files["ccm.checklist.js"] = {
                 if (progress === 100) {
                     listHtml.classList.add('completed');
                 }
+
             }
         }
 

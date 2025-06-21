@@ -438,3 +438,48 @@ button {
 .subitem-progress {
     display: none;
 }
+
+/**
+ * =================================================================
+ * 8. TOOLBAR & SORTIERUNG (Bestmögliches Design mit reinem CSS)
+ * =================================================================
+ */
+
+/* Container für die Sortier-Buttons */
+#element .filter-controls {
+    display: inline-flex;
+    background-color: #e9ecef; /* Heller Hintergrund für den "Track" */
+    border-radius: 8px;
+    padding: 4px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 1rem; /* Etwas Abstand nach unten */
+}
+
+/* Alle Buttons innerhalb der Sortier-Steuerung */
+#element .filter-controls button {
+    border: none;
+    background: transparent;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s ease-in-out;
+}
+
+/* Hover-Effekt für nicht-fokussierte Buttons */
+#element .filter-controls button:not(:focus):hover {
+    color: var(--text-primary);
+}
+
+/* Der Trick: Wir stylen den :focus-Zustand so, als wäre er "aktiv".
+   Dieser Stil wird angewendet, nachdem ein Button geklickt wurde,
+   und bleibt, bis ein anderes Element den Fokus erhält.
+*/
+#element .filter-controls button:focus {
+    outline: none; /* Entfernt den Standard-Fokus-Rahmen des Browsers */
+    background-color: #ffffff; /* Weißer, hervorgehobener Hintergrund */
+    color: var(--accent-color); /* Akzentfarbe für den Text */
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* Leichter Schatten für Tiefenwirkung */
+}
