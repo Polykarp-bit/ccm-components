@@ -12,7 +12,7 @@ ccm.files["ccm.checklist.js"] = {
         css: ["ccm.load", "./resources/style.css"],
         user: ["ccm.instance", "https://ccmjs.github.io/akless-components/user/ccm.user.js"],
         text: {
-            listName: "Listen Name (z.B. Projekt 2024)",
+            listName: "Listen-Name (z.B. Projekt 2024)",
             firstItemName: "Erstes Listenobjekt (z.B. Aufgabe 1)",
             listCreateButtonText: "Liste erstellen",
             saveListText: "Liste speichern",
@@ -22,7 +22,6 @@ ccm.files["ccm.checklist.js"] = {
             addText: "Hinzufügen",
             secondItemNameText: "Objekt-Name (z.B. Aufgabe 2)",
             addSubpointText: "+",
-            deadlineText: "Fälligkeitsdatum",
             removeText: "Enfernen",
             subPointText: 'Unterpunkt-Name (z.B. Unteraufgabe)',
             editText: "Bearbeiten",
@@ -148,7 +147,6 @@ ccm.files["ccm.checklist.js"] = {
         let self = this;
         let my;
         let studentId;
-
 
         this.init = async () => {
             $ = Object.assign({}, this.ccm.helper, this.helper);
@@ -277,7 +275,6 @@ ccm.files["ccm.checklist.js"] = {
                 const label = wrapper.querySelector('label');
                 const editForm = wrapper.querySelector('.item-name-edit-form');
                 const input = editForm.querySelector('input');
-
 
                 label.style.display = 'none';
                 editButton.style.display = 'none';
@@ -428,7 +425,6 @@ ccm.files["ccm.checklist.js"] = {
                 updateParentState(itemKey, listKey, listContent);
 
                 const progress = calculateProgress(listKey, my.listsData[listKey].items);
-
                 const listItem = listContent.closest('.list-container');
 
                 if (listItem) {
@@ -450,7 +446,6 @@ ccm.files["ccm.checklist.js"] = {
                 } else {
                     console.warn("Konnte das übergeordnete '.list-container' Element nicht finden.");
                 }
-
 
                 await self.store.set({key: studentId, listsData: my.listsData, listState: my.listState});
             },
@@ -510,7 +505,6 @@ ccm.files["ccm.checklist.js"] = {
                 my.filter = 'alphabetical';
                 await renderLists();
             },
-
         }
 
         this.start = async () => {
@@ -644,7 +638,6 @@ ccm.files["ccm.checklist.js"] = {
             }
 
             for (const key of listKeys) {
-
                 const listData = my.listsData[key];
 
                 if (!listData || !Array.isArray(listData.items)) {
@@ -682,7 +675,6 @@ ccm.files["ccm.checklist.js"] = {
                     onCancelAddSubitem: (event) => self.events.onCancelAddSubitem(event),
                 }));
 
-
                 itemElement.appendChild(listHtml);
 
                 const itemContent = listHtml.querySelector('.item-content');
@@ -708,7 +700,6 @@ ccm.files["ccm.checklist.js"] = {
                 if (progress === 100) {
                     listHtml.classList.add('completed');
                 }
-
             }
         }
 
@@ -716,7 +707,6 @@ ccm.files["ccm.checklist.js"] = {
             const itemKey = parentKey ? `${parentKey}§§§${item.key}` : item.key;
             const isEndPoint = item.items.length === 0;
             const subitemProgress = isEndPoint ? 0 : calculateProgress(listKey, item.items, itemKey);
-
 
             if (!my.listState[listKey]) {
                 my.listState[listKey] = {items: {}, collapsed: false};
@@ -756,11 +746,9 @@ ccm.files["ccm.checklist.js"] = {
                 onSaveItemName: (event) => self.events.onSaveItemName(event, listKey, item),
                 onCancelNameButton: (event) => self.events.onCancelNameButton(event),
                 onCancelAddSubitem: (event) => self.events.onCancelAddSubitem(event)
-
             }));
 
             parentElement.appendChild(itemHtml);
-
 
             const nameEditForm = itemHtml.querySelector('.item-name-edit-form');
             const titleDisplay = itemHtml.querySelector(`.point-title, .subitem-title`);
@@ -877,7 +865,5 @@ ccm.files["ccm.checklist.js"] = {
             }
             return true;
         }
-
     }
 };
-
