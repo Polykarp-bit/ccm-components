@@ -133,7 +133,7 @@ ccm.files["ccm.checklist.js"] = {
                                         <button class="edit-note-btn" title="%noteTitle%" onclick="%onEditeNote%">%noteIcon%</button>
                                         <p class="%subItemNoteClass%">%noteShow%</p>
                                         <div class="note-edit-form" style="display: none;">
-                                            <textarea class="note-input" rows="3" placeholder="%writeNoteText%">%itemNote%</textarea>
+                                            <textarea class="note-input" rows="3" placeholder="%writeNote%">%itemNote%</textarea>
                                             <button class="save-note-btn" onclick="%onSaveNoteButton%">%saveButton%</button>
                                             <button class="cancel-note-btn" onclick="%onCancelNoteBtn%">%cancelButton%</button>
                                         </div>
@@ -249,7 +249,6 @@ ccm.files["ccm.checklist.js"] = {
                 }
                 parentItemList.unshift(newSubitem);
 
-                console.log(itemKey)
                 if (my.listState[listKey] && my.listState[listKey].items && my.listState[listKey].items[parentItemKey]) {
                     if (my.listState[listKey].items[parentItemKey].checked) {
                         my.listState[listKey].items[parentItemKey].checked = false;
@@ -730,7 +729,7 @@ ccm.files["ccm.checklist.js"] = {
                 subitemProgress: !isEndPoint ? ('<span class="subitem-progress">' + Math.round(subitemProgress) + '</span>') : '',
                 subItemNoteClass: item.note ? 'subitem-note' : 'subitem-note-placeholder',
                 noteShow: item.note ? item.note : "",
-                noteTitle: item.note ? self.text.editNoteText : self.text.addNoteText,
+                noteTitle: item.note ? self.text.editNoteButton : self.text.addNoteButton,
                 itemNote: item.note || '',
                 subItemList: !isEndPoint ? '<div class="subitem-list"></div>' : '',
                 subPointName: self.text.subPointName,
