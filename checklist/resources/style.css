@@ -61,7 +61,6 @@ button {
     padding-bottom: 10px;
 }
 
-/* Der Border-Bottom für Listenelemente innerhalb von #items */
 #items .list-item {
     border-bottom: 1px solid var(--border-color);
 }
@@ -70,7 +69,6 @@ button {
     padding: 1rem 0 1rem 1rem;
 }
 
-/* Einrückung für verschachtelte Listen */
 .subitem-list,
 .subitem-list-children {
     margin-left: 0;
@@ -79,7 +77,6 @@ button {
     display: block;
 }
 
-/* Stile für Nachfahren von .list-item (ehemals fehlerhafter Block) */
 .list-item > div {
     margin-bottom: 1rem;
 }
@@ -397,7 +394,6 @@ button {
     opacity: 1;
 }
 
-/* Beibehaltung der !important-Regeln, da sie möglicherweise dynamisches JS überschreiben */
 .add-subitem.top-add-subitem {
     display: inline-block !important;
     visibility: visible !important;
@@ -445,17 +441,15 @@ button {
  * =================================================================
  */
 
-/* Container für die Sortier-Buttons */
 #element .filter-controls {
     display: inline-flex;
-    background-color: #e9ecef; /* Heller Hintergrund für den "Track" */
+    background-color: #e9ecef;
     border-radius: 8px;
     padding: 4px;
     border: 1px solid var(--border-color);
-    margin-bottom: 1rem; /* Etwas Abstand nach unten */
+    margin-bottom: 1rem;
 }
 
-/* Alle Buttons innerhalb der Sortier-Steuerung */
 #element .filter-controls button {
     border: none;
     background: transparent;
@@ -468,18 +462,14 @@ button {
     transition: all 0.2s ease-in-out;
 }
 
-/* Hover-Effekt für nicht-fokussierte Buttons */
 #element .filter-controls button:not(:focus):hover {
     color: var(--text-primary);
 }
 
-/* Der Trick: Wir stylen den :focus-Zustand so, als wäre er "aktiv".
-   Dieser Stil wird angewendet, nachdem ein Button geklickt wurde,
-   und bleibt, bis ein anderes Element den Fokus erhält.
-*/
+
 #element .filter-controls button:focus {
-    outline: none; /* Entfernt den Standard-Fokus-Rahmen des Browsers */
-    background-color: #ffffff; /* Weißer, hervorgehobener Hintergrund */
-    color: var(--accent-color); /* Akzentfarbe für den Text */
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* Leichter Schatten für Tiefenwirkung */
+    outline: none;
+    background-color: #ffffff;
+    color: var(--accent-color);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }

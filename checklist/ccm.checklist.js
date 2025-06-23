@@ -723,7 +723,7 @@ ccm.files["ccm.checklist.js"] = {
                 saveButton: self.text.saveButton,
                 cancelButton: self.text.cancelButton,
                 // todo wird nicht genutzt, könnte aber als placeholder genutzt werden
-                writeNoteButton: self.text.writeNoteButton,
+                writeNote: self.text.writeNote,
                 itemKey: itemKey,
                 itemDeadline: item.deadline || '',
                 subitemProgress: !isEndPoint ? ('<span class="subitem-progress">' + Math.round(subitemProgress) + '</span>') : '',
