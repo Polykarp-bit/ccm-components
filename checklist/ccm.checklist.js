@@ -20,9 +20,8 @@ ccm.files["ccm.checklist.js"] = {
             cancelText: "Abbrechen",
             addListObjectText: "+ Listenobjekt hinzufügen",
             addText: "Hinzufügen",
-            secondItemNameText: "Objekt-Name (z.B. Aufgabe 2)",
             addSubpointText: "+",
-            removeText: "Enfernen",
+            removeText: "Entfernen",
             subPointText: 'Unterpunkt-Name (z.B. Unteraufgabe)',
             editText: "Bearbeiten",
             deleteText: "Löschen",
@@ -34,6 +33,12 @@ ccm.files["ccm.checklist.js"] = {
             editNoteText: "Notiz bearbeiten",
             addNoteText: "Notiz hinzufügen",
             errorLoginRequired: "Bitte melde dich an, um fortzufahren.",
+            toggleOpenIcon: "▼",
+            toggleClosedIcon: "▶",
+            editIcon: "&#9998;",
+            deleteIcon: "🗑",
+            addIcon: "+",
+            noteIcon: "🗒️"
         },
         helper: ["ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-7.2.0.mjs"],
         html: {
@@ -63,7 +68,7 @@ ccm.files["ccm.checklist.js"] = {
                     <div class="item-header">
                         
                         <div class="item-header-left">
-                           <button class="toggle-item" onclick="%onClickToggleButton%">▼</button>
+                           <button class="toggle-item" onclick="%onClickToggleButton%">%toggleOpenIcon%</button>
                             <div class="list-title-wrapper">
                                 <h3 class="list-title-heading">%listTitle%</h3>
                                 <div class="list-name-edit-form" style="display: none;">
@@ -72,13 +77,13 @@ ccm.files["ccm.checklist.js"] = {
                                     <button class="cancel-list-name-btn" onclick="%onCancelListName%">%cancelText%</button>
                                 </div>
                             </div>
-                            <button class="edit-list-name-btn" title="%editText%" onclick="%onEditListName%">&#9998;</button>
+                            <button class="edit-list-name-btn" title="%editText%" onclick="%onEditListName%">%editIcon%</button>
                             <div class="progress-percentage"></div>
                         </div>
                 
                         <div class="item-header-right">
                              <input type="date" class="deadline-picker" value="%listDeadline%" onchange="%onListDeadlineChange%">
-                             <button class="delete-list" title="%deleteText%" onclick="%onDeleteButton%">🗑</button>
+                             <button class="delete-list" title="%deleteText%" onclick="%onDeleteButton%">%deleteIcon%</button>
                         </div>
                     </div>
                         <div class="item-content">
@@ -91,7 +96,7 @@ ccm.files["ccm.checklist.js"] = {
                                         %addSubpointText% </button> 
                                 </div>
                             <div class='subitem-input' style="display: none">
-                                <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%onConfirmSubitem%">Hinzufügen</button>
+                                <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%onConfirmSubitem%">%addText%</button>
                                 <button class='cancel-subitem' onclick="%onCancelAddSubitem%">%cancelText%</button>
                             </div>
                         </div>
@@ -106,7 +111,7 @@ ccm.files["ccm.checklist.js"] = {
                             
                             <div class="title-edit-wrapper">
                                  <label for="checkbox-%itemKey%" class="%isEndPoint%-title">%itemName%</label>
-                                 <button class="edit-item-name-btn" title="%editItemNameText%" onclick="%onEditName%">&#9998;</button>
+                                 <button class="edit-item-name-btn" title="%editItemNameText%" onclick="%onEditName%">%editIcon%</button>
     
                                  <div class="item-name-edit-form" style="display: none;">
                                      <input type="text" class="item-name-input-field" value="%itemName%">
@@ -116,16 +121,16 @@ ccm.files["ccm.checklist.js"] = {
                             </div>
                             
                             <div class='action-button-group'>
-                                <button class='add-subitem' onclick="%onAddSubitem%">+</button> 
+                                <button class='add-subitem' onclick="%onAddSubitem%">%addIcon%</button> 
                             </div>
                             <div class='subitem-input' style="display: none">
-                                <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%onConfirmSubitem%">Hinzufügen</button>
+                                <input type='text' class='subitem-name' placeholder="%subPointName%"/> <button class='confirm-subitem' onclick="%onConfirmSubitem%">%addText%</button>
                                  <button class='cancel-subitem' onclick="%onCancelAddSubitem%">%cancelText%</button>
                             </div>
                                 </div>
                                 <div class="item-meta-actions">
                                     <div class="note-container">
-                                        <button class="edit-note-btn" title="%noteTitle%" onclick="%onEditeNote%">🗒️</button>
+                                        <button class="edit-note-btn" title="%noteTitle%" onclick="%onEditeNote%">%noteIcon%</button>
                                         <p class="%subItemNoteClass%">%noteShow%</p>
                                         <div class="note-edit-form" style="display: none;">
                                             <textarea class="note-input" rows="3" placeholder=" ">%itemNote%</textarea>
@@ -135,7 +140,7 @@ ccm.files["ccm.checklist.js"] = {
                                 </div>
                                 <input type="date" class="deadline-picker" value=%itemDeadline% onchange="%onDeadlinePicker%">
                                 %subitemProgress%
-                                <button class='remove-subitem' onclick="%onRemoveSubitem%">🗑</button>
+                                <button class='remove-subitem' onclick="%onRemoveSubitem%">%deleteIcon%</button>
                             </div>
                         </div>
                         %subItemList% 
@@ -347,8 +352,7 @@ ccm.files["ccm.checklist.js"] = {
             onClickToggleButton: async (key, itemContent, toggleButton) => {
                 my.listState[key].collapsed = !my.listState[key].collapsed;
                 itemContent.style.display = my.listState[key].collapsed ? 'none' : 'block';
-                toggleButton.textContent = my.listState[key].collapsed ? '▶' : '▼';
-                await self.store.set({
+                toggleButton.textContent = my.listState[key].collapsed ? self.text.toggleClosedIcon : self.text.toggleOpenIcon;                await self.store.set({
                     key: studentId,
                     listsData: my.listsData,
                     listState: my.listState
@@ -655,12 +659,16 @@ ccm.files["ccm.checklist.js"] = {
                 $.setContent(listHtml, $.html(self.html.renderList, {
                     listKey: key,
                     listTitle: listTitle,
+                    addText:self.text.addText,
                     saveText: self.text.saveText,
                     cancelText: self.text.cancelText,
                     deleteText: self.text.deleteText,
                     editText: self.text.editText,
                     addSubpointText: self.text.addSubpointText,
                     subPointName: self.text.subPointText,
+                    editIcon: self.text.editIcon,
+                    deleteIcon: self.text.deleteIcon,
+                    toggleOpenIcon: self.toggleOpenIcon,
 
                     onDeleteButton: () => self.events.onDeleteButton(key, itemElement, listHtml),
                     onClickToggleButton: () => self.events.onClickToggleButton(key, itemContent, toggleButton),
@@ -679,7 +687,7 @@ ccm.files["ccm.checklist.js"] = {
                 itemElement.appendChild(listHtml);
 
                 const itemContent = listHtml.querySelector('.item-content');
-                const subitemList = listHtml.querySelector('.subitem-list');
+               // const subitemList = listHtml.querySelector('.subitem-list');
                 const toggleButton = listHtml.querySelector('.toggle-item');
 
                 if (my.listState[key] && my.listState[key].collapsed) {
@@ -737,13 +745,18 @@ ccm.files["ccm.checklist.js"] = {
                 itemNote: item.note || '',
                 subItemList: !isEndPoint ? '<div class="subitem-list"></div>' : '',
                 subPointName: self.text.subPointText,
+                deleteIcon: self.text.deleteIcon,
+                editIcon: self.text.editIcon,
+                addIcon: self.text.addIcon,
+                noteIcon: self.text.noteIcon,
                 checkboxChecked: my.listState[listKey].items[itemKey]?.checked ? true : false,
                 onEditeNote: (event) => self.events.onEditNote(event, itemHtml, item, noteDisplay, notePlaceholder, editNoteBtn, noteEditForm, noteInput),
                 onSaveNoteButton: (event) => self.events.onSaveNoteButton(event, item, itemHtml, noteInput, listKey, noteEditForm, editNoteBtn),
                 onCancelNoteBtn: (event) => self.events.onCancelNoteBtn(event, noteEditForm, editNoteBtn, noteDisplay, notePlaceholder, item),
                 onDeadlinePicker: async (event) => await self.events.onDeadlinePicker(event, item, listKey),
                 onCheckboxChange: (event) => self.events.onCheckboxChange(event, item, listKey, itemKey, isEndPoint, itemHtml, listContent),
-                onConfirmSubitem: () => self.events.onConfirmSubitem(itemKey, item, null, listKey),                onAddSubitem: () => self.events.onAddSubitem(itemKey),
+                onConfirmSubitem: () => self.events.onConfirmSubitem(itemKey, item, null, listKey),
+                onAddSubitem: () => self.events.onAddSubitem(itemKey),
                 onRemoveSubitem: () => self.events.onRemoveSubitem(item, listKey),
                 onEditName: (event) => self.events.onEditName(event),
                 onSaveItemName: (event) => self.events.onSaveItemName(event, listKey, item),
