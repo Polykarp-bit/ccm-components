@@ -12,13 +12,9 @@
 
     --card-padding: 20px;
     --card-border-radius: 8px;
-    --primary-color: #007bff;
-    --secondary-color: #6c757d;
     --danger-color: #dc3545;
-    --light-gray-color: #f8f9fa;
     --gray-color: #6c757d;
     --border-color: #dee2e6;
-    --shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 h1, h2, h3, h4 {
@@ -587,14 +583,6 @@ textarea.event-note-input {
     font-weight: 600;
 }
 
-.day .events-container p {
-    color: #cbd5e1;
-    font-size: 0.9rem;
-    font-weight: 400;
-    text-align: center;
-    padding-top: 40px;
-}
-
 .event {
     background-color: #ffffff;
     padding: 16px;
@@ -642,7 +630,7 @@ textarea.event-note-input {
     font-size: 0.9rem;
     color: #4b5563;
     line-height: 1.7;
-    white-space: nowrap;
+  //  white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }

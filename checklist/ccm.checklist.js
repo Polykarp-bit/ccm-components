@@ -29,6 +29,7 @@ ccm.files["ccm.checklist.js"] = {
             saveText: "Speichern",
             sortByDeadline: "Nach Fälligkeit sortieren",
             sortAlphabetical: "Alphabetisch sortieren",
+            // todo wird nicht genutzt, könnte aber als placeholder genutzt werden
             writeNoteText: "Notiz eingeben...",
             editNoteText: "Notiz bearbeiten",
             addNoteText: "Notiz hinzufügen",
@@ -725,6 +726,7 @@ ccm.files["ccm.checklist.js"] = {
                 itemName: item.name,
                 saveText: self.text.saveText,
                 cancelText: self.text.cancelText,
+                // todo wird nicht genutzt, könnte aber als placeholder genutzt werden
                 writeNoteText: self.text.writeNoteText,
                 itemKey: itemKey,
                 itemDeadline: item.deadline || '',
@@ -734,6 +736,7 @@ ccm.files["ccm.checklist.js"] = {
                 noteTitle: item.note ? self.text.editNoteText : self.text.addNoteText,
                 itemNote: item.note || '',
                 subItemList: !isEndPoint ? '<div class="subitem-list"></div>' : '',
+                subPointName: self.text.subPointText,
                 checkboxChecked: my.listState[listKey].items[itemKey]?.checked ? true : false,
                 onEditeNote: (event) => self.events.onEditNote(event, itemHtml, item, noteDisplay, notePlaceholder, editNoteBtn, noteEditForm, noteInput),
                 onSaveNoteButton: (event) => self.events.onSaveNoteButton(event, item, itemHtml, noteInput, listKey, noteEditForm, editNoteBtn),

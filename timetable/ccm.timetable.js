@@ -8,12 +8,16 @@ ccm.files["ccm.timetable.js"] = {
     name: "timetable",
     ccm: "https://ccmjs.github.io/ccm/ccm.js",
     config: {
+        // todo kommentar wofür die stores gut sind jeweils
         courseStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_teacher_courses"}],
         studentCourseStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_student_courses"}],
         studentStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_student_schedules"}],
         css: ["ccm.load", "./css/style.css"],
         text: {
-            configureTimetableText: "Stundenplan Konfigurieren",
+            // todo nochmal durchgehen welche nicht genutzt werden, wie zb der erste :)
+            // am beesten doppelklick auf namen und dann command shift f
+            // oder erst gucken was man selbst weiß was nicht mehr drin ist
+            configureTimetableText: "Stundenplan konfigurieren",
             timeTableText: "Stundenplan",
             plsLoggin: "Bitte logge dich ein, um deinen Stundenplan zu sehen",
             timetableEditText: "Stundenplan bearbeiten",
@@ -64,17 +68,17 @@ ccm.files["ccm.timetable.js"] = {
             noNotesText: "Keine Notizen vorhanden",
             noLinksText: "Keine Links vorhanden",
             semesterLabelText: "Semester ",
-            linksLabelText: "Nützliche Links:",
+            linksLabelText: "Nützliche Links",
             linkTitleText: "Titel des Links",
             linkUrlText: "https://beispiel.de",
             addLinkInlineButtonText: "Link hinzufügen",
-            noteLabelText: "Notizen:",
+            noteLabelText: "Notizen",
             noteText: "Notizen:",
             eventItemRoomText: "Raum: ",
             eventItemWhoText: "Dozent: ",
             eventItemPeriodText: "Zeitraum: ",
             toTimeText: "Zur Stundenplanansicht",
-            timetableConfigureText: "Stundenplan Konfigurieren",
+            timetableConfigureText: "Stundenplan konfigurieren",
             ownCourseText: "[eigene Veranstaltung]",
             noStudyText: "Ohne Studiengang",
             nAText: "N/A",
@@ -84,10 +88,23 @@ ccm.files["ccm.timetable.js"] = {
             errorLoginRequired: "Bitte melde dich an, um fortzufahren.",
             errorLinkUrlRequired: "Bitte geben Sie eine URL für den Link ein.",
             removeLinkButtonText: "Link entfernen",
+            unknownText: "Unbekannt",
+            unknownCourseText: "Unbekannter Kurs",
+            noCoursesOnDay: "Keine Kurse an diesem Tag.",
+            iconExpand: "▶",
+            iconCollapse: "▼",
+            errorEventNotFoundInCourse: "FEHLER: Event konnte nicht im Kurs gefunden werden.",
+            errorModalNotFound: "FEHLER: Das Modal-Element wurde nicht im DOM gefunden."
         },
         user: ["ccm.instance", "https://ccmjs.github.io/akless-components/user/ccm.user.js"],
         helper: ["ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-8.4.2.min.mjs"],
         html: {
+            userTemplate: `
+                <div class="main">
+                    <div id="user"></div>
+                    <div id="content"></div>
+                </div>
+            `,
             mainTemplate: `
                 <div id="main-template">
                     <div id="toggle-button">
@@ -121,7 +138,6 @@ ccm.files["ccm.timetable.js"] = {
                             </form>
                         </div>
                         <div class="dropdown-container">
-                        
                             <div id="course-dropdown-content" class="dropdown-content">
                                 <input type="text" id="course-search" placeholder="%courseSearchPlaceholderText%">
                                 <select id="day-filter">
@@ -238,9 +254,11 @@ ccm.files["ccm.timetable.js"] = {
                             <div class="course-details">
                                 <h3>%courseTitle%</h3>
                                 <div class="event-info" data-event-key="%eventKey%">%eventTimeData%</div>
+                                <div class="event-teacher-info">%eventTeacherInfo%</div>
+                                <div class="event-period-info">%eventPeriodInfo%</div>
                             </div>
                             <div class="course-actions">
-                                <div id="toggle-icon-%eventKey%" class="card-toggle-icon">▼</div>
+                                <div id="toggle-icon-%eventKey%" class="card-toggle-icon">%iconExpand%</div>
                                 <div class="event-color-picker">
                                     <label for="event-color-%eventKey%">%eventColorText%</label>
                                     <input type="color" class="color-picker" id="event-color-%eventKey%" value="%colorValue%">
@@ -265,7 +283,6 @@ ccm.files["ccm.timetable.js"] = {
                         </div>
                     </div>
                 `,
-
                 linkDisplayItem: `
                     <ul class="current-event-links">
                         <li class="event-link-display-item">
@@ -327,7 +344,7 @@ ccm.files["ccm.timetable.js"] = {
                         <a href="%url%" target="_blank" rel="noopener noreferrer">%linkName%</a>
                     </div>
                 `,
-                noEvents: `<p>Keine Kurse an diesem Tag.</p>`
+                noEvents: `<p>%noCoursesOnDay%</p>`
             }
         },
         onchange: event => console.log(event)
@@ -350,7 +367,7 @@ ccm.files["ccm.timetable.js"] = {
                 "sa": "Samstag", "samstag": "Samstag",
                 "so": "Sonntag", "sonntag": "Sonntag"
             };
-            return dayMap[day.toLowerCase()] || "Unbekannt";
+            return dayMap[day.toLowerCase()] || self.text.unknownText;
         };
 
         this.timeToMinutes = (time) => {
@@ -426,7 +443,6 @@ ccm.files["ccm.timetable.js"] = {
                     alert(e.message);
                 }
             },
-
             onRemoveLinkButton: (eventKey, linkKey, currentLinksDiv) => {
                 return async () => {
                     const course = currentCourses.find(c => c.value.events.some(e => e.key === eventKey));
@@ -447,6 +463,24 @@ ccm.files["ccm.timetable.js"] = {
         };
 
         this.start = async () => {
+
+            $.setContent(this.element, $.html(this.html.userTemplate));
+
+            if (this.user) {
+                $.setContent(this.element.querySelector('#user'), this.user.root);
+                this.user.start();
+            }
+
+
+            studentId = await this.user.getValue();
+            if (!studentId) {
+                alert(self.text.errorLoginRequired);
+                return;
+            }
+            studentId = studentId.key;
+
+
+
             console.log("courseStore:", await self.courseStore.get());
             console.log("studentCourseStore:", await self.studentCourseStore.get());
             console.log("studentStore:", await self.studentStore.get());
@@ -457,20 +491,7 @@ ccm.files["ccm.timetable.js"] = {
                 timeTableText: self.text.timeTableText,
                 onToggleButton: self.events.onToggleButton
             });
-            $.setContent(self.element, mainHtml);
-
-            if (this.user) {
-                mainHtml.querySelector('#user').append(this.user.root);
-                this.user.start();
-            }
-
-            studentId = await this.user.getValue();
-            if (!studentId) {
-                alert(self.text.errorLoginRequired);
-                console.log("User is not logged in");
-                return;
-            }
-            studentId = studentId.key;
+            $.setContent(self.element.querySelector('#content'), mainHtml);
 
             let savedSchedule;
             try {
@@ -560,18 +581,17 @@ ccm.files["ccm.timetable.js"] = {
             const container = self.element.querySelector('#main-content');
             $.setContent(container, mainHtml);
 
+            // todo werden die variablen hier gebraucht?
             const courseFormContainer = container.querySelector('#course-form-container');
             const courseForm = container.querySelector('#course-form');
             const addCourseButton = container.querySelector('#add-course-button');
             const cancelButton = container.querySelector('#cancel-button');
             const eventsContainer = courseForm.querySelector('#events-container');
 
-            let eventIndex = 0;
-
             await self.initSelectCoursesDropdown(container);
 
             currentCourses.forEach(course => {
-                self.renderCourse(course, self.updateParentCheckboxes);
+                self.renderCourse(course);
             });
         };
 
@@ -600,7 +620,6 @@ ccm.files["ccm.timetable.js"] = {
                     if (group) eventData.group = group;
                     return eventData;
                 });
-
 
                 const courseData = {
                     course: courseName,
@@ -680,19 +699,18 @@ ccm.files["ccm.timetable.js"] = {
                         });
                         $.append(semesterHtml.querySelector('.courses'), courseHtml);
 
-                        for (const kurs of courseList) {
-                            if (kurs?.value?.events) {
-                                for (const event of kurs.value.events) {
-                                    const eventInfo = `${event.type} (${event.day}, ${event.from} - ${event.until}, Raum: ${event.room}${event.who ? `, Dozent: ${event.who}` : ''}${event.group ? `, Gruppe: ${event.group}` : ''}, ${event.period_from} - ${event.period_until})`;
+                        for (const courseItem of courseList) {
+                            if (courseItem?.value?.events) {
+                                for (const event of courseItem.value.events) {
                                     const isChecked = currentCourses.some(c => c.value.events.some(e => e.key === event.key));
-
+                                    const eventInfo = `${event.type} (${event.day}, ${event.from} - ${event.until}, ${self.text.eventItemRoomText}${event.room}${event.who ? `, ${self.text.eventItemWhoText}${event.who}` : ''}${event.group ? `, ${self.text.groupText} ${event.group}` : ''}, ${event.period_from} - ${event.period_until})`;
                                     const eventItemHtml = self.ccm.helper.html(self.html.editView.checkboxStudyEvent, {
-                                        courseKey: kurs.key,
+                                        courseKey: courseItem.key,
                                         eventKey: event.key,
                                         day: self.normalizeDay(event.day),
                                         eventDay: self.normalizeDay(event.day),
                                         isChecked: isChecked,
-                                        eventInfo: eventInfo + (kurs.value.createdBy === "student" ? ` ${self.text.ownCourseText}` : '')
+                                        eventInfo: eventInfo + (courseItem.value.createdBy === "student" ? ` ${self.text.ownCourseText}` : '')
                                     });
                                     $.append(courseHtml.querySelector('.courses'), eventItemHtml);
                                 }
@@ -807,7 +825,7 @@ ccm.files["ccm.timetable.js"] = {
                 $.setContent(selectedScheduleContainer, '');
                 currentCourses.forEach(course => {
                     if (course.value.events.length > 0) {
-                        self.renderCourse(course, self.updateParentCheckboxes);
+                        self.renderCourse(course);
                     }
                 });
             };
@@ -839,8 +857,7 @@ ccm.files["ccm.timetable.js"] = {
                     if (affectedEvents.length > 0) {
                         affectedEvents.forEach((event) => {
                             self.updateParentCheckboxes(event)
-                        })
-                        ;
+                        });
                     }
 
                     await self.saveSelectedCourses();
@@ -869,23 +886,25 @@ ccm.files["ccm.timetable.js"] = {
             }
         };
 
-        this.renderCourse = (course, updateParentCheckbox) => {
+        this.renderCourse = (course) => {
             const selectedScheduleContainer = self.element.querySelector('#selected-schedule');
 
             if (!course.value.events || !Array.isArray(course.value.events)) {
                 console.warn(`Kurs ${course.value.course} hat keine gültigen Events.`, course);
                 course.value.events = [];
             }
-            // hier sind noch sahen bei denen du das ins onclick im tepmalet schreiben kannst und dann noch in events auslagern
+
             course.value.events.forEach(event => {
                 if (!event.links) event.links = [];
                 if (!event.color) event.color = '#cccccc';
 
                 const courseHtml = self.ccm.helper.html(self.html.editView.courseItem, {
                     key: course.key,
-                    courseTitle: course.value.course + " (" + event.type + ")" || "Unbekannter Kurs",
+                    courseTitle: (course.value.course ? `${course.value.course} (${event.type})` : self.text.unknownCourseText),
                     eventKey: event.key,
-                    eventTimeData: `${event.day}, ${event.from} - ${event.until}, Raum: ${event.room}`,
+                    eventTeacherInfo: event.who ? `${self.text.eventItemWhoText}${event.who}` : '',
+                    eventPeriodInfo: (event.period_from && event.period_until) ? `${self.text.eventItemPeriodText}${event.period_from} - ${event.period_until}` : '',
+                    eventTimeData: `${event.day}, ${event.from} - ${event.until}, ${self.text.eventItemRoomText}${event.room}`,
                     borderColor: event.color,
                     colorValue: event.color,
                     eventColorText: self.text.eventColorText,
@@ -896,6 +915,7 @@ ccm.files["ccm.timetable.js"] = {
                     addLinkInlineButtonText: self.text.addLinkInlineButtonText,
                     noteLabelText: self.text.noteLabelText,
                     noteText: self.text.noteLabelText,
+                    //todo das und das darunter könnt man noch zu den events packen
                     onAddLink: async () => {
                         const title = newLinkTitleInput.value.trim();
                         let url = newLinkUrlInput.value.trim();
@@ -931,7 +951,7 @@ ccm.files["ccm.timetable.js"] = {
                 const toggleIcon = courseHtml.querySelector(`#toggle-icon-${event.key}`);
 
                 cardBody.classList.add('collapsed'); // Karte standardmäßig einklappen
-                toggleIcon.textContent = '▶';
+                toggleIcon.textContent = self.text.iconExpand;
 
                 cardHeader.addEventListener('click', (e) => {
                     if (e.target.closest('button, input')) {
@@ -939,7 +959,7 @@ ccm.files["ccm.timetable.js"] = {
                     }
 
                     const isCollapsed = cardBody.classList.toggle('collapsed');
-                    toggleIcon.textContent = isCollapsed ? '▶' : '▼';
+                    toggleIcon.textContent = isCollapsed ? self.text.iconExpand : self.text.iconCollapse;
                 });
 
                 const colorPicker = courseHtml.querySelector(`#event-color-${event.key}`);
@@ -1097,7 +1117,7 @@ ccm.files["ccm.timetable.js"] = {
                                 title: `${course.value.course} (${event.type})${event.group ? ` [${event.group}]` : ''}`,
                                 time: `${event.from} - ${event.until}`,
                                 room: event.room,
-                                who: event.who || "Unbekannt",
+                                who: event.who || self.text.unknownText,
                                 period: `${event.period_from} - ${event.period_until}`,
                                 color: event.color || "#F0F0F0",
                                 courseId: course.key,
@@ -1146,7 +1166,7 @@ ccm.files["ccm.timetable.js"] = {
 
                     $.setContent(eventsContainer, eventItems);
                 } else {
-                    $.setContent(eventsContainer, $.html(self.html.scheduleView.noEvents));
+                    $.setContent(eventsContainer, $.html(self.html.scheduleView.noEvents, { noCoursesOnDay: self.text.noCoursesOnDay }));
                 }
 
                 scheduleContainer.appendChild(dayColumn);
@@ -1160,12 +1180,12 @@ ccm.files["ccm.timetable.js"] = {
                 const course = currentCourses.find(c => c.key === courseId);
                 const event = course.value.events.find(e => e.key === eventId);
                 if (!event) {
-                    console.error('ABBRUCH: Event konnte nicht im Kurs gefunden werden.');
+                    console.error(self.text.errorEventNotFoundInCourse);
                     return;
                 }
                 const modal = self.element.querySelector('#modal');
                 if (!modal) {
-                    console.error('ABBRUCH: Das Modal-Element mit der ID #modal wurde nicht im DOM gefunden.');
+                    console.error(self.text.errorModalNotFound);
                     return;
                 }
                 const modalTitle = modal.querySelector("#modal-title");
@@ -1198,7 +1218,7 @@ ccm.files["ccm.timetable.js"] = {
             if (modal) {
                 modal.classList.remove('is-open');
             } else {
-                console.error("Modal element not found in closeModal!");
+                console.error(self.text.errorModalNotFound);
             }
         };
     }
