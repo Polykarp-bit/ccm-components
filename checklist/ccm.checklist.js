@@ -51,15 +51,16 @@ ccm.files["ccm.checklist.js"] = {
             mainContent: `
                 <div class="container">
                     <h1>%myList%</h1>
-                    <div class="filter-controls">
-                        <button onclick="%onSortAlphabetical%">%sortAlphabeticalButton%</button>
-                        <button onclick="%onSortByDeadline%">%sortByDeadlineButton%</button>
-                    </div>
                     <div class="create-list">
                         <input type="text" id="list-name" placeholder="%listName%">
                         <input type="text" id="first-item-name" placeholder="%firstItemName%">
                         <button id="start-create" onclick="%onStartCreateButton%">%listCreateButton%</button>
                     </div>
+                    <div class="filter-controls">
+                        <button onclick="%onSortAlphabetical%">%sortAlphabeticalButton%</button>
+                        <button onclick="%onSortByDeadline%">%sortByDeadlineButton%</button>
+                    </div>
+                    
                     <div id="items"></div>
                 </div>
             `,
