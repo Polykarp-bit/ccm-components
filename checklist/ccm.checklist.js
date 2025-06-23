@@ -92,7 +92,7 @@ ccm.files["ccm.checklist.js"] = {
                             </div>
                             <div class="subitem-list">
                                 <div class='action-button-group'>
-                                    <button class='add-subitem top-add-subitem' onclick="%onAddSubitemToRoot%">
+                                    <button class='add-subitem top-add-subitem' onclick="%onAddSubitem%">
                                         %addSubpointText% </button> 
                                 </div>
                             <div class='subitem-input' style="display: none">
@@ -162,18 +162,6 @@ ccm.files["ccm.checklist.js"] = {
 
         this.events = {
             onAddSubitem: (itemKey, event) => {
-                if (event) event.stopPropagation();
-                const currentItemRenderedRoot = self.element.querySelector(`[data-id="${itemKey}"]`);
-
-                const subitemInputContainer = currentItemRenderedRoot.querySelector('.subitem-input');
-                subitemInputContainer.style.display === 'none' ? subitemInputContainer.style.display = 'block' : subitemInputContainer.style.display = 'none';
-                const subitemNameInputForNew = subitemInputContainer.querySelector('.subitem-name');
-                if (subitemNameInputForNew) {
-                    subitemNameInputForNew.value = '';
-                    subitemNameInputForNew.focus();
-                }
-            },
-            onAddSubitemToRoot: (itemKey, event) => {
                 if (event) event.stopPropagation();
                 const currentItemRenderedRoot = self.element.querySelector(`[data-id="${itemKey}"]`);
 
@@ -672,7 +660,7 @@ ccm.files["ccm.checklist.js"] = {
 
                     onDeleteButton: () => self.events.onDeleteButton(key, itemElement, listHtml),
                     onClickToggleButton: () => self.events.onClickToggleButton(key, itemContent, toggleButton),
-                    onAddSubitemToRoot: () => self.events.onAddSubitemToRoot(key),
+                    onAddSubitem: () => self.events.onAddSubitem(key),
                     onConfirmSubitem: () => self.events.onConfirmSubitem(key, null),
 
                     listDeadline: listData.deadline || '',
@@ -687,7 +675,7 @@ ccm.files["ccm.checklist.js"] = {
                 itemElement.appendChild(listHtml);
 
                 const itemContent = listHtml.querySelector('.item-content');
-               // const subitemList = listHtml.querySelector('.subitem-list');
+                const subitemList = listHtml.querySelector('.subitem-list');
                 const toggleButton = listHtml.querySelector('.toggle-item');
 
                 if (my.listState[key] && my.listState[key].collapsed) {
