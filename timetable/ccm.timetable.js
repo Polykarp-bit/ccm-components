@@ -8,16 +8,14 @@ ccm.files["ccm.timetable.js"] = {
     name: "timetable",
     ccm: "https://ccmjs.github.io/ccm/ccm.js",
     config: {
-        // todo kommentar wofür die stores gut sind jeweils
+        // Enthält alle von Kurse aus dem Kurriculum
         courseStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_teacher_courses"}],
+        // Enthält alle von Studenten selbst erstellten Kurse
         studentCourseStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_student_courses"}],
+        // Speichert die individuelle Stundenplan-Zusammenstellung für jeden Studenten
         studentStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_student_schedules"}],
         css: ["ccm.load", "./css/style.css"],
         text: {
-            // todo nochmal durchgehen welche nicht genutzt werden, wie zb der erste :)
-            // am beesten doppelklick auf namen und dann command shift f
-            // oder erst gucken was man selbst weiß was nicht mehr drin ist
-            configureTimetableText: "Stundenplan konfigurieren",
             timeTableText: "Stundenplan",
             plsLoggin: "Bitte logge dich ein, um deinen Stundenplan zu sehen",
             timetableEditText: "Stundenplan bearbeiten",
@@ -65,15 +63,15 @@ ccm.files["ccm.timetable.js"] = {
             groupPlaceholderText: "z.B. A",
             removeButtonText: "Veranstaltung entfernen",
             eventColorText: "Farbe:",
-            noNotesText: "Keine Notizen vorhanden",
+            noNotesText: "Keine Notiz vorhanden",
             noLinksText: "Keine Links vorhanden",
             semesterLabelText: "Semester ",
             linksLabelText: "Nützliche Links",
             linkTitleText: "Titel des Links",
             linkUrlText: "https://beispiel.de",
             addLinkInlineButtonText: "Link hinzufügen",
-            noteLabelText: "Notizen",
-            noteText: "Notizen:",
+            noteLabelText: "Notiz",
+            noteText: "Notiz",
             eventItemRoomText: "Raum: ",
             eventItemWhoText: "Dozent: ",
             eventItemPeriodText: "Zeitraum: ",
@@ -256,6 +254,7 @@ ccm.files["ccm.timetable.js"] = {
                                 <div class="event-info" data-event-key="%eventKey%">%eventTimeData%</div>
                                 <div class="event-teacher-info">%eventTeacherInfo%</div>
                                 <div class="event-period-info">%eventPeriodInfo%</div>
+
                             </div>
                             <div class="course-actions">
                                 <div id="toggle-icon-%eventKey%" class="card-toggle-icon">%iconExpand%</div>
@@ -278,7 +277,7 @@ ccm.files["ccm.timetable.js"] = {
                             </div>
                             <div class="event-section" id="event-note-container-%eventKey%">
                                 <label class="section-label" for="event-note-input-%eventKey%">%noteLabelText%</label>
-                                <textarea class="event-note-input" id="event-note-input-%eventKey%" placeholder="%noteText%" onchange="%onChangeNote%"></textarea>
+                                <textarea class="event-note-input" id="event-note-input-%eventKey%" data-event-key="%eventKey%" placeholder="%noteText%" onchange="%onChangeNote%"></textarea>
                             </div>
                         </div>
                     </div>
@@ -453,7 +452,54 @@ ccm.files["ccm.timetable.js"] = {
                         await self.saveSelectedCourses();
                     }
                 };
+            },
+            onAddLink: async (domEvent) => {
+                const button = domEvent.target;
+                const eventKey = button.dataset.eventKey;
+
+                const course = currentCourses.find(c => c.value.events.some(e => e.key === eventKey));
+                const eventData = course?.value.events.find(e => e.key === eventKey);
+                if (!eventData) return;
+
+                const linksSection = button.closest(`#event-links-section-${eventKey}`);
+                const titleInput = linksSection.querySelector('.new-link-title-inline');
+                const urlInput = linksSection.querySelector('.new-link-url-inline');
+                const linksDiv = linksSection.querySelector('.current-event-links');
+
+                const title = titleInput.value.trim();
+                let url = urlInput.value.trim();
+                if (url) {
+                    if (!url.match(/^https?:\/\//i)) {
+                        url = 'https://' + url;
+                    }
+                    if (!eventData.links) eventData.links = [];
+                    eventData.links.push({
+                        key: self.ccm.helper.generateKey(),
+                        title: title || url,
+                        url: url
+                    });
+                    titleInput.value = '';
+                    urlInput.value = '';
+                    self.refreshLinksDisplay(eventData, linksDiv);
+                    await self.saveSelectedCourses();
+                } else {
+                    alert(self.text.errorLinkUrlRequired);
+                }
+            },
+            onChangeNote: async (domEvent) => {
+
+                const noteInput = domEvent.target;
+                console.log(noteInput.id);
+                const eventKey = noteInput.dataset.eventKey;
+                console.log(eventKey)
+                const course = currentCourses.find(c => c.value.events.some(e => e.key === eventKey));
+                const eventData = course?.value.events.find(e => e.key === eventKey);
+                if (!eventData) return;
+
+                eventData.note = noteInput.value.trim();
+                await self.saveSelectedCourses();
             }
+
         };
 
         this.init = async () => {
@@ -463,7 +509,6 @@ ccm.files["ccm.timetable.js"] = {
         };
 
         this.start = async () => {
-
             $.setContent(this.element, $.html(this.html.userTemplate));
 
             if (this.user) {
@@ -471,15 +516,12 @@ ccm.files["ccm.timetable.js"] = {
                 this.user.start();
             }
 
-
             studentId = await this.user.getValue();
             if (!studentId) {
                 alert(self.text.errorLoginRequired);
                 return;
             }
             studentId = studentId.key;
-
-
 
             console.log("courseStore:", await self.courseStore.get());
             console.log("studentCourseStore:", await self.studentCourseStore.get());
@@ -506,28 +548,31 @@ ccm.files["ccm.timetable.js"] = {
                 alert(self.text.errorSaveCoursesFailed);
                 return;
             }
-            console.log("allCourses", allCourses);
 
             if (savedSchedule?.value?.courses) {
-                currentCourses = savedSchedule.value.courses
-                    .filter(course => {
-                        const fullCourse = allCourses.find(c => c.key === course.key) || {
+                currentCourses = [];
+                for (const savedCourse of savedSchedule.value.courses) {
+                    const fullCourse = allCourses.find(c => c.key === savedCourse.key);
+                    if (fullCourse && fullCourse.value && fullCourse.value.course) {
+                        const courseEvents = fullCourse.value.events
+                            .filter(event => savedCourse.events.some(se => se.key === event.key))
+                            .map(event => ({
+                                ...event,
+                                color: savedCourse.events.find(se => se.key === event.key)?.color || "",
+                                note: savedCourse.events.find(se => se.key === event.key)?.note || "",
+                                links: savedCourse.events.find(se => se.key === event.key)?.links || []
+                            }));
+                        currentCourses.push({
+                            key: fullCourse.key,
+                            course: fullCourse.value.course,
                             value: {
-                                course: course.course,
-                                events: course.events
+                                course: fullCourse.value.course,
+                                events: courseEvents,
+                                course_of_study: fullCourse.value.course_of_study || []
                             }
-                        };
-                        return fullCourse && fullCourse.value && fullCourse.value.course;
-                    })
-                    .map(course => ({
-                        key: course.key,
-                        course: course.course,
-                        value: {
-                            course: course.course,
-                            events: course.events || [],
-                            course_of_study: course.course_of_study || []
-                        }
-                    }));
+                        });
+                    }
+                }
                 console.log("currentCourses", currentCourses);
             } else {
                 isEditMode = true;
@@ -576,17 +621,11 @@ ccm.files["ccm.timetable.js"] = {
                 onAddCourseButton: self.events.onAddCourseButton,
                 onCancelButton: self.events.onCancelButton,
                 onCourseForm: self.events.onCourseForm,
-                onEventContainer: self.events.onEventContainer
+                //todo
+                //onEventContainer: self.events.onEventContainer
             });
             const container = self.element.querySelector('#main-content');
             $.setContent(container, mainHtml);
-
-            // todo werden die variablen hier gebraucht?
-            const courseFormContainer = container.querySelector('#course-form-container');
-            const courseForm = container.querySelector('#course-form');
-            const addCourseButton = container.querySelector('#add-course-button');
-            const cancelButton = container.querySelector('#cancel-button');
-            const eventsContainer = courseForm.querySelector('#events-container');
 
             await self.initSelectCoursesDropdown(container);
 
@@ -630,7 +669,7 @@ ccm.files["ccm.timetable.js"] = {
                 };
 
                 const courseId = self.ccm.helper.generateKey();
-                await self.studentCourseStore.set({key: courseId, value: courseData});
+                await self.studentCourseStore.set({ key: courseId, value: courseData });
                 console.log("Neuer studentischer Kurs hinzugefügt:", courseData);
 
                 const newCourse = {
@@ -639,7 +678,21 @@ ccm.files["ccm.timetable.js"] = {
                 };
                 allCourses.push(newCourse);
 
-                currentCourses.push(newCourse);
+                // Nur die Referenz in currentCourses speichern
+                currentCourses.push({
+                    key: courseId,
+                    course: courseName,
+                    value: {
+                        course: courseName,
+                        events: events.map(event => ({
+                            key: event.key,
+                            color: "",
+                            note: "",
+                            links: []
+                        })),
+                        course_of_study: []
+                    }
+                });
                 await self.saveSelectedCourses();
                 return newCourse;
             } catch (e) {
@@ -759,21 +812,23 @@ ccm.files["ccm.timetable.js"] = {
                     value: {
                         student_id: studentId,
                         courses: currentCourses
-                            .filter(course => course && course.value && course.value.course)
+                            .filter(course => course && course.key)
                             .map(course => ({
                                 key: course.key,
-                                course: course.value.course,
-                                events: course.value.events.map(event => ({
-                                    ...event,
-                                    color: event.color || "",
-                                    note: event.note || ""
-                                }))
+                                events: course.value.events
+                                    .filter(event => event && event.key)
+                                    .map(event => ({
+                                        key: event.key,
+                                        color: event.color || "",
+                                        note: event.note || "",
+                                        links: event.links || []
+                                    }))
                             }))
                     }
                 };
                 await self.studentStore.set(scheduleData);
-                console.log("Kurse automatisch gespeichert:", scheduleData);
-                this.onchange && this.onchange({event: "saveCourse", instance: self});
+                console.log("Kurse (Referenzen) automatisch gespeichert:", scheduleData);
+                this.onchange && this.onchange({ event: "saveCourse", instance: self });
             } catch (e) {
                 console.error("Fehler beim Speichern der Kurse:", e);
                 alert(self.text.errorSaveCoursesFailed);
@@ -916,32 +971,8 @@ ccm.files["ccm.timetable.js"] = {
                     noteLabelText: self.text.noteLabelText,
                     noteText: self.text.noteLabelText,
                     //todo das und das darunter könnt man noch zu den events packen
-                    onAddLink: async () => {
-                        const title = newLinkTitleInput.value.trim();
-                        let url = newLinkUrlInput.value.trim();
-                        if (url) {
-                            if (!url.match(/^https?:\/\//i)) {
-                                url = 'https://' + url;
-                            }
-                            if (!event.links) event.links = [];
-                            event.links.push({
-                                key: self.ccm.helper.generateKey(),
-                                title: title || url,
-                                url: url
-                            });
-                            newLinkTitleInput.value = '';
-                            newLinkUrlInput.value = '';
-                            self.refreshLinksDisplay(event, currentLinksDiv);
-                            await self.saveSelectedCourses();
-                        } else {
-                            alert(self.text.errorLinkUrlRequired);
-                        }
-                    },
-                    onChangeNote: async () => {
-                        const noteInput = courseHtml.querySelector(`#event-note-input-${event.key}`);
-                        event.note = noteInput.value.trim();
-                        await self.saveSelectedCourses()
-                    }
+                    onAddLink: self.events.onAddLink,
+                    onChangeNote: self.events.onChangeNote
                 });
 
                 $.append(selectedScheduleContainer, courseHtml);
