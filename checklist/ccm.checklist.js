@@ -28,8 +28,7 @@ ccm.files["ccm.checklist.js"] = {
             saveButton: "Speichern",
             sortByDeadlineButton: "Nach Fälligkeit sortieren",
             sortAlphabeticalButton: "Alphabetisch sortieren",
-            // todo wird nicht genutzt, könnte aber als placeholder genutzt werden
-            writeNote: "Notiz eingeben...",
+            writeNote: "Notiz eingeben ...",
             editNoteButton: "Notiz bearbeiten",
             addNoteButton: "Notiz hinzufügen",
             errorLoginRequired: "Bitte melde dich an, um fortzufahren.",
@@ -310,7 +309,7 @@ ccm.files["ccm.checklist.js"] = {
                 label.style.display = '';
                 editButton.style.display = '';
             },
-            onRemoveSubitem: async (item, listKey) => {
+            onRemoveSubitem: async (item, listKey, stateKey) => {
                 const listItems = my.listsData[listKey].items;
 
                 if (listItems.length === 1 && listItems[0].key === item.key) {
@@ -320,6 +319,7 @@ ccm.files["ccm.checklist.js"] = {
 
                 if (findAndOperateRecursive(listItems, item.key, (foundItem, parentArray, index) => {
                     parentArray.splice(index, 1);
+                    removeStateRecursively(listKey, stateKey);
                 })) {
                     await self.store.set({key: studentId, listsData: my.listsData, listState: my.listState});
                     await renderLists();
@@ -327,20 +327,40 @@ ccm.files["ccm.checklist.js"] = {
                     console.warn(`Item "${item.name}" konnte nicht zum Löschen gefunden werden.`);
                 }
             },
-            onDeleteButton: async (key, itemElement, listHtml) => {
-                delete my.listsData[key];
-                delete my.listState[key];
-                itemElement.removeChild(listHtml);
-                self.store.set({
+            onDeleteButton: async (listKey, listContainer, listHtml) => {
+
+                function removeAllStateKeys(items, parentPath = '') {
+                    items.forEach(it => {
+                        const fullKey = parentPath ? `${parentPath}§§§${it.key}` : it.key;
+
+                        removeStateRecursively(listKey, fullKey);
+
+                        if (it.items && it.items.length) {
+                            removeAllStateKeys(it.items, fullKey);
+                        }
+                    });
+                }
+
+                const listItems = my.listsData[listKey]?.items || [];
+                removeAllStateKeys(listItems);
+
+                delete my.listsData[listKey];
+                delete my.listState[listKey];
+                listContainer.removeChild(listHtml);
+
+                await self.store.set({
                     key: studentId,
                     listsData: my.listsData,
                     listState: my.listState
                 });
             },
+
+
             onClickToggleButton: async (key, itemContent, toggleButton) => {
                 my.listState[key].collapsed = !my.listState[key].collapsed;
                 itemContent.style.display = my.listState[key].collapsed ? 'none' : 'block';
-                toggleButton.textContent = my.listState[key].collapsed ? self.text.toggleClosedIcon : self.text.toggleOpenIcon;                await self.store.set({
+                toggleButton.textContent = my.listState[key].collapsed ? self.text.toggleClosedIcon : self.text.toggleOpenIcon;
+                await self.store.set({
                     key: studentId,
                     listsData: my.listsData,
                     listState: my.listState
@@ -520,6 +540,8 @@ ccm.files["ccm.checklist.js"] = {
                 my.listsData = my.listsData || {};
                 my.listState = my.listState || {};
 
+                console.log('[INIT] listsData', JSON.parse(JSON.stringify(my.listsData)));
+                console.log('[INIT] listState', JSON.parse(JSON.stringify(my.listState)));
 
                 Object.keys(my.listsData).forEach(listKey => {
                     const list = my.listsData[listKey];
@@ -546,14 +568,10 @@ ccm.files["ccm.checklist.js"] = {
                     onSortByDeadline: self.events.onSortByDeadline,
                     onSortAlphabetical: self.events.onSortAlphabetical,
                     onStartCreateButton: () => self.events.onStartCreateButton(createListForm),
-                    //onStartCreateButton: () => self.events.onStartCreateButton(createListForm),
                 }));
                 $.setContent(self.element.querySelector('#content'), itemHtml);
 
                 const createListForm = self.element.querySelector('.create-list');
-                const listForm = self.element.querySelector('.list-form');
-                const previewList = self.element.querySelector('#preview-list');
-                const itemElement = self.element.querySelector('#items');
 
                 await renderLists();
             } catch (e) {
@@ -580,7 +598,7 @@ ccm.files["ccm.checklist.js"] = {
             }
             items.forEach(item => {
                 const itemKey = parentKey ? `${parentKey}§§§${item.key}` : item.key;
-                state.items[itemKey] = state.items[itemKey] || {checked: false, collapsed: false};
+                state.items[itemKey] = state.items[itemKey] || {checked: false};
                 initializeState(listKey, item.items, state, itemKey);
             });
         }
@@ -711,7 +729,7 @@ ccm.files["ccm.checklist.js"] = {
                 initializeState(listKey, my.listsData[listKey], my.listState[listKey]);
             }
             if (!my.listState[listKey].items[itemKey]) {
-                my.listState[listKey].items[itemKey] = {checked: false, collapsed: false};
+                my.listState[listKey].items[itemKey] = {checked: false};
             }
 
             const itemHtml = document.createElement('div');
@@ -723,7 +741,6 @@ ccm.files["ccm.checklist.js"] = {
                 itemName: item.name,
                 saveButton: self.text.saveButton,
                 cancelButton: self.text.cancelButton,
-                // todo wird nicht genutzt, könnte aber als placeholder genutzt werden
                 writeNote: self.text.writeNote,
                 itemKey: itemKey,
                 itemDeadline: item.deadline || '',
@@ -748,7 +765,7 @@ ccm.files["ccm.checklist.js"] = {
                 onCheckboxChange: (event) => self.events.onCheckboxChange(event, item, listKey, itemKey, isEndPoint, itemHtml, listContent),
                 onConfirmSubitem: () => self.events.onConfirmSubitem(itemKey, item, null, listKey),
                 onAddSubitem: () => self.events.onAddSubitem(itemKey),
-                onRemoveSubitem: () => self.events.onRemoveSubitem(item, listKey),
+                onRemoveSubitem: () => self.events.onRemoveSubitem(item, listKey, itemKey),
                 onEditName: (event) => self.events.onEditName(event),
                 onSaveItemName: (event) => self.events.onSaveItemName(event, listKey, item),
                 onCancelNameButton: (event) => self.events.onCancelNameButton(event),
@@ -756,11 +773,6 @@ ccm.files["ccm.checklist.js"] = {
             }));
 
             parentElement.appendChild(itemHtml);
-
-            const nameEditForm = itemHtml.querySelector('.item-name-edit-form');
-    //        const titleDisplay = itemHtml.querySelector(`.point-title, .subitem-title`);
-    //        const editNameBtn = itemHtml.querySelector('.edit-item-name-btn');
-    //        const nameInput = nameEditForm.querySelector('.item-name-input-field');
 
             const checkbox = itemHtml.querySelector(`.${isEndPoint ? 'point' : 'subitem'}--checkbox`);
             const subitemList = itemHtml.querySelector('.subitem-list');
@@ -871,6 +883,17 @@ ccm.files["ccm.checklist.js"] = {
                 return false;
             }
             return true;
+        }
+
+        function removeStateRecursively(listKey, itemKey) {
+            const stateItems = my.listState[listKey]?.items;
+            if (!stateItems) return;
+
+            for (const key in stateItems) {
+                if (key === itemKey || key.startsWith(itemKey + '§§§')) {
+                    delete stateItems[key];
+                }
+            }
         }
     }
 };
