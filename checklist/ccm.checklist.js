@@ -379,7 +379,7 @@ ccm.files["ccm.checklist.js"] = {
                 noteInput.value = item.note || '';
                 noteInput.focus();
             },
-            onSaveNoteButton: async (event, item, itemHtml, noteInput, listKey, noteEditForm, editNoteBtn) => {
+            onSaveNoteButton: async (event, item, itemHtml, noteInput, listKey) => {
                 event.stopPropagation();
                 const newNote = noteInput.value.trim();
 
@@ -761,7 +761,7 @@ ccm.files["ccm.checklist.js"] = {
                 editButton: self.text.editButton,
                 checkboxChecked: my.listState[listKey].items[itemKey]?.checked ? true : false,
                 onEditeNote: (event) => self.events.onEditNote(event, itemHtml, item, noteDisplay, notePlaceholder, editNoteBtn, noteEditForm, noteInput),
-                onSaveNoteButton: (event) => self.events.onSaveNoteButton(event, item, itemHtml, noteInput, listKey, noteEditForm, editNoteBtn),
+                onSaveNoteButton: (event) => self.events.onSaveNoteButton(event, item, itemHtml, noteInput, listKey),
                 onCancelNoteBtn: (event) => self.events.onCancelNoteBtn(event, noteEditForm, editNoteBtn, noteDisplay, notePlaceholder, item),
                 onDeadlinePicker: async (event) => await self.events.onDeadlinePicker(event, item, listKey),
                 onCheckboxChange: (event) => self.events.onCheckboxChange(event, item, listKey, itemKey, isEndPoint, itemHtml, listContent),
