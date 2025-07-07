@@ -186,7 +186,9 @@ ccm.files["ccm.checklist.js"] = {
                     return;
                 }
                 const listKey = $.generateKey();
-                const firstItemKey = `item§§§${firstItemName.replace(/[^a-zA-Z0-9äöüß]/g, '§§§').toLowerCase()}§§§${Date.now()}`;
+                const encodedName = encodeKey(firstItemName);
+                if (!encodedName) return;
+                const firstItemKey = `subitem§§§${encodedName}§§§${Date.now()}`;
                 const firstItem = {key: firstItemKey, name: firstItemName, items: [], deadline: null, note: ""};
 
                 my.listsData[listKey] = {
@@ -234,7 +236,9 @@ ccm.files["ccm.checklist.js"] = {
                     return;
                 }
 
-                const newSubitemKey = `subitem§§§${subitemName.replace(/[^a-zA-Z0-9äöüß]/g, '§§§').toLowerCase()}§§§${Date.now()}`;
+                const encodedName = encodeKey(subitemName);
+                if (!encodedName) return;
+                const newSubitemKey = `subitem§§§${encodedName}§§§${Date.now()}`;
                 const newSubitem = {key: newSubitemKey, name: subitemName, items: [], deadline: null, note: ""};
 
                 let parentItemList;
@@ -354,8 +358,6 @@ ccm.files["ccm.checklist.js"] = {
                     listState: my.listState
                 });
             },
-
-
             onClickToggleButton: async (key, itemContent, toggleButton) => {
                 my.listState[key].collapsed = !my.listState[key].collapsed;
                 itemContent.style.display = my.listState[key].collapsed ? 'none' : 'block';
@@ -877,12 +879,21 @@ ccm.files["ccm.checklist.js"] = {
         }
 
         function isInputValid(inputText) {
-            const forbiddenSequence = '§§§';
-            if (inputText.includes(forbiddenSequence)) {
-                alert(`Die Zeichenfolge "${forbiddenSequence}" ist im Namen nicht erlaubt.`);
+            const PATH_SEPARATOR = '§§§';
+            const SAFE_REPLACE = '__';
+            if (inputText.includes(PATH_SEPARATOR) || inputText.includes(SAFE_REPLACE)) {
+                alert(`Die Zeichenfolgen "${PATH_SEPARATOR}" und "${SAFE_REPLACE}" dürfen nicht verwendet werden.`);
                 return false;
             }
             return true;
+        }
+
+        function encodeKey(name) {
+            if (!isInputValid(name)) return null;
+            return name
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9äöüß]/gi, '__');
         }
 
         function removeStateRecursively(listKey, itemKey) {
