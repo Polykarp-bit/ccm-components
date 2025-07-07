@@ -8,13 +8,13 @@ ccm.files["ccm.timetable.js"] = {
     name: "timetable",
     ccm: "https://ccmjs.github.io/ccm/ccm.js",
     config: {
-        // Enthält alle von Kurse aus dem Kurriculum
+        // Enthält alle Kurse aus dem Curriculum
         courseStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_teacher_courses"}],
-        // Enthält alle von Studenten selbst erstellten Kurse
+        // Enthält alle von Studierenden selbst erstellten Kurse
         studentCourseStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_student_courses"}],
-        // Speichert die individuelle Stundenplan-Zusammenstellung für jeden Studenten
+        // Speichert die individuelle Stundenplan-Zusammenstellung für jeden Studierenden
         studentStore: ["ccm.store", {url: "https://ccm2.inf.h-brs.de", name: "tniede2s_student_schedules"}],
-        css: ["ccm.load", "./css/style.css"],
+        css: ["ccm.load", "./resources/style.css"],
         text: {
             timeTableText: "Stundenplan",
             plsLoggin: "Bitte logge dich ein, um deinen Stundenplan zu sehen",
@@ -91,8 +91,7 @@ ccm.files["ccm.timetable.js"] = {
             noCoursesOnDay: "Keine Kurse an diesem Tag.",
             iconExpand: "▶",
             iconCollapse: "▼",
-            errorEventNotFoundInCourse: "FEHLER: Event konnte nicht im Kurs gefunden werden.",
-            errorModalNotFound: "FEHLER: Das Modal-Element wurde nicht im DOM gefunden."
+            deletingError: "Der Kurs konnte nicht endgültig gelöscht werden."
         },
         user: ["ccm.instance", "https://ccmjs.github.io/akless-components/user/ccm.user.js"],
         helper: ["ccm.load", "https://ccmjs.github.io/akless-components/modules/versions/helper-8.4.2.min.mjs"],
@@ -322,7 +321,7 @@ ccm.files["ccm.timetable.js"] = {
                     </div>
                 `,
                 eventItem: `
-                         <div class="event" data-course-id="%courseId%" data-event-id="%eventId%" style="--event-color: %color%;">
+                         <div class="event" data-course-id="%courseId%" data-event-id="%eventId%" style="--event-color: %color%; %outOfRangeStyle%">
                         <div class="event-header">
                             <strong>%title%</strong>
                             %noteIcon%
@@ -355,6 +354,20 @@ ccm.files["ccm.timetable.js"] = {
         let currentCourses = [];
         let isEditMode = false;
         let $;
+
+        this.getWeekRange = () => {
+            const now = new Date();
+            const dayOfWeek = now.getDay();
+            const diffToMonday = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+            const startOfWeek = new Date(now.setDate(diffToMonday));
+            startOfWeek.setHours(0, 0, 0, 0);
+
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            endOfWeek.setHours(23, 59, 59, 999);
+
+            return { start: startOfWeek, end: endOfWeek };
+        };
 
         this.normalizeDay = (day) => {
             const dayMap = {
@@ -487,11 +500,8 @@ ccm.files["ccm.timetable.js"] = {
                 }
             },
             onChangeNote: async (domEvent) => {
-
                 const noteInput = domEvent.target;
-                console.log(noteInput.id);
                 const eventKey = noteInput.dataset.eventKey;
-                console.log(eventKey)
                 const course = currentCourses.find(c => c.value.events.some(e => e.key === eventKey));
                 const eventData = course?.value.events.find(e => e.key === eventKey);
                 if (!eventData) return;
@@ -499,7 +509,6 @@ ccm.files["ccm.timetable.js"] = {
                 eventData.note = noteInput.value.trim();
                 await self.saveSelectedCourses();
             }
-
         };
 
         this.init = async () => {
@@ -523,10 +532,6 @@ ccm.files["ccm.timetable.js"] = {
             }
             studentId = studentId.key;
 
-            console.log("courseStore:", await self.courseStore.get());
-            console.log("studentCourseStore:", await self.studentCourseStore.get());
-            console.log("studentStore:", await self.studentStore.get());
-
             const mainHtml = self.ccm.helper.html(self.html.mainTemplate, {
                 timetableConfigureText: self.text.timetableConfigureText,
                 plsLoggin: self.text.plsLoggin,
@@ -539,9 +544,12 @@ ccm.files["ccm.timetable.js"] = {
             try {
                 savedSchedule = await self.studentStore.get(studentId);
                 const teacherCourses = await self.courseStore.get();
-                const studentCourses = await self.studentCourseStore.get();
-                const ownStudentCourses = studentCourses.filter(course => course.value.who === studentId);
-                console.log("Gespeicherte Konfiguration für", studentId, ":", savedSchedule);
+                const ownStudentCourses = await self.studentCourseStore.get({ "value.who": studentId });
+
+                console.log(savedSchedule);
+                console.log(teacherCourses);
+                console.log(ownStudentCourses);
+
                 allCourses = [...teacherCourses, ...ownStudentCourses];
             } catch (e) {
                 console.error("Fehler beim Laden der Kurse:", e);
@@ -573,7 +581,6 @@ ccm.files["ccm.timetable.js"] = {
                         });
                     }
                 }
-                console.log("currentCourses", currentCourses);
             } else {
                 isEditMode = true;
             }
@@ -621,8 +628,6 @@ ccm.files["ccm.timetable.js"] = {
                 onAddCourseButton: self.events.onAddCourseButton,
                 onCancelButton: self.events.onCancelButton,
                 onCourseForm: self.events.onCourseForm,
-                //todo
-                //onEventContainer: self.events.onEventContainer
             });
             const container = self.element.querySelector('#main-content');
             $.setContent(container, mainHtml);
@@ -670,29 +675,30 @@ ccm.files["ccm.timetable.js"] = {
 
                 const courseId = self.ccm.helper.generateKey();
                 await self.studentCourseStore.set({ key: courseId, value: courseData });
-                console.log("Neuer studentischer Kurs hinzugefügt:", courseData);
 
                 const newCourse = {
                     key: courseId,
                     value: courseData
                 };
-                allCourses.push(newCourse);
 
-                // Nur die Referenz in currentCourses speichern
-                currentCourses.push({
+                const newCourseForDisplay = {
                     key: courseId,
                     course: courseName,
                     value: {
                         course: courseName,
                         events: events.map(event => ({
-                            key: event.key,
+                            ...event,
                             color: "",
                             note: "",
                             links: []
                         })),
                         course_of_study: []
                     }
-                });
+                };
+
+                allCourses.push(newCourseForDisplay);
+                currentCourses.push(newCourseForDisplay);
+
                 await self.saveSelectedCourses();
                 return newCourse;
             } catch (e) {
@@ -722,7 +728,6 @@ ccm.files["ccm.timetable.js"] = {
                     });
                 }
             });
-            console.log(studyGroups);
 
             for (const studyName of Object.keys(studyGroups).sort()) {
                 const studyHtml = $.html(self.html.editView.checkboxStudyName, {
@@ -827,7 +832,6 @@ ccm.files["ccm.timetable.js"] = {
                     }
                 };
                 await self.studentStore.set(scheduleData);
-                console.log("Kurse (Referenzen) automatisch gespeichert:", scheduleData);
                 this.onchange && this.onchange({ event: "saveCourse", instance: self });
             } catch (e) {
                 console.error("Fehler beim Speichern der Kurse:", e);
@@ -970,7 +974,6 @@ ccm.files["ccm.timetable.js"] = {
                     addLinkInlineButtonText: self.text.addLinkInlineButtonText,
                     noteLabelText: self.text.noteLabelText,
                     noteText: self.text.noteLabelText,
-                    //todo das und das darunter könnt man noch zu den events packen
                     onAddLink: self.events.onAddLink,
                     onChangeNote: self.events.onChangeNote
                 });
@@ -981,7 +984,7 @@ ccm.files["ccm.timetable.js"] = {
                 const cardBody = courseHtml.querySelector(`#card-body-${event.key}`);
                 const toggleIcon = courseHtml.querySelector(`#toggle-icon-${event.key}`);
 
-                cardBody.classList.add('collapsed'); // Karte standardmäßig einklappen
+                cardBody.classList.add('collapsed');
                 toggleIcon.textContent = self.text.iconExpand;
 
                 cardHeader.addEventListener('click', (e) => {
@@ -1019,10 +1022,29 @@ ccm.files["ccm.timetable.js"] = {
                     const courseInCurrent = currentCourses.find(c => c.key === course.key);
                     if (courseInCurrent) {
                         courseInCurrent.value.events = courseInCurrent.value.events.filter(e => e.key !== event.key);
+
                         if (courseInCurrent.value.events.length === 0) {
                             currentCourses = currentCourses.filter(c => c.key !== course.key);
+
+                            const originalCourse = allCourses.find(c => c.key === course.key);
+                            if (originalCourse && originalCourse.value.createdBy === 'student') {
+                                try {
+                                    await self.studentCourseStore.del(course.key);
+
+                                    allCourses = allCourses.filter(c => c.key !== course.key);
+
+                                    const courseGroupToRemove = self.element.querySelector(`.course-group[data-course="${originalCourse.value.course}"]`);
+                                    if (courseGroupToRemove) courseGroupToRemove.remove();
+
+                                } catch (e) {
+                                    console.error("Fehler beim endgültigen Löschen des Kurses:", e);
+                                    alert(self.text.deletingError);
+                                }
+                            }
                         }
+
                         courseHtml.remove();
+
                         const courseCheckboxList = self.element.querySelector('#course-checkbox-list');
                         const checkbox = courseCheckboxList.querySelector(`.event-checkbox[data-event-key="${event.key}"]`);
                         if (checkbox) {
@@ -1031,6 +1053,7 @@ ccm.files["ccm.timetable.js"] = {
                                 self.updateParentCheckboxes(checkbox);
                             }
                         }
+
                         await self.saveSelectedCourses();
                     }
                 });
@@ -1142,7 +1165,7 @@ ccm.files["ccm.timetable.js"] = {
                 currentCourses.forEach(course => {
                     if (course && course.value && course.value.events) {
                         course.value.events.forEach(event => {
-                            const normalizedDay = self.normalizeDay(event.day || "Unbekannt");
+                            const normalizedDay = self.normalizeDay(event.day || self.text.unknownText);
                             if (!schedule[normalizedDay]) schedule[normalizedDay] = [];
                             schedule[normalizedDay].push({
                                 title: `${course.value.course} (${event.type})${event.group ? ` [${event.group}]` : ''}`,
@@ -1150,6 +1173,8 @@ ccm.files["ccm.timetable.js"] = {
                                 room: event.room,
                                 who: event.who || self.text.unknownText,
                                 period: `${event.period_from} - ${event.period_until}`,
+                                period_from: event.period_from,
+                                period_until: event.period_until,
                                 color: event.color || "#F0F0F0",
                                 courseId: course.key,
                                 eventId: event.key,
@@ -1164,6 +1189,8 @@ ccm.files["ccm.timetable.js"] = {
                 schedule[day].sort((a, b) => self.timeToMinutes(a.time.split(' - ')[0]) - self.timeToMinutes(b.time.split(' - ')[0]));
             });
 
+            const weekRange = self.getWeekRange();
+
             const dayOrder = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
             const alwaysShowDays = dayOrder.slice(0, 5);
             const optionalDays = dayOrder.slice(5).filter(day => schedule[day] && schedule[day].length > 0);
@@ -1175,6 +1202,14 @@ ccm.files["ccm.timetable.js"] = {
 
                 if (schedule[day] && schedule[day].length > 0) {
                     const eventItems = schedule[day].map(event => {
+
+                        const [dayFrom, monthFrom, yearFrom] = event.period_from.split('.').map(Number);
+                        const [dayUntil, monthUntil, yearUntil] = event.period_until.split('.').map(Number);
+                        const eventStart = new Date(yearFrom, monthFrom - 1, dayFrom);
+                        const eventEnd = new Date(yearUntil, monthUntil - 1, dayUntil);
+                        const isOutOfRange = eventEnd < weekRange.start || eventStart > weekRange.end;
+                        const outOfRangeStyle = isOutOfRange ? 'opacity: 0.2;' : '';
+
                         const noteIconHtml = event.note.trim() !== ""
                             ? $.html(self.html.scheduleView.noteIcon, {note: event.note}).outerHTML
                             : '';
@@ -1191,7 +1226,8 @@ ccm.files["ccm.timetable.js"] = {
                             who: event.who,
                             eventItemRoomText: self.text.eventItemRoomText,
                             eventItemWhoText: self.text.eventItemWhoText,
-                            eventItemPeriodText: self.text.eventItemPeriodText
+                            eventItemPeriodText: self.text.eventItemPeriodText,
+                            outOfRangeStyle: outOfRangeStyle
                         });
                     });
 
@@ -1211,12 +1247,12 @@ ccm.files["ccm.timetable.js"] = {
                 const course = currentCourses.find(c => c.key === courseId);
                 const event = course.value.events.find(e => e.key === eventId);
                 if (!event) {
-                    console.error(self.text.errorEventNotFoundInCourse);
+                    console.error("FEHLER: Event konnte nicht im Kurs gefunden werden.");
                     return;
                 }
                 const modal = self.element.querySelector('#modal');
                 if (!modal) {
-                    console.error(self.text.errorModalNotFound);
+                    console.error("FEHLER: Das Modal-Element wurde nicht im DOM gefunden.");
                     return;
                 }
                 const modalTitle = modal.querySelector("#modal-title");
@@ -1240,7 +1276,7 @@ ccm.files["ccm.timetable.js"] = {
 
                 modal.classList.add('is-open');
             } catch (error) {
-                console.error('!!! FEHLER in openModal !!!:', error);
+                console.error('FEHLER in openModal:', error);
             }
         };
 
@@ -1249,7 +1285,7 @@ ccm.files["ccm.timetable.js"] = {
             if (modal) {
                 modal.classList.remove('is-open');
             } else {
-                console.error(self.text.errorModalNotFound);
+                console.error("FEHLER: Das Modal-Element wurde nicht im DOM gefunden.");
             }
         };
     }
