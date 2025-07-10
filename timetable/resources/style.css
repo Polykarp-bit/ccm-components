@@ -629,7 +629,6 @@ textarea.event-note-input {
     font-size: 0.9rem;
     color: #4b5563;
     line-height: 1.7;
-  //  white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -679,7 +678,6 @@ textarea.event-note-input {
 
 /* === MODAL === */
 .modal {
-    display: none;
     position: fixed;
     top: 0;
     left: 0;

@@ -108,7 +108,7 @@ ccm.files["ccm.checklist.js"] = {
                         <div class="%isEndPoint%--header">
                             <div class="item-main-content">
                             <input type="checkbox" id="%itemKey%" class="%isEndPoint%--checkbox" checked="%checkboxChecked%" onchange="%onCheckboxChange%">
-                            
+                           
                             <div class="title-edit-wrapper">
                                  <label for="checkbox-%itemKey%" class="%isEndPoint%-title">%itemName%</label>
                                  <button class="edit-item-name-btn" title="%editItemNameButton%" onclick="%onEditName%">%editIcon%</button>
@@ -154,6 +154,7 @@ ccm.files["ccm.checklist.js"] = {
         let my;
         let studentId;
 
+        // Initialisierung: lädt Hilfsmodule und wartet auf Benutzerwechsel
         this.init = async () => {
             $ = Object.assign({}, this.ccm.helper, this.helper);
             $.use(this.ccm);
@@ -206,6 +207,7 @@ ccm.files["ccm.checklist.js"] = {
                 createListForm.querySelector('#list-name').value = '';
                 createListForm.querySelector('#first-item-name').value = '';
             },
+            // Fügt neuen Unterpunkt unter ein bestehendes Item hinzu
             onConfirmSubitem: async (itemKey, item, event, listKey) => {
                 if (event && typeof event.stopPropagation === 'function') {
                     event.stopPropagation();
@@ -368,6 +370,7 @@ ccm.files["ccm.checklist.js"] = {
                     listState: my.listState
                 });
             },
+            // Zeigt Eingabefeld für Notiz
             onEditNote: (event, itemHtml, item, noteDisplay, notePlaceholder, editNoteBtn, noteEditForm, noteInput) => {
                 event.stopPropagation();
 
@@ -379,6 +382,7 @@ ccm.files["ccm.checklist.js"] = {
                 noteInput.value = item.note || '';
                 noteInput.focus();
             },
+            // Speichert geänderte Notiz und aktualisiert UI
             onSaveNoteButton: async (event, item, itemHtml, noteInput, listKey) => {
                 event.stopPropagation();
                 const newNote = noteInput.value.trim();
@@ -420,6 +424,7 @@ ccm.files["ccm.checklist.js"] = {
                     console.error(`Konnte Item mit Schlüssel ${item.key} nicht finden, um Deadline zu aktualisieren.`);
                 }
             },
+            // Reaktion auf Häkchen: speichert Status, aktualisiert UI & Fortschritt
             onCheckboxChange: async (event, item, listKey, itemKey, isEndPoint, itemHtml, listContent) => {
                 my.listState[listKey].items[itemKey].checked = event.target.checked;
 
@@ -522,6 +527,7 @@ ccm.files["ccm.checklist.js"] = {
             },
         }
 
+        // Startmethode: lädt Benutzerdaten, initialisiert DOM und rendert Inhalte
         this.start = async () => {
             try {
                 $.setContent(this.element, $.html(this.html.main));
@@ -593,6 +599,7 @@ ccm.files["ccm.checklist.js"] = {
             });
         }
 
+        // Initialisiert Standard-Zustand für neue oder unvollständige Listen
         function initializeState(listKey, items, state = my.listState[listKey], parentKey = '') {
             if (!state) {
                 state = {items: {}, collapsed: false};
@@ -631,6 +638,7 @@ ccm.files["ccm.checklist.js"] = {
             return totalPoints > 0 ? (checkedPoints / totalPoints) * 100 : 0;
         }
 
+        // Rendert alle Listen gemäß aktuellem Filterzustand (z.B. Alphabet oder Deadline)
         async function renderLists() {
             const itemElement = self.element.querySelector('#items');
             itemElement.innerHTML = '';
@@ -721,6 +729,7 @@ ccm.files["ccm.checklist.js"] = {
             }
         }
 
+        // Rekursives Rendering eines Listenelements samt Unterpunkten
         function renderItem(listKey, item, parentElement, listContent, parentKey) {
             const itemKey = parentKey ? `${parentKey}§§§${item.key}` : item.key;
             const isEndPoint = item.items.length === 0;
@@ -808,6 +817,7 @@ ccm.files["ccm.checklist.js"] = {
             return null;
         }
 
+        // Rekursive Hilfsfunktion: führt Callback auf Item mit passendem Key aus
         function findAndOperateRecursive(items, targetKey, callback) {
             for (let i = 0; i < items.length; i++) {
                 const item = items[i];
@@ -824,6 +834,7 @@ ccm.files["ccm.checklist.js"] = {
             return false;
         }
 
+        // Aktualisiert Checkbox-Status und Fortschritt übergeordneter Items
         const updateParentState = (itemId, currentListKey, currentListContent) => {
             const parts = itemId.split('§§§');
             if (parts.length <= 3) return;
@@ -888,6 +899,7 @@ ccm.files["ccm.checklist.js"] = {
             return true;
         }
 
+        // Erzeugt sicheren Schlüssel aus Itemnamen (keine Sonderzeichen)
         function encodeKey(name) {
             if (!isInputValid(name)) return null;
             return name

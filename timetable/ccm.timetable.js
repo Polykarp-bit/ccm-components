@@ -355,6 +355,7 @@ ccm.files["ccm.timetable.js"] = {
         let isEditMode = false;
         let $;
 
+        // Liefert den Wochenbereich (Montag bis Sonntag) für die aktuelle Woche
         this.getWeekRange = () => {
             const now = new Date();
             const dayOfWeek = now.getDay();
@@ -369,6 +370,7 @@ ccm.files["ccm.timetable.js"] = {
             return { start: startOfWeek, end: endOfWeek };
         };
 
+        // Wandelt Kürzel oder Varianten eines Wochentags in den vollständigen deutschen Namen um
         this.normalizeDay = (day) => {
             const dayMap = {
                 "mo": "Montag", "montag": "Montag",
@@ -382,6 +384,7 @@ ccm.files["ccm.timetable.js"] = {
             return dayMap[day.toLowerCase()] || self.text.unknownText;
         };
 
+        // Konvertiert Uhrzeit (HH:MM) in Minuten für Sortierung und Vergleich
         this.timeToMinutes = (time) => {
             const [hours, minutes] = time.split(':').map(Number);
             return hours * 60 + minutes;
@@ -518,6 +521,9 @@ ccm.files["ccm.timetable.js"] = {
         };
 
         this.start = async () => {
+
+            currentCourses = [];
+            allCourses = [];
             $.setContent(this.element, $.html(this.html.userTemplate));
 
             if (this.user) {
@@ -543,6 +549,8 @@ ccm.files["ccm.timetable.js"] = {
             let savedSchedule;
             try {
                 savedSchedule = await self.studentStore.get(studentId);
+                console.log("savedSchedule");
+                console.log(savedSchedule);
                 const teacherCourses = await self.courseStore.get();
                 const ownStudentCourses = await self.studentCourseStore.get({ "value.who": studentId });
 
@@ -639,6 +647,7 @@ ccm.files["ccm.timetable.js"] = {
             });
         };
 
+        // Erstellt studentischen Kurs mit Eventdaten aus dem Formular und speichert ihn im Store
         this.addNewCourse = async (form) => {
             try {
                 const courseName = form.querySelector('#course-title').value.trim();
@@ -707,6 +716,7 @@ ccm.files["ccm.timetable.js"] = {
             }
         };
 
+        // Lädt alle verfügbaren Kurse in einer strukturierten Ansicht (Studiengang → Semester → Kurs → Event)
         this.initSelectCoursesDropdown = async (container) => {
             const courseCheckboxList = container.querySelector('#course-checkbox-list');
             const studyGroups = {};
@@ -810,6 +820,7 @@ ccm.files["ccm.timetable.js"] = {
             semesterCheckbox.indeterminate = someCoursesChecked && !allCoursesChecked;
         };
 
+        // Speichert die aktuelle Kursauswahl des Nutzers dauerhaft im Store
         this.saveSelectedCourses = async () => {
             try {
                 const scheduleData = {
@@ -1060,6 +1071,7 @@ ccm.files["ccm.timetable.js"] = {
             });
         };
 
+        // Zeigt oder versteckt Dropdown-Listen für Kursauswahl und implementiert Text- & Tages-Filterung
         this.initDropdownButtonAndSearch = (container, courseCheckboxList) => {
             const dropdownButton = container.querySelector('#course-dropdown-button');
             const dropdownContent = container.querySelector('#course-dropdown-content');
@@ -1074,6 +1086,7 @@ ccm.files["ccm.timetable.js"] = {
                 if (!isOpen) searchInput.focus();
             };
 
+            // Wendet Filterkriterien (Suchtext, Wochentag) auf die Dropdown-Kursliste an
             const filterCourses = () => {
                 const searchTerm = searchInput.value.toLowerCase();
                 const selectedDay = dayFilter.value;
@@ -1121,6 +1134,7 @@ ccm.files["ccm.timetable.js"] = {
             dayFilter.addEventListener('change', filterCourses);
         };
 
+        // Lädt den Stundenplan (Wochenansicht) und bindet Modal-Eventhandler
         this.renderScheduleView = async () => {
             const scheduleViewElement = await self.renderSchedule();
 
@@ -1150,6 +1164,8 @@ ccm.files["ccm.timetable.js"] = {
             $.setContent(container, scheduleViewElement);
         };
 
+
+        // Erzeugt HTML für die Stundenplanansicht (Tagesspalten und Events)
         this.renderSchedule = async () => {
             const schedule = {};
             const mainContainer = $.html(self.html.scheduleView.main, {
@@ -1207,6 +1223,7 @@ ccm.files["ccm.timetable.js"] = {
                         const [dayUntil, monthUntil, yearUntil] = event.period_until.split('.').map(Number);
                         const eventStart = new Date(yearFrom, monthFrom - 1, dayFrom);
                         const eventEnd = new Date(yearUntil, monthUntil - 1, dayUntil);
+                        // Überprüft, ob ein Event-Termin außerhalb des aktuellen Wochenbereichs liegt
                         const isOutOfRange = eventEnd < weekRange.start || eventStart > weekRange.end;
                         const outOfRangeStyle = isOutOfRange ? 'opacity: 0.2;' : '';
 
